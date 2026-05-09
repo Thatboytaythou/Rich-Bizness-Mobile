@@ -1,29 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rich Bizness</title>
+<title>RICH BIZNESS — OMNI CORE</title>
 
 <style>
-body{
+
+html,body{
   margin:0;
-  overflow:hidden;
+  height:100%;
   background:#000;
+  overflow:hidden;
+  font-family:sans-serif;
 }
 
-#app{
-  width:100vw;
-  height:100vh;
+/* BG */
+.bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at center, rgba(0,255,200,.2), transparent 60%),
+    url("/images/brand/19FB5229-30DD-40B0-9404-5136C27FEF6A.png")
+    center/cover no-repeat;
+}
+
+/* CENTER */
+.app{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+
+/* WHEEL */
+.omni{
+  width:340px;
+  height:340px;
   position:relative;
 }
+
+/* RING */
+.ring{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:#001;
+
+  box-shadow:
+    0 0 120px #00ffcc,
+    inset 0 0 80px rgba(0,255,200,.3);
+}
+
+/* ROTATION */
+.wheel{
+  position:absolute;
+  inset:0;
+  transition:transform .1s;
+}
+
+/* ICONS */
+.seg{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform-origin:center;
+  font-size:22px;
+  opacity:.5;
+  transition:.2s;
+  cursor:pointer;
+}
+
+.seg.active{
+  transform:translate(-50%,-50%) scale(1.6);
+  opacity:1;
+  filter:drop-shadow(0 0 20px #00ffff);
+}
+
+/* CORE BUTTON */
+.core{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+
+  width:130px;
+  height:130px;
+
+  border-radius:50%;
+  background:#000;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#00ffcc;
+  font-weight:bold;
+  font-size:18px;
+
+  box-shadow:0 0 60px #00ffcc;
+  cursor:pointer;
+}
+
+/* LABEL */
+.screen{
+  position:fixed;
+  bottom:60px;
+  width:100%;
+  text-align:center;
+  font-size:26px;
+  color:#00ffcc;
+  letter-spacing:2px;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="app"></div>
+<div class="bg"></div>
 
-<script type="module" src="/core/app.js"></script>
+<div class="app">
+  <div class="omni">
+    <div class="ring"></div>
+    <div class="wheel" id="wheel"></div>
+    <div class="core" id="enterBtn">ENTER</div>
+  </div>
+</div>
+
+<div class="screen" id="screen">META</div>
+
+<script>
+
+/* DATA */
+const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒","⬆️","👤","💬","🔔"];
+const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE","UPLOAD","PROFILE","MESSAGES","ALERTS"];
+
+const ROUTES = [
+  "/meta.html",
+  "/live.html",
+  "/music.html",
+  "/gaming.html",
+  "/sports.html",
+  "/store.html",
+  "/upload.html",
+  "/profile.html",
+  "/messages.html",
+  "/notifications.html"
+];
+
+const wheel = document.getElementById("wheel");
+const screen = document.getElementById("screen");
+const enterBtn = document.getElementById("enterBtn");
+
+let rot = 0;
+let vel = 0;
+
+const step = (Math.PI*2)/ITEMS.length;
+const radius = 120;
+
+/* BUILD */
+ITEMS.forEach((icon,i)=>{
+
+  const el = document.createElement("div");
+  el.className = "seg";
+  el.innerText = icon;
+
+  const angle = i * step - Math.PI/2;
+
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(angle) * radius;
+
+  el.style.transform = `
+    translate(-50%,-50%)
+    translate(${x}px, ${y}px)
+  `;
+
+  el.addEventListener("click", ()=>{
+    window.location.href = ROUTES[i];
+  });
+
+  wheel.appendChild(el);
+});
+
+/* UPDATE */
+function update(){
+
+  wheel.style.transform = `rotate(${rot}rad)`;
+
+  let index = Math.round(-rot/step)%ITEMS.length;
+  if(index<0) index+=ITEMS.length;
+
+  document.querySelectorAll(".seg").forEach((s,i)=>{
+    s.classList.toggle("active", i===index);
+  });
+
+  screen.innerText = LABELS[index];
+
+  currentIndex = index;
+}
+
+let currentIndex = 0;
+
+/* LOOP */
+function loop(){
+  rot += vel;
+  vel *= 0.92;
+
+  if(Math.abs(vel)<0.002){
+    const snap = Math.round(rot/step)*step;
+    rot += (snap-rot)*0.12;
+  }
+
+  update();
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* TOUCH */
+let startX=0;
+
+window.addEventListener("touchstart", e=>{
+  startX = e.touches[0].clientX;
+});
+
+window.addEventListener("touchmove", e=>{
+  let dx = e.touches[0].clientX - startX;
+  vel = dx * 0.0004;
+});
+
+/* ENTER BUTTON */
+enterBtn.onclick = ()=>{
+  window.location.href = ROUTES[currentIndex];
+};
+
+</script>
 
 </body>
 </html>
