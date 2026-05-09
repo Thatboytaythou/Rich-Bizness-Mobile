@@ -1,23 +1,31 @@
+const app = document.getElementById("app");
+
 export function startEngine(){
 
-  console.log("ENGINE STARTED");
+  const wheel = document.createElement("div");
+  wheel.className = "wheel";
 
-  const app = document.getElementById("app");
+  wheel.innerHTML = `
+    <div class="center">ENTER</div>
 
-  if(!app){
-    console.error("NO #app FOUND");
-    return;
-  }
+    <div class="node" data-page="live">LIVE</div>
+    <div class="node" data-page="music">MUSIC</div>
+    <div class="node" data-page="gaming">GAMING</div>
+    <div class="node" data-page="store">STORE</div>
+    <div class="node" data-page="sports">SPORTS</div>
+    <div class="node" data-page="upload">UPLOAD</div>
+  `;
 
-  const text = document.createElement("div");
+  app.appendChild(wheel);
 
-  text.innerText = "RICH BIZNESS LOADING...";
-  text.style.color = "#00ffcc";
-  text.style.fontSize = "24px";
-  text.style.position = "absolute";
-  text.style.top = "50%";
-  text.style.left = "50%";
-  text.style.transform = "translate(-50%, -50%)";
+  rotateWheel(wheel);
+}
 
-  app.appendChild(text);
+function rotateWheel(wheel){
+  let angle = 0;
+
+  setInterval(()=>{
+    angle += 0.3;
+    wheel.style.transform = `translate(-50%,-50%) rotate(${angle}deg)`;
+  },16);
 }
