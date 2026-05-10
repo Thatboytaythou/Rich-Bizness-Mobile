@@ -1,8 +1,6 @@
 /* =========================
-   RICH BIZNESS GLOBAL STYLE
+   GLOBAL RESET
 ========================= */
-
-/* ===== RESET ===== */
 html,body{
   margin:0;
   height:100%;
@@ -12,7 +10,9 @@ html,body{
   color:#00ffcc;
 }
 
-/* ===== BACKGROUND ===== */
+/* =========================
+   BACKGROUND
+========================= */
 .bg{
   position:fixed;
   inset:0;
@@ -23,18 +23,9 @@ html,body{
 }
 
 /* =========================
-   CENTER SYSTEM (FIXED)
+   HARD CENTER (LOCKED)
 ========================= */
-
-/* 🔥 THIS IS THE REAL FIX */
-.app{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  z-index:10;
-}
-
+.app,
 .container{
   position:fixed;
   top:50%;
@@ -43,16 +34,9 @@ html,body{
   z-index:10;
 }
 
-/* profile stays normal */
-.profile-card{
-  position:relative;
-  z-index:10;
-}
-
 /* =========================
-   TOP NAV
+   TOPBAR
 ========================= */
-
 .topbar{
   position:fixed;
   top:15px;
@@ -71,18 +55,17 @@ html,body{
   align-items:center;
   justify-content:center;
   color:#00ffcc;
-  font-size:18px;
   backdrop-filter:blur(10px);
   box-shadow:0 0 10px rgba(0,255,200,.3);
+  cursor:pointer;
 }
 
 /* =========================
    BUTTONS
 ========================= */
-
 .main-btn{
-  padding:18px 40px;
-  font-size:18px;
+  padding:16px 36px;
+  font-size:16px;
   font-weight:bold;
   background:#00ffcc;
   color:black;
@@ -92,7 +75,7 @@ html,body{
 }
 
 .secondary-btn{
-  padding:14px 28px;
+  padding:12px 24px;
   background:#111;
   color:#00ffcc;
   border:none;
@@ -100,12 +83,11 @@ html,body{
 }
 
 /* =========================
-   OMNI CORE (WHEEL)
+   OMNI CORE
 ========================= */
-
 .omni{
-  width:340px;
-  height:340px;
+  width:320px;
+  height:320px;
   position:relative;
 }
 
@@ -115,8 +97,8 @@ html,body{
   border-radius:50%;
   background:#001;
   box-shadow:
-    0 0 120px #00ffcc,
-    inset 0 0 80px rgba(0,255,200,.3);
+    0 0 100px #00ffcc,
+    inset 0 0 60px rgba(0,255,200,.3);
 }
 
 .wheel{
@@ -135,9 +117,9 @@ html,body{
 }
 
 .seg.active{
-  transform:translate(-50%,-50%) scale(1.6);
+  transform:translate(-50%,-50%) scale(1.5);
   opacity:1;
-  filter:drop-shadow(0 0 20px #00ffff);
+  filter:drop-shadow(0 0 15px #00ffff);
 }
 
 .core{
@@ -145,8 +127,8 @@ html,body{
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
-  width:130px;
-  height:130px;
+  width:120px;
+  height:120px;
   border-radius:50%;
   background:#000;
   display:flex;
@@ -154,18 +136,17 @@ html,body{
   justify-content:center;
   color:#00ffcc;
   font-weight:bold;
-  box-shadow:0 0 60px #00ffcc;
+  box-shadow:0 0 40px #00ffcc;
+  cursor:pointer;
 }
 
 /* =========================
    LABEL
 ========================= */
-
 .screen{
   position:fixed;
   bottom:60px;
   width:100%;
   text-align:center;
   font-size:22px;
-  letter-spacing:2px;
 }
