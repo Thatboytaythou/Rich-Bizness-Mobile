@@ -1,21 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+<title>RICH BIZNESS LOGIN</title>
+
+<link rel="stylesheet" href="/styles/main.css">
+
+<style>
+.container input{
+  display:block;
+  margin:12px auto;
+  padding:12px;
+  width:220px;
+  border-radius:8px;
+  border:none;
+}
+</style>
 </head>
 
-<body style="background:black;color:#00ffcc;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+<body>
 
-<h1>RICH BIZNESS LOGIN</h1>
+<div class="bg"></div>
 
-<input id="email" placeholder="Email" style="margin:10px;padding:10px;">
-<input id="password" type="password" placeholder="Password" style="margin:10px;padding:10px;">
+<div class="container">
 
-<button onclick="login()" style="padding:10px 20px;">TAP IN 🔥</button>
+  <h1>RICH BIZNESS LOGIN</h1>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button class="main-btn" onclick="login()">
+    TAP IN 🔥
+  </button>
+
+</div>
 
 <script>
 function login(){
-
   const email = document.getElementById("email").value;
 
   if(!email){
@@ -23,10 +43,12 @@ function login(){
     return;
   }
 
-  // 🔥 THIS IS THE KEY
-  localStorage.setItem("rb_user", email);
+  // 🔥 SAVE USER
+  localStorage.setItem("rb_user", JSON.stringify({
+    email: email
+  }));
 
-  // go back to home
+  // 🔥 GO HOME
   window.location.href = "/";
 }
 </script>
