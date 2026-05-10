@@ -1,30 +1,78 @@
-.wheel{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:320px;
-  height:320px;
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  box-shadow:0 0 40px #00ffcc;
+/* =========================
+   RICH BIZNESS GLOBAL STYLE
+   styles/main.css
+========================= */
+
+/* ===== RESET ===== */
+html,body{
+  margin:0;
+  height:100%;
+  background:black;
+  font-family:sans-serif;
+  overflow:hidden;
+  color:#00ffcc;
 }
 
-.center{
-  position:absolute;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:#000;
-  color:#00ffcc;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
+/* ===== BACKGROUND (MATCH INDEX) ===== */
+.bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at center, rgba(0,255,200,.2), transparent 60%),
+    url("/images/19FB5229-30DD-40B0-9404-5136C27FEF6A.png")
+    center/cover no-repeat;
+  z-index:-1;
 }
 
-.node{
-  position:absolute;
+/* ===== CENTER WRAP ===== */
+.container{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  text-align:center;
+}
+
+/* ===== TITLE ===== */
+h1{
+  font-size:34px;
+  letter-spacing:2px;
+  margin-bottom:40px;
+  text-shadow:0 0 15px #00ffcc;
+}
+
+/* ===== MAIN BUTTON ===== */
+.main-btn{
+  padding:18px 40px;
+  font-size:18px;
+  font-weight:bold;
+  background:#00ffcc;
+  color:black;
+  border:none;
+  border-radius:12px;
+  box-shadow:0 0 25px #00ffcc;
+  margin-bottom:20px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.main-btn:active{
+  transform:scale(.95);
+}
+
+/* ===== SECOND BUTTON ===== */
+.secondary-btn{
+  padding:14px 28px;
+  font-size:14px;
+  border:none;
+  border-radius:10px;
+  background:#111;
   color:#00ffcc;
+  box-shadow:0 0 10px rgba(0,255,200,.3);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.secondary-btn:active{
+  transform:scale(.95);
 }
