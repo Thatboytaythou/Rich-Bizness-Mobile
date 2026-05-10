@@ -53,7 +53,6 @@
 
     </div>
 
-    <!-- CENTER -->
     <div class="top-center">
 
       <div class="brand-lockup">
@@ -68,21 +67,22 @@
 
     </div>
 
-    <!-- RIGHT -->
     <div class="top-right">
 
       <button
         class="icon notification"
-        onclick="window.location.href='/notifications.html'"
+        data-route="/notifications.html"
         type="button"
+        aria-label="Notifications"
       >
         🔔
       </button>
 
       <button
         class="icon"
-        onclick="toggleMenu()"
+        id="menuBtn"
         type="button"
+        aria-label="Open Menu"
       >
         ☰
       </button>
@@ -95,6 +95,8 @@
        QUICK MENU
   ========================== -->
   <aside class="quick-menu" id="quickMenu">
+
+    <a href="/index.html">Home</a>
 
     <a href="/feed.html">Feed</a>
 
@@ -118,116 +120,112 @@
 
     <a href="/messages.html">Messages</a>
 
+    <a href="/notifications.html">Notifications</a>
+
     <a href="/profile.html">Profile</a>
 
   </aside>
 
   <!-- =========================
-       DIAL LABELS
+       DIAL BUTTON LOCK ZONES
+       Engine rotates the real dial.
+       These buttons stay locked as tap zones.
   ========================== -->
-  <main class="dial-ui">
+  <main class="dial-ui" id="dialUi">
 
-    <!-- TOP -->
     <button
       class="dial-card top-card"
-      onclick="window.location.href='/live.html'"
+      data-dial-card="live"
+      data-route="/live.html"
       type="button"
+      aria-label="Open Live"
     >
       <div class="dial-icon">◉</div>
-
       <div class="dial-title">LIVE</div>
-
       <div class="dial-sub">STREAM</div>
     </button>
 
-    <!-- TOP LEFT -->
     <button
       class="dial-card top-left-card"
-      onclick="window.location.href='/gallery.html'"
+      data-dial-card="gallery"
+      data-route="/gallery.html"
       type="button"
+      aria-label="Open Gallery"
     >
       <div class="dial-icon">▣</div>
-
       <div class="dial-title">GALLERY</div>
-
       <div class="dial-sub">PHOTOS</div>
     </button>
 
-    <!-- TOP RIGHT -->
     <button
       class="dial-card top-right-card"
-      onclick="window.location.href='/music.html'"
+      data-dial-card="music"
+      data-route="/music.html"
       type="button"
+      aria-label="Open Music"
     >
       <div class="dial-icon">♪</div>
-
       <div class="dial-title">MUSIC</div>
-
       <div class="dial-sub">VIBES</div>
     </button>
 
-    <!-- LEFT -->
     <button
       class="dial-card left-card"
-      onclick="window.location.href='/upload.html'"
+      data-dial-card="upload"
+      data-route="/upload.html"
       type="button"
+      aria-label="Open Upload"
     >
       <div class="dial-icon">⬆</div>
-
       <div class="dial-title">UPLOAD</div>
-
       <div class="dial-sub">CONTENT</div>
     </button>
 
-    <!-- RIGHT -->
     <button
       class="dial-card right-card"
-      onclick="window.location.href='/gaming.html'"
+      data-dial-card="gaming"
+      data-route="/gaming.html"
       type="button"
+      aria-label="Open Gaming"
     >
       <div class="dial-icon">🎮</div>
-
       <div class="dial-title">GAMING</div>
-
       <div class="dial-sub">PLAY</div>
     </button>
 
-    <!-- BOTTOM LEFT -->
     <button
       class="dial-card bottom-left-card"
-      onclick="window.location.href='/sports.html'"
+      data-dial-card="sports"
+      data-route="/sports.html"
       type="button"
+      aria-label="Open Sports"
     >
       <div class="dial-icon">🏆</div>
-
       <div class="dial-title">SPORTS</div>
-
       <div class="dial-sub">HIGHLIGHTS</div>
     </button>
 
-    <!-- BOTTOM -->
     <button
       class="dial-card bottom-card"
-      onclick="window.location.href='/metaverse.html'"
+      data-dial-card="meta"
+      data-route="/metaverse.html"
       type="button"
+      aria-label="Open Metaverse"
     >
       <div class="dial-icon">◎</div>
-
       <div class="dial-title">META</div>
-
       <div class="dial-sub">VERSE</div>
     </button>
 
-    <!-- BOTTOM RIGHT -->
     <button
       class="dial-card bottom-right-card"
-      onclick="window.location.href='/store.html'"
+      data-dial-card="store"
+      data-route="/store.html"
       type="button"
+      aria-label="Open Store"
     >
       <div class="dial-icon">🛒</div>
-
       <div class="dial-title">STORE</div>
-
       <div class="dial-sub">SHOP</div>
     </button>
 
@@ -260,7 +258,6 @@
   <button
     class="enter"
     id="activateBtn"
-    onclick="enterWorld()"
     type="button"
   >
 
@@ -280,62 +277,76 @@
   <footer class="stats">
 
     <div class="stat-card">
-
       <span class="stat-icon">▰</span>
-
       <small>BALANCE</small>
-
       <strong>$10,890.00</strong>
-
     </div>
 
     <div class="stat-card">
-
       <span class="stat-icon">♛</span>
-
       <small>RICH POINTS</small>
-
       <strong>28,450</strong>
-
     </div>
 
     <div class="stat-card">
-
       <span class="stat-icon">🛡</span>
-
       <small>RANK</small>
-
       <strong>BIZ LEGEND</strong>
-
     </div>
 
     <div class="stat-card">
-
       <span class="stat-icon">👥</span>
-
       <small>ONLINE</small>
-
       <strong>1,245</strong>
-
     </div>
 
   </footer>
 
   <!-- =========================
-       SCRIPT HELPERS
+       PAGE ACTIONS
   ========================== -->
   <script>
 
-    window.RB_ROUTES = [
-      "/gallery.html",
-      "/live.html",
-      "/music.html",
-      "/gaming.html",
-      "/store.html",
-      "/metaverse.html",
-      "/sports.html",
-      "/upload.html"
-    ];
+    window.RB_ROUTES = {
+      gallery: "/gallery.html",
+      live: "/live.html",
+      music: "/music.html",
+      gaming: "/gaming.html",
+      store: "/store.html",
+      meta: "/metaverse.html",
+      sports: "/sports.html",
+      upload: "/upload.html"
+    };
+
+    window.RB_ACTIVE_KEY = "live";
+    window.RB_ACTIVE_ROUTE = "/live.html";
+
+    function setActiveDial(key) {
+      if (!key) return;
+
+      const route = window.RB_ROUTES[key];
+
+      if (route) {
+        window.RB_ACTIVE_KEY = key;
+        window.RB_ACTIVE_ROUTE = route;
+      }
+
+      document.querySelectorAll("[data-dial-card]").forEach((card) => {
+        card.classList.toggle(
+          "is-active",
+          card.dataset.dialCard === key
+        );
+      });
+    }
+
+    function goToRoute(route) {
+      if (!route) return;
+      window.location.href = route;
+    }
+
+    function enterWorld() {
+      goToRoute(window.RB_ACTIVE_ROUTE || "/feed.html");
+    }
 
     function toggleMenu() {
       document
@@ -344,14 +355,53 @@
         .toggle("open");
     }
 
-    function enterWorld() {
+    window.enterWorld = enterWorld;
+    window.enter = enterWorld;
+    window.setActiveDial = setActiveDial;
 
-      const route =
-        window.RB_ACTIVE_ROUTE ||
-        "/feed.html";
+    document.addEventListener("click", (event) => {
+      const menuBtn = event.target.closest("#menuBtn");
 
-      window.location.href = route;
-    }
+      if (menuBtn) {
+        event.preventDefault();
+        toggleMenu();
+        return;
+      }
+
+      const directRoute = event.target.closest("[data-route]");
+
+      if (directRoute && !directRoute.matches("[data-dial-card]")) {
+        event.preventDefault();
+        goToRoute(directRoute.dataset.route);
+        return;
+      }
+
+      const dialCard = event.target.closest("[data-dial-card]");
+
+      if (dialCard) {
+        event.preventDefault();
+
+        const key = dialCard.dataset.dialCard;
+        const route = dialCard.dataset.route;
+
+        setActiveDial(key);
+
+        if (window.RB_DIAL_CLICK_TO_OPEN === true) {
+          goToRoute(route);
+        }
+
+        return;
+      }
+
+      const activateBtn = event.target.closest("#activateBtn");
+
+      if (activateBtn) {
+        event.preventDefault();
+        enterWorld();
+      }
+    });
+
+    setActiveDial("live");
 
   </script>
 
