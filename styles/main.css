@@ -1,48 +1,41 @@
 html,body{
   margin:0;
   height:100%;
-  background:black;
-  font-family:sans-serif;
   overflow:hidden;
-  color:#00ffcc;
+  background:black;
 }
 
-/* 🔥 CANVAS (3D ENGINE) */
+/* BACKGROUND */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background:
+    radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
+    url("/images/background-v2.png") center/cover no-repeat;
+}
+
+/* 🔥 CANVAS = ABOVE BACKGROUND */
 canvas{
   position:fixed;
   top:0;
   left:0;
   width:100%;
   height:100%;
-  z-index:2; /* ABOVE BG */
+  z-index:1;
+  pointer-events:auto;
 }
 
-/* 🔥 BACKGROUND (BEHIND EVERYTHING) */
-.bg{
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
-    url("/images/background-v2.png") center/cover no-repeat;
-  z-index:1; /* BELOW CANVAS */
-}
-
-/* 🔥 UI ON TOP */
-.topbar,
-.enter{
-  position:relative;
-  z-index:5;
-}
-
-/* TOPBAR */
+/* 🔥 UI LAYER */
 .topbar{
-  position:absolute;
+  position:fixed;
   top:10px;
   left:0;
   width:100%;
   display:flex;
   justify-content:space-between;
   padding:0 15px;
+  z-index:5;
 }
 
 .right-icons{
@@ -60,19 +53,19 @@ canvas{
   justify-content:center;
   color:#00ffcc;
   font-size:18px;
-  backdrop-filter:blur(6px);
 }
 
-/* BUTTON */
+/* 🔥 FIXED BUTTON (THIS WAS BROKEN) */
 .enter{
-  position:absolute;
-  bottom:60px;
+  position:fixed;
+  bottom:40px;
   left:50%;
   transform:translateX(-50%);
+  z-index:5;
+
   background:#00ffcc;
   color:#000;
   padding:15px 30px;
   border-radius:30px;
   font-weight:bold;
-  box-shadow:0 0 20px #00ffcc;
 }
