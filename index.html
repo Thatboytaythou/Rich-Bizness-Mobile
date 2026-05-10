@@ -1,47 +1,367 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RB OMNI ELITE</title>
+  <meta charset="UTF-8" />
 
-<link rel="stylesheet" href="/styles/main.css">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>RB OMNI ELITE</title>
+
+  <link rel="stylesheet" href="/styles/main.css" />
 </head>
 
 <body>
 
-<canvas id="engine"></canvas>
+  <!-- =========================
+       ENGINE
+  ========================== -->
+  <canvas id="engine"></canvas>
 
-<!-- 🔥 TOP BAR -->
-<div class="topbar">
-  <div class="top-left">
-    <div class="icon">👤</div>
-  </div>
+  <div class="screen-vignette"></div>
+  <div class="screen-noise"></div>
 
-  <div class="top-center"></div>
+  <!-- =========================
+       TOP HUD
+  ========================== -->
+  <header class="topbar">
 
-  <div class="top-right">
-    <div class="icon notification">🔔</div>
-    <div class="icon">⚙️</div>
-  </div>
-</div>
+    <div class="top-left">
 
-<!-- 🔥 CORE CENTER -->
-<div class="center-ui">
-  <div class="core-pill">RICH<br>BIZNESS</div>
-</div>
+      <div class="welcome-block">
+        <div class="welcome-text">WELCOME BACK</div>
 
-<!-- BUTTON -->
-<div class="enter" onclick="enter()">ACTIVATE</div>
+        <div class="welcome-name" data-user-name>
+          Thatboytaythou
+        </div>
+      </div>
 
-<!-- STATS -->
-<div class="stats">
-  <div>$10,890</div>
-  <div>28,450 pts</div>
-  <div>LEGEND</div>
-  <div>1,245 online</div>
-</div>
+      <div class="rank-panel">
 
-<script type="module" src="/core/engine/omni-engine.js"></script>
+        <div class="rank-icon">
+          ◈
+        </div>
+
+        <div class="rank-copy">
+          <small>RICH LEVEL</small>
+          <strong>MAX</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- CENTER -->
+    <div class="top-center">
+
+      <div class="brand-lockup">
+
+        <span class="brand-rich">RICH</span>
+
+        <span class="brand-biz">BIZNESS</span>
+
+        <span class="brand-llc">LLC</span>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="top-right">
+
+      <button
+        class="icon notification"
+        onclick="window.location.href='/notifications.html'"
+        type="button"
+      >
+        🔔
+      </button>
+
+      <button
+        class="icon"
+        onclick="toggleMenu()"
+        type="button"
+      >
+        ☰
+      </button>
+
+    </div>
+
+  </header>
+
+  <!-- =========================
+       QUICK MENU
+  ========================== -->
+  <aside class="quick-menu" id="quickMenu">
+
+    <a href="/feed.html">Feed</a>
+
+    <a href="/watch.html">Watch</a>
+
+    <a href="/live.html">Live</a>
+
+    <a href="/music.html">Music</a>
+
+    <a href="/gaming.html">Gaming</a>
+
+    <a href="/sports.html">Sports</a>
+
+    <a href="/gallery.html">Gallery</a>
+
+    <a href="/upload.html">Upload</a>
+
+    <a href="/store.html">Store</a>
+
+    <a href="/metaverse.html">Metaverse</a>
+
+    <a href="/messages.html">Messages</a>
+
+    <a href="/profile.html">Profile</a>
+
+  </aside>
+
+  <!-- =========================
+       DIAL LABELS
+  ========================== -->
+  <main class="dial-ui">
+
+    <!-- TOP -->
+    <button
+      class="dial-card top-card"
+      onclick="window.location.href='/live.html'"
+      type="button"
+    >
+      <div class="dial-icon">◉</div>
+
+      <div class="dial-title">LIVE</div>
+
+      <div class="dial-sub">STREAM</div>
+    </button>
+
+    <!-- TOP LEFT -->
+    <button
+      class="dial-card top-left-card"
+      onclick="window.location.href='/gallery.html'"
+      type="button"
+    >
+      <div class="dial-icon">▣</div>
+
+      <div class="dial-title">GALLERY</div>
+
+      <div class="dial-sub">PHOTOS</div>
+    </button>
+
+    <!-- TOP RIGHT -->
+    <button
+      class="dial-card top-right-card"
+      onclick="window.location.href='/music.html'"
+      type="button"
+    >
+      <div class="dial-icon">♪</div>
+
+      <div class="dial-title">MUSIC</div>
+
+      <div class="dial-sub">VIBES</div>
+    </button>
+
+    <!-- LEFT -->
+    <button
+      class="dial-card left-card"
+      onclick="window.location.href='/upload.html'"
+      type="button"
+    >
+      <div class="dial-icon">⬆</div>
+
+      <div class="dial-title">UPLOAD</div>
+
+      <div class="dial-sub">CONTENT</div>
+    </button>
+
+    <!-- RIGHT -->
+    <button
+      class="dial-card right-card"
+      onclick="window.location.href='/gaming.html'"
+      type="button"
+    >
+      <div class="dial-icon">🎮</div>
+
+      <div class="dial-title">GAMING</div>
+
+      <div class="dial-sub">PLAY</div>
+    </button>
+
+    <!-- BOTTOM LEFT -->
+    <button
+      class="dial-card bottom-left-card"
+      onclick="window.location.href='/sports.html'"
+      type="button"
+    >
+      <div class="dial-icon">🏆</div>
+
+      <div class="dial-title">SPORTS</div>
+
+      <div class="dial-sub">HIGHLIGHTS</div>
+    </button>
+
+    <!-- BOTTOM -->
+    <button
+      class="dial-card bottom-card"
+      onclick="window.location.href='/metaverse.html'"
+      type="button"
+    >
+      <div class="dial-icon">◎</div>
+
+      <div class="dial-title">META</div>
+
+      <div class="dial-sub">VERSE</div>
+    </button>
+
+    <!-- BOTTOM RIGHT -->
+    <button
+      class="dial-card bottom-right-card"
+      onclick="window.location.href='/store.html'"
+      type="button"
+    >
+      <div class="dial-icon">🛒</div>
+
+      <div class="dial-title">STORE</div>
+
+      <div class="dial-sub">SHOP</div>
+    </button>
+
+  </main>
+
+  <!-- =========================
+       CENTER PORTAL UI
+  ========================== -->
+  <section class="center-ui">
+
+    <div class="portal-core">
+
+      <div class="portal-inner">
+
+        <div class="portal-title">
+          <span>RICH</span>
+          <span>BIZNESS</span>
+          <small>LLC</small>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       ACTIVATE
+  ========================== -->
+  <button
+    class="enter"
+    id="activateBtn"
+    onclick="enterWorld()"
+    type="button"
+  >
+
+    <span class="enter-main">
+      ACTIVATE
+    </span>
+
+    <span class="enter-sub">
+      TAP TO ENTER
+    </span>
+
+  </button>
+
+  <!-- =========================
+       STATS
+  ========================== -->
+  <footer class="stats">
+
+    <div class="stat-card">
+
+      <span class="stat-icon">▰</span>
+
+      <small>BALANCE</small>
+
+      <strong>$10,890.00</strong>
+
+    </div>
+
+    <div class="stat-card">
+
+      <span class="stat-icon">♛</span>
+
+      <small>RICH POINTS</small>
+
+      <strong>28,450</strong>
+
+    </div>
+
+    <div class="stat-card">
+
+      <span class="stat-icon">🛡</span>
+
+      <small>RANK</small>
+
+      <strong>BIZ LEGEND</strong>
+
+    </div>
+
+    <div class="stat-card">
+
+      <span class="stat-icon">👥</span>
+
+      <small>ONLINE</small>
+
+      <strong>1,245</strong>
+
+    </div>
+
+  </footer>
+
+  <!-- =========================
+       SCRIPT HELPERS
+  ========================== -->
+  <script>
+
+    window.RB_ROUTES = [
+      "/gallery.html",
+      "/live.html",
+      "/music.html",
+      "/gaming.html",
+      "/store.html",
+      "/metaverse.html",
+      "/sports.html",
+      "/upload.html"
+    ];
+
+    function toggleMenu() {
+      document
+        .getElementById("quickMenu")
+        ?.classList
+        .toggle("open");
+    }
+
+    function enterWorld() {
+
+      const route =
+        window.RB_ACTIVE_ROUTE ||
+        "/feed.html";
+
+      window.location.href = route;
+    }
+
+  </script>
+
+  <!-- =========================
+       ENGINE
+  ========================== -->
+  <script
+    type="module"
+    src="/core/engine/omni-engine.js"
+  ></script>
 
 </body>
 </html>
