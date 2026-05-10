@@ -9,7 +9,7 @@
 
 <style>
 
-/* PROFILE CARD */
+/* CARD */
 .profile-card{
   text-align:center;
   padding:30px 25px;
@@ -19,7 +19,30 @@
   box-shadow:0 0 30px rgba(0,255,200,.25);
 }
 
-/* USER NAME */
+/* AVATAR */
+.avatar{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  background:#00ffcc;
+  color:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:bold;
+  margin:0 auto 20px;
+  box-shadow:0 0 20px #00ffcc;
+  overflow:hidden;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* TEXT */
 .username{
   font-size:20px;
   margin-bottom:6px;
@@ -28,23 +51,19 @@
 .email{
   font-size:13px;
   opacity:.6;
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
-/* AVATAR */
-.avatar{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:#00ffcc;
-  color:black;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:30px;
-  font-weight:bold;
-  margin:0 auto 20px;
-  box-shadow:0 0 20px #00ffcc;
+/* INPUT */
+.input{
+  padding:12px;
+  width:220px;
+  border-radius:10px;
+  border:none;
+  margin-bottom:12px;
+  background:#111;
+  color:#00ffcc;
+  box-shadow:0 0 10px rgba(0,255,200,.3);
 }
 
 </style>
@@ -65,12 +84,23 @@
 
     <h1>PROFILE</h1>
 
+    <!-- AVATAR -->
     <div class="avatar" id="avatar">?</div>
 
+    <!-- DISPLAY -->
     <div class="username" id="username">Loading...</div>
     <div class="email" id="email">Loading...</div>
 
-    <button class="main-btn" onclick="logout()">
+    <!-- EDIT -->
+    <input class="input" id="editName" placeholder="Edit username">
+
+    <input type="file" id="avatarUpload" accept="image/*">
+
+    <button class="main-btn" onclick="saveProfile()">
+      SAVE CHANGES 💾
+    </button>
+
+    <button class="secondary-btn" onclick="logout()">
       LOG OUT ✌🏽
     </button>
 
@@ -101,27 +131,69 @@ function getUser(){
 /* =========================
    INIT
 ========================= */
-const user = getUser();
+let user = getUser();
 
 if(!user){
-  // 🔥 protect route
   window.location.href = "/auth.html";
 }
 
 /* =========================
-   DISPLAY USER
+   RENDER
 ========================= */
-if(user){
+function render(){
 
-  const username = user.username || "User";
-  const email = user.email || "No Email";
+  document.getElementById("username").innerText = user.username;
+  document.getElementById("email").innerText = user.email;
 
-  document.getElementById("username").innerText = username;
-  document.getElementById("email").innerText = email;
+  const avatar = document.getElementById("avatar");
 
-  // 🔥 avatar letter
-  document.getElementById("avatar").innerText =
-    username.charAt(0).toUpperCase();
+  if(user.avatar){
+    avatar.innerHTML = `<img src="${user.avatar}" />`;
+  }else{
+    avatar.innerText = user.username.charAt(0).toUpperCase();
+  }
+
+}
+
+render();
+
+/* =========================
+   SAVE PROFILE
+========================= */
+function saveProfile(){
+
+  const newName = document.getElementById("editName").value.trim();
+
+  if(newName){
+    user.username = newName;
+  }
+
+  const fileInput = document.getElementById("avatarUpload");
+  const file = fileInput.files[0];
+
+  if(file){
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+      user.avatar = e.target.result;
+
+      localStorage.setItem("rb_user", JSON.stringify(user));
+      render();
+
+      alert("Profile updated 🔥");
+    };
+
+    reader.readAsDataURL(file);
+
+  }else{
+
+    localStorage.setItem("rb_user", JSON.stringify(user));
+    render();
+
+    alert("Profile updated 🔥");
+  }
+
 }
 
 /* =========================
