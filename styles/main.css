@@ -7,22 +7,31 @@ html,body{
   color:#00ffcc;
 }
 
-/* BACKGROUND */
+/* 🔥 CANVAS (3D ENGINE) */
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:2; /* ABOVE BG */
+}
+
+/* 🔥 BACKGROUND (BEHIND EVERYTHING) */
 .bg{
   position:fixed;
   inset:0;
   background:
-    radial-gradient(circle at center, rgba(0,255,200,.15), transparent 70%),
+    radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
     url("/images/background-v2.png") center/cover no-repeat;
-  z-index:0;
-  opacity:0.55; /* 🔥 stops overpowering */
+  z-index:1; /* BELOW CANVAS */
 }
 
-/* CANVAS (🔥 FIXED LAYER) */
-canvas{
-  position:fixed;
-  inset:0;
-  z-index:2;
+/* 🔥 UI ON TOP */
+.topbar,
+.enter{
+  position:relative;
+  z-index:5;
 }
 
 /* TOPBAR */
@@ -34,7 +43,6 @@ canvas{
   display:flex;
   justify-content:space-between;
   padding:0 15px;
-  z-index:10;
 }
 
 .right-icons{
@@ -55,7 +63,7 @@ canvas{
   backdrop-filter:blur(6px);
 }
 
-/* ENTER BUTTON */
+/* BUTTON */
 .enter{
   position:absolute;
   bottom:60px;
@@ -66,6 +74,5 @@ canvas{
   padding:15px 30px;
   border-radius:30px;
   font-weight:bold;
-  z-index:10;
   box-shadow:0 0 20px #00ffcc;
 }
