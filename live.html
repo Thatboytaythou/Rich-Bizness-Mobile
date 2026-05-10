@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVE</title>
 
-<script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.min.js"></script>
+<!-- ✅ FIXED CDN (your error was HERE) -->
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
 <link rel="stylesheet" href="/styles/main.css">
 </head>
 
@@ -27,7 +29,15 @@
 <script>
 
 /* =========================
-   USER FIX (VERY IMPORTANT)
+   MAKE SURE LIVEKIT LOADED
+========================= */
+if (typeof LivekitClient === "undefined") {
+  alert("LiveKit failed to load. Refresh the page.");
+  throw new Error("LivekitClient not found");
+}
+
+/* =========================
+   USER FIX
 ========================= */
 function getUsername(){
   const raw = localStorage.getItem("rb_user");
@@ -35,13 +45,7 @@ function getUsername(){
 
   try {
     const user = JSON.parse(raw);
-
-    // 🔥 FIX: you were using user.username (doesn't exist)
-    const base = user.email || "guest";
-
-    // 🔥 CLEAN FOR LIVEKIT (no weird characters)
-    return base.replace(/[^a-zA-Z0-9_-]/g,"");
-
+    return (user.email || "guest").replace(/[^a-zA-Z0-9_-]/g,"");
   } catch {
     return "guest";
   }
@@ -58,14 +62,14 @@ const statusEl = document.getElementById("status");
 const btn = document.getElementById("liveBtn");
 
 /* =========================
-   TOKEN
+   GET TOKEN
 ========================= */
 async function getToken(username){
   const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
   const data = await res.json();
 
   if(!data.token){
-    throw new Error("Token not returned from API");
+    throw new Error("Token missing from API");
   }
 
   return data.token;
@@ -94,16 +98,15 @@ btn.onclick = async () => {
         token
       );
 
-      // 🔥 iPHONE SAFE CAMERA ACCESS
+      // 🔥 CAMERA (mobile safe)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true
       });
 
-      // show preview
       videoEl.srcObject = stream;
 
-      // 🔥 FIXED TRACK PUBLISH (THIS WAS BREAKING YOU)
+      // 🔥 FIXED TRACK PUBLISH
       for (const track of stream.getTracks()) {
 
         if(track.kind === "video"){
@@ -126,15 +129,12 @@ btn.onclick = async () => {
     } catch(err){
 
       console.error("LIVE ERROR:", err);
-
-      // 🔥 REAL ERROR MESSAGE (IMPORTANT)
       alert("Stream failed: " + err.message);
 
     }
 
   } else {
 
-    // 🔥 CLEAN DISCONNECT
     if(room){
       room.disconnect();
       room = null;
