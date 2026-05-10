@@ -9,31 +9,34 @@
 
 <style>
 
-/* ===== LIVE UI ADDITIONS ===== */
-
-.live-status{
-  margin-top:10px;
-  font-size:14px;
-  opacity:.8;
+/* CAMERA BOX */
+.video-box{
+  margin-top:20px;
+  width:260px;
+  height:160px;
+  border-radius:12px;
+  overflow:hidden;
+  background:black;
+  box-shadow:0 0 20px rgba(0,255,200,.3);
 }
 
-.viewer-count{
-  margin-top:6px;
-  font-size:14px;
-  color:#00ffcc;
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
+/* CHAT */
 .chat-box{
   margin-top:20px;
   width:260px;
-  height:140px;
+  height:120px;
   overflow:hidden;
   border-radius:10px;
   background:rgba(0,0,0,.6);
   padding:10px;
   font-size:12px;
   text-align:left;
-  box-shadow:0 0 10px rgba(0,255,200,.2);
 }
 
 .chat-line{
@@ -48,7 +51,7 @@
 
 <div class="bg"></div>
 
-<!-- 🔥 TOP NAV -->
+<!-- TOPBAR -->
 <div class="topbar">
   <div id="userEmail" style="font-size:12px;"></div>
   <div class="icon" onclick="goProfile()">👤</div>
@@ -59,16 +62,17 @@
 
   <h1>LIVE</h1>
 
-  <!-- 🔴 STATUS -->
-  <div class="live-status" id="statusText">OFFLINE</div>
+  <div id="statusText">OFFLINE</div>
+  <div id="viewerCount">0 watching</div>
 
-  <!-- 👀 VIEWERS -->
-  <div class="viewer-count" id="viewerCount">0 watching</div>
-
-  <!-- 🔴 BUTTON -->
   <button class="main-btn" onclick="toggleLive()" id="liveBtn">
     GO LIVE 🔴
   </button>
+
+  <!-- 🎥 CAMERA -->
+  <div class="video-box">
+    <video id="video" autoplay muted playsinline></video>
+  </div>
 
   <!-- 💬 CHAT -->
   <div class="chat-box" id="chatBox"></div>
@@ -81,10 +85,7 @@
 
 <script>
 
-/* =========================
-   USER SYSTEM (STEP 3)
-========================= */
-
+/* USER */
 const user = JSON.parse(localStorage.getItem("rb_user"));
 
 if(!user){
@@ -94,39 +95,63 @@ if(!user){
 document.getElementById("userEmail").innerText = user.email;
 
 
-/* =========================
-   LIVE STATE
-========================= */
-
+/* LIVE STATE */
 let isLive = false;
 let viewers = 0;
 let chatBox = document.getElementById("chatBox");
+let video = document.getElementById("video");
+let stream = null;
 
-function toggleLive(){
+/* TOGGLE LIVE */
+async function toggleLive(){
+
   isLive = !isLive;
 
   if(isLive){
+
     document.getElementById("statusText").innerText = "LIVE 🔴";
     document.getElementById("liveBtn").innerText = "END STREAM ⛔";
-    startLive();
+
+    startViewers();
+    startCamera();
+
   } else {
+
     document.getElementById("statusText").innerText = "OFFLINE";
     document.getElementById("liveBtn").innerText = "GO LIVE 🔴";
+
     viewers = 0;
     updateViewers();
+
+    stopCamera();
   }
 }
 
 
-/* =========================
-   FAKE VIEWERS
-========================= */
+/* CAMERA */
+async function startCamera(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    video.srcObject = stream;
+  }catch(err){
+    alert("Camera access denied");
+  }
+}
 
+function stopCamera(){
+  if(stream){
+    stream.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
+  }
+}
+
+
+/* VIEWERS */
 function updateViewers(){
   document.getElementById("viewerCount").innerText = viewers + " watching";
 }
 
-function startLive(){
+function startViewers(){
   setInterval(()=>{
     if(!isLive) return;
 
@@ -137,10 +162,7 @@ function startLive(){
 }
 
 
-/* =========================
-   FAKE CHAT
-========================= */
-
+/* CHAT */
 const messages = [
   "🔥 this fire",
   "yo this crazy",
@@ -148,10 +170,8 @@ const messages = [
   "drop more",
   "W stream",
   "nah this hard",
-  "keep going",
-  "😂😂😂",
   "TURN UP",
-  "this elite"
+  "😂😂😂"
 ];
 
 function spawnChat(){
@@ -159,7 +179,10 @@ function spawnChat(){
 
   const msg = document.createElement("div");
   msg.className = "chat-line";
-  msg.innerText = "user" + Math.floor(Math.random()*100) + ": " + messages[Math.floor(Math.random()*messages.length)];
+  msg.innerText =
+    "user" + Math.floor(Math.random()*100) +
+    ": " +
+    messages[Math.floor(Math.random()*messages.length)];
 
   chatBox.appendChild(msg);
 
@@ -171,10 +194,7 @@ function spawnChat(){
 setInterval(spawnChat,1500);
 
 
-/* =========================
-   NAV
-========================= */
-
+/* NAV */
 function goBack(){ window.location.href = "/"; }
 function goProfile(){ window.location.href = "/profile.html"; }
 function goSettings(){ window.location.href = "/setting.html"; }
