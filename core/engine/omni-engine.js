@@ -1,30 +1,23 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
+const labels = ["LIVE","MUSIC","GAMING","STORE","META","SPORTS","UPLOAD","GALLERY"];
 const ROUTES = [
-  "/live.html",
-  "/music.html",
-  "/gaming.html",
-  "/store.html",
-  "/meta.html",
-  "/sports.html",
-  "/upload.html",
-  "/gallery.html"
+  "/live.html","/music.html","/gaming.html","/store.html",
+  "/meta.html","/sports.html","/upload.html","/gallery.html"
 ];
 
-const labels = ["LIVE","MUSIC","GAMING","STORE","META","SPORTS","UPLOAD","GALLERY"];
-
-/* ENGINE */
-const canvas = document.getElementById("engine");
-
+/* SCENE */
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
-camera.position.z = 7;
+camera.position.set(0,0,6.5);
 
-const renderer = new THREE.WebGLRenderer({canvas,antialias:true});
+const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
 
-/* LIGHT */
+/* LIGHTING */
 scene.add(new THREE.AmbientLight(0xffffff,1.2));
 
 const light = new THREE.PointLight(0x00ffcc,3);
@@ -33,7 +26,7 @@ scene.add(light);
 
 /* CORE */
 const core = new THREE.Mesh(
-  new THREE.SphereGeometry(0.7,32,32),
+  new THREE.SphereGeometry(0.6,32,32),
   new THREE.MeshStandardMaterial({
     color:0x00ffcc,
     emissive:0x00ffcc,
@@ -42,29 +35,39 @@ const core = new THREE.Mesh(
 );
 scene.add(core);
 
-/* RING */
-const panels = [];
-const radius = 2.2;
-const step = (Math.PI*2)/labels.length;
-
-function createPanel(label){
-  const geo = new THREE.BoxGeometry(1,0.6,0.2);
-
-  const mat = new THREE.MeshStandardMaterial({
-    color:0x111111,
+/* 🔥 METAL RING (THIS FIXES THE FLOATING LOOK) */
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(2.4,0.08,32,100),
+  new THREE.MeshStandardMaterial({
+    color:0x222222,
     metalness:1,
     roughness:.3,
     emissive:0x00ffcc,
-    emissiveIntensity:.2
-  });
+    emissiveIntensity:.15
+  })
+);
+scene.add(ring);
 
-  const mesh = new THREE.Mesh(geo,mat);
+/* PANELS */
+const panels = [];
+const radius = 2.4;
+const step = (Math.PI*2)/labels.length;
 
-  return mesh;
+function createPanel(){
+  return new THREE.Mesh(
+    new THREE.BoxGeometry(0.9,0.55,0.15),
+    new THREE.MeshStandardMaterial({
+      color:0x111111,
+      metalness:1,
+      roughness:.35,
+      emissive:0x00ffcc,
+      emissiveIntensity:.2
+    })
+  );
 }
 
 labels.forEach((l,i)=>{
-  const p = createPanel(l);
+  const p = createPanel();
   scene.add(p);
   panels.push(p);
 });
@@ -84,66 +87,84 @@ function animate(){
     velocity *= 0.9;
 
     if(Math.abs(velocity)<0.001){
-      velocity=0;
-      rotation=Math.round(rotation/step)*step;
-      navigator.vibrate?.(10);
+      velocity = 0;
+
+      /* 🔥 SNAP PERFECT */
+      const target = Math.round(rotation/step)*step;
+      rotation = target;
+
+      navigator.vibrate?.(8);
     }
   }
 
-  let best=-Infinity;
+  let bestZ = -Infinity;
 
   panels.forEach((p,i)=>{
-    const angle=i*step+rotation;
+    const angle = i*step + rotation;
 
-    const x=Math.cos(angle)*radius;
-    const y=Math.sin(angle)*radius*0.4;
-    const z=Math.sin(angle)*radius;
+    /* 🔥 TRUE CIRCLE */
+    const x = Math.cos(angle)*radius;
+    const z = Math.sin(angle)*radius;
 
-    p.position.set(x,y,z);
+    p.position.set(x, 0, z);
+
+    /* 🔥 FACE CENTER */
     p.lookAt(0,0,0);
 
-    const depth=(z+radius)/(radius*2);
+    /* 🔥 DEPTH SCALE */
+    const depth = (z + radius) / (radius * 2);
 
-    p.scale.setScalar(0.8+depth*0.4);
+    const scale = 0.7 + depth * 0.6;
+    p.scale.set(scale,scale,scale);
 
-    if(z>best){
-      best=z;
-      active=i;
+    /* 🔥 ACTIVE DETECTION */
+    if(z > bestZ){
+      bestZ = z;
+      active = i;
     }
 
-    p.material.emissiveIntensity=(i===active)?1.5:0.2;
+    /* 🔥 GLOW */
+    p.material.emissiveIntensity = (i === active) ? 1.6 : 0.2;
   });
 
-  core.rotation.y += 0.01;
+  core.rotation.y += 0.015;
+  ring.rotation.z += 0.002;
 
   renderer.render(scene,camera);
 }
 animate();
 
 /* TOUCH */
-let lastX=0;
+let lastX = 0;
 
 addEventListener("touchstart",e=>{
-  dragging=true;
-  lastX=e.touches[0].clientX;
+  dragging = true;
+  lastX = e.touches[0].clientX;
 });
 
 addEventListener("touchmove",e=>{
-  const dx=e.touches[0].clientX-lastX;
-  velocity=dx*0.003;
-  lastX=e.touches[0].clientX;
+  const dx = e.touches[0].clientX - lastX;
+  velocity = dx * 0.0035; // 🔥 tighter control
+  lastX = e.touches[0].clientX;
 });
 
-addEventListener("touchend",()=>dragging=false);
+addEventListener("touchend",()=>{
+  dragging = false;
+});
 
-/* NAV */
-window.enter=()=>{
+/* CLICK */
+addEventListener("click",()=>{
+  location.href = ROUTES[active];
+});
+
+/* ENTER BUTTON */
+window.enter = () => {
   location.href = ROUTES[active];
 };
 
 /* RESIZE */
 addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;
+  camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
 });
