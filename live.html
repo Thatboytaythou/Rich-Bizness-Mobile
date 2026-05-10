@@ -6,73 +6,32 @@
 <title>LIVE</title>
 
 <script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.min.js"></script>
-
-<style>
-html,body{
-  margin:0;
-  height:100%;
-  background:black;
-  color:#00ffcc;
-  font-family:sans-serif;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-h1{
-  font-size:40px;
-  text-shadow:0 0 20px #00ffcc;
-}
-
-.status{
-  margin:10px 0;
-  font-size:18px;
-}
-
-.main-btn{
-  padding:18px 40px;
-  font-size:18px;
-  font-weight:bold;
-  background:#00ffcc;
-  color:black;
-  border:none;
-  border-radius:14px;
-  box-shadow:0 0 30px #00ffcc;
-  margin:20px 0;
-}
-
-video{
-  width:90%;
-  max-width:400px;
-  border-radius:16px;
-  box-shadow:0 0 20px #00ffcc;
-  margin-top:20px;
-}
-
-.back{
-  margin-top:30px;
-  padding:12px 26px;
-  border-radius:10px;
-  background:#111;
-  color:#00ffcc;
-}
-</style>
+<link rel="stylesheet" href="/styles/main.css">
 </head>
 
 <body>
 
-<h1>LIVE</h1>
+<div class="container">
 
+<h1>LIVE</h1>
 <div class="status" id="status">OFFLINE</div>
 
 <button class="main-btn" id="liveBtn">GO LIVE 🔴</button>
 
 <video id="video" autoplay muted playsinline></video>
 
-<button class="back" onclick="location.href='/'">GO BACK</button>
+<button class="secondary-btn" onclick="location.href='/'">GO BACK</button>
+
+</div>
 
 <script>
+
+/* USER */
+function getUser(){
+  const raw = localStorage.getItem("rb_user");
+  if(!raw) return null;
+  return JSON.parse(raw);
+}
 
 let room = null;
 let isLive = false;
@@ -81,72 +40,61 @@ const videoEl = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const btn = document.getElementById("liveBtn");
 
-/* 🔥 TOKEN */
 async function getToken(username){
   const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
   const data = await res.json();
-
-  if(!data.token){
-    throw new Error("No token returned");
-  }
-
+  if(!data.token) throw new Error("No token");
   return data.token;
 }
 
-/* 🔥 GO LIVE */
 btn.onclick = async () => {
 
   if(!isLive){
 
-    const username = localStorage.getItem("rb_user") || "guest";
+    const user = getUser();
+    if(!user){
+      location.href="/auth.html";
+      return;
+    }
 
     try {
-      const token = await getToken(username);
+      const token = await getToken(user.username);
 
       room = new LivekitClient.Room();
 
-      // ✅ YOUR NEW LIVEKIT URL (FIXED)
       await room.connect(
         "wss://rich-bizness-mobile-zvq5cojk.livekit.cloud",
         token
       );
 
-      // ✅ CORRECT WAY (THIS FIXES YOUR STREAM FAIL)
       const tracks = await LivekitClient.createLocalTracks({
-        audio: true,
-        video: true
+        audio:true,
+        video:true
       });
 
-      // show video
-      const videoTrack = tracks.find(t => t.kind === "video");
+      const videoTrack = tracks.find(t=>t.kind==="video");
       videoTrack.attach(videoEl);
 
-      // publish tracks
-      for (const track of tracks) {
-        await room.localParticipant.publishTrack(track);
+      for(const t of tracks){
+        await room.localParticipant.publishTrack(t);
       }
 
-      statusEl.innerText = "LIVE 🔴";
-      btn.innerText = "END STREAM ⛔";
-      isLive = true;
+      statusEl.innerText="LIVE 🔴";
+      btn.innerText="END STREAM ⛔";
+      isLive=true;
 
-    } catch (err){
-      console.error("LIVE ERROR:", err);
-      alert("Stream failed — check API / env");
+    } catch(err){
+      console.error(err);
+      alert("Stream failed");
     }
 
   } else {
+    room.disconnect();
+    videoEl.srcObject=null;
 
-    if(room){
-      room.disconnect();
-    }
-
-    videoEl.srcObject = null;
-
-    statusEl.innerText = "OFFLINE";
-    btn.innerText = "GO LIVE 🔴";
-    isLive = false;
-
+    statusEl.innerText="OFFLINE";
+    btn.innerText="GO LIVE 🔴";
+    isLive=false;
   }
 
 };
