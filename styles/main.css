@@ -1,6 +1,7 @@
 /* =========================
-   GLOBAL RESET
+   RICH BIZNESS GLOBAL STYLE
 ========================= */
+
 html,body{
   margin:0;
   height:100%;
@@ -10,9 +11,7 @@ html,body{
   color:#00ffcc;
 }
 
-/* =========================
-   BACKGROUND
-========================= */
+/* BG */
 .bg{
   position:fixed;
   inset:0;
@@ -22,21 +21,16 @@ html,body{
   z-index:0;
 }
 
-/* =========================
-   HARD CENTER (LOCKED)
-========================= */
-.app,
-.container{
+/* CENTER LOCK */
+.app,.container{
   position:fixed;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%);
+  transform:translate(-50%,-50%);
   z-index:10;
 }
 
-/* =========================
-   TOPBAR
-========================= */
+/* TOPBAR */
 .topbar{
   position:fixed;
   top:15px;
@@ -56,22 +50,14 @@ html,body{
   justify-content:center;
   color:#00ffcc;
   backdrop-filter:blur(10px);
-  box-shadow:0 0 10px rgba(0,255,200,.3);
-  cursor:pointer;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* BUTTONS */
 .main-btn{
-  padding:16px 36px;
-  font-size:16px;
-  font-weight:bold;
+  padding:16px 32px;
   background:#00ffcc;
-  color:black;
   border:none;
-  border-radius:12px;
-  box-shadow:0 0 25px #00ffcc;
+  border-radius:10px;
 }
 
 .secondary-btn{
@@ -79,47 +65,33 @@ html,body{
   background:#111;
   color:#00ffcc;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
 }
 
-/* =========================
-   OMNI CORE
-========================= */
-.omni{
-  width:320px;
-  height:320px;
-  position:relative;
-}
+/* OMNI */
+.omni{ width:320px; height:320px; position:relative; }
 
 .ring{
   position:absolute;
   inset:0;
   border-radius:50%;
   background:#001;
-  box-shadow:
-    0 0 100px #00ffcc,
-    inset 0 0 60px rgba(0,255,200,.3);
+  box-shadow:0 0 100px #00ffcc, inset 0 0 60px rgba(0,255,200,.3);
 }
 
-.wheel{
-  position:absolute;
-  inset:0;
-}
+.wheel{ position:absolute; inset:0; }
 
 .seg{
   position:absolute;
   top:50%;
   left:50%;
   transform-origin:center;
-  font-size:22px;
   opacity:.6;
-  transition:.2s;
 }
 
 .seg.active{
   transform:translate(-50%,-50%) scale(1.5);
   opacity:1;
-  filter:drop-shadow(0 0 15px #00ffff);
 }
 
 .core{
@@ -134,19 +106,13 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  color:#00ffcc;
-  font-weight:bold;
   box-shadow:0 0 40px #00ffcc;
-  cursor:pointer;
 }
 
-/* =========================
-   LABEL
-========================= */
+/* LABEL */
 .screen{
   position:fixed;
   bottom:60px;
   width:100%;
   text-align:center;
-  font-size:22px;
 }
