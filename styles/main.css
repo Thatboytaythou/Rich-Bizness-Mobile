@@ -19,7 +19,7 @@ html,body{
   inset:0;
   background:
     radial-gradient(circle at center, rgba(0,255,200,.2), transparent 60%),
-    url("/images/19FB5229-30DD-40B0-9404-5136C27FEF6A.png")
+    url("./images/19FB5229-30DD-40B0-9404-5136C27FEF6A.png")
     center/cover no-repeat;
   z-index:-1;
 }
