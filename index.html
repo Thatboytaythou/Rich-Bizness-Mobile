@@ -6,32 +6,6 @@
 
 <link rel="stylesheet" href="/styles/main.css">
 
-<style>
-/* ===== LAYERS FIXED ===== */
-canvas{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:2;
-}
-
-/* background behind */
-.bg{
-  position:fixed;
-  inset:0;
-  z-index:1;
-}
-
-/* UI always on top */
-.topbar,
-.enter{
-  position:relative;
-  z-index:10;
-}
-</style>
-
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.158.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -70,7 +44,7 @@ const ROUTES = [
    THREE ENGINE
 ========================= */
 
-const scene = new THREE.Scene(); // 🚫 NO FOG
+const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -89,10 +63,15 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.domElement.style.position = "fixed";
+renderer.domElement.style.top = "0";
+renderer.domElement.style.left = "0";
+renderer.domElement.style.zIndex = "2";
+
 document.body.appendChild(renderer.domElement);
 
 /* =========================
-   LIGHT (FIXED)
+   LIGHT
 ========================= */
 
 scene.add(new THREE.AmbientLight(0xffffff, 2));
@@ -141,7 +120,7 @@ for(let i=0;i<count;i++){
 }
 
 /* =========================
-   MOTION (NO DRAG)
+   MOTION
 ========================= */
 
 let velocity = 0;
@@ -158,9 +137,7 @@ function animate(){
 
     if(Math.abs(velocity) < 0.001){
       velocity = 0;
-
-      const snap = Math.round(rotation / step) * step;
-      rotation = snap;
+      rotation = Math.round(rotation / step) * step;
     }
   }
 
@@ -213,10 +190,7 @@ window.addEventListener("touchend", ()=>{
   dragging = false;
 });
 
-/* =========================
-   CLICK
-========================= */
-
+/* CLICK */
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -233,23 +207,16 @@ window.addEventListener("click", e=>{
   }
 });
 
-/* =========================
-   ENTER
-========================= */
-
+/* ENTER */
 window.enter = ()=>{
   if(!window.user){
     location.href="/auth.html";
     return;
   }
-
   location.href = ROUTES[window.activeIndex];
 };
 
-/* =========================
-   RESIZE
-========================= */
-
+/* RESIZE */
 window.addEventListener("resize", ()=>{
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
