@@ -1,139 +1,96 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
-const canvas = document.getElementById("engine");
-
 /* =========================
    SCENE
 ========================= */
 const scene = new THREE.Scene();
 
-/* =========================
-   CAMERA (🔥 FIXED CENTER)
-========================= */
+/* CAMERA */
 const camera = new THREE.PerspectiveCamera(
   75,
-  window.innerWidth / window.innerHeight,
+  window.innerWidth/window.innerHeight,
   0.1,
   1000
 );
+camera.position.set(0, 0, 7);
 
-/* 🔥 KEY FIXES */
-camera.position.set(0, 0, 8.5);   // pull back = no crop
-camera.lookAt(0, 0, 0);           // hard center lock
-
-/* =========================
-   RENDERER
-========================= */
+/* RENDERER */
 const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true,
-  alpha: true
+  canvas: document.getElementById("engine"),
+  antialias: true
 });
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 
-/* =========================
-   LIGHT
-========================= */
+/* LIGHT */
 scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-
-const light = new THREE.PointLight(0x00ffcc, 3);
-light.position.set(5, 5, 5);
+const light = new THREE.PointLight(0x00ffcc, 2);
+light.position.set(4, 4, 4);
 scene.add(light);
 
 /* =========================
-   🔥 CENTER GROUP (IMPORTANT)
+   CORE HUB
 ========================= */
-const centerGroup = new THREE.Group();
-scene.add(centerGroup);
+const hub = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.7, 0.7, 0.3, 64),
+  new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    metalness: 1,
+    roughness: 0.25,
+    emissive: 0x00ffcc,
+    emissiveIntensity: 0.4
+  })
+);
+scene.add(hub);
 
 /* =========================
-   🔥 METAL RING
+   WHEEL (THE ACTUAL DIAL)
 ========================= */
-const ring = new THREE.Mesh(
-  new THREE.TorusGeometry(2.6, 0.12, 40, 200),
-  new THREE.MeshStandardMaterial({
+const wheel = new THREE.Group();
+scene.add(wheel);
+
+const segments = [];
+const count = 8;
+const radius = 2.6;
+const step = (Math.PI * 2) / count;
+
+/* BUILD SEGMENTS */
+for (let i = 0; i < count; i++) {
+
+  const geo = new THREE.BoxGeometry(0.8, 0.8, 0.3);
+
+  const mat = new THREE.MeshStandardMaterial({
     color: 0x1a1a1a,
     metalness: 1,
     roughness: 0.3,
     emissive: 0x00ffcc,
-    emissiveIntensity: 0.15
-  })
-);
-centerGroup.add(ring);
-
-/* =========================
-   PORTAL
-========================= */
-const portal = new THREE.Mesh(
-  new THREE.SphereGeometry(1, 32, 32),
-  new THREE.MeshStandardMaterial({
-    color: 0x00ffcc,
-    emissive: 0x00ffcc,
-    emissiveIntensity: 2,
-    transparent: true,
-    opacity: 0.9
-  })
-);
-centerGroup.add(portal);
-
-/* =========================
-   SEGMENTS
-========================= */
-const sections = 8;
-const radius = 2.6;
-const step = (Math.PI * 2) / sections;
-
-const segments = [];
-
-for (let i = 0; i < sections; i++) {
-  const geo = new THREE.BoxGeometry(0.5, 0.8, 0.2);
-
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0x111111,
-    metalness: 1,
-    roughness: 0.3,
-    emissive: 0x00ffcc,
-    emissiveIntensity: 0.2
+    emissiveIntensity: 0.3
   });
 
-  const mesh = new THREE.Mesh(geo, mat);
+  const seg = new THREE.Mesh(geo, mat);
 
-  centerGroup.add(mesh);
-  segments.push(mesh);
+  const angle = i * step;
+
+  seg.position.set(
+    Math.cos(angle) * radius,
+    0,
+    Math.sin(angle) * radius
+  );
+
+  /* FACE CENTER */
+  seg.lookAt(0, 0, 0);
+
+  seg.userData.index = i;
+
+  wheel.add(seg);
+  segments.push(seg);
 }
 
 /* =========================
-   PARTICLES
+   ROTATION (DIAL)
 ========================= */
-const starGeo = new THREE.BufferGeometry();
-const count = 600;
-const pos = new Float32Array(count * 3);
-
-for (let i = 0; i < count; i++) {
-  pos[i * 3] = (Math.random() - 0.5) * 12;
-  pos[i * 3 + 1] = (Math.random() - 0.5) * 12;
-  pos[i * 3 + 2] = (Math.random() - 0.5) * 12;
-}
-
-starGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-
-const stars = new THREE.Points(
-  starGeo,
-  new THREE.PointsMaterial({
-    color: 0x00ffcc,
-    size: 0.05
-  })
-);
-
-scene.add(stars);
-
-/* =========================
-   MOTION
-========================= */
-let rotation = 0;
 let velocity = 0;
+let rotation = 0;
 let dragging = false;
 
 function animate() {
@@ -150,58 +107,77 @@ function animate() {
     }
   }
 
-  segments.forEach((m, i) => {
-    const angle = i * step + rotation;
+  /* 🔒 ONLY THIS ROTATES */
+  wheel.rotation.y = rotation;
 
-    m.position.x = Math.cos(angle) * radius;
-    m.position.y = Math.sin(angle) * 0.3; // 🔥 reduced vertical stretch
-    m.position.z = Math.sin(angle) * radius;
+  /* FRONT HIGHLIGHT */
+  let best = -Infinity;
+  let active = 0;
 
-    m.lookAt(0, 0, 0);
+  segments.forEach((s, i) => {
+    const pos = new THREE.Vector3();
+    s.getWorldPosition(pos);
 
-    const depth = (m.position.z + radius) / (radius * 2);
+    if (pos.z > best) {
+      best = pos.z;
+      active = i;
+    }
 
-    const scale = 0.7 + depth * 0.4;
-    m.scale.set(scale, scale, scale);
+    /* subtle glow */
+    const depth = (pos.z + radius) / (radius * 2);
+    s.material.emissiveIntensity = 0.3 + depth * 0.8;
   });
 
-  /* 🔥 STABLE CENTER */
-  centerGroup.position.y = 0;   // locks vertical center
-
-  portal.scale.setScalar(1 + Math.sin(Date.now() * 0.002) * 0.05);
-
-  stars.rotation.y += 0.0005;
+  window.activeIndex = active;
 
   renderer.render(scene, camera);
 }
 animate();
 
 /* =========================
-   TOUCH
+   TOUCH CONTROL
 ========================= */
 let lastX = 0;
 
-addEventListener("touchstart", e => {
+window.addEventListener("touchstart", e => {
   dragging = true;
   lastX = e.touches[0].clientX;
 });
 
-addEventListener("touchmove", e => {
+window.addEventListener("touchmove", e => {
   const dx = e.touches[0].clientX - lastX;
-  velocity = dx * 0.004;
+  velocity = dx * 0.003;
   lastX = e.touches[0].clientX;
 });
 
-addEventListener("touchend", () => {
+window.addEventListener("touchend", () => {
   dragging = false;
 });
 
 /* =========================
-   RESIZE (🔥 CRITICAL FIX)
+   CLICK NAV
 ========================= */
-addEventListener("resize", () => {
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener("click", e => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const hit = raycaster.intersectObjects(segments);
+
+  if (hit.length) {
+    console.log("CLICKED:", hit[0].object.userData.index);
+  }
+});
+
+/* =========================
+   RESIZE
+========================= */
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
