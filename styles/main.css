@@ -7,6 +7,7 @@ html,body{
   color:#00ffcc;
 }
 
+/* BACKGROUND */
 .bg{
   position:fixed;
   inset:0;
@@ -16,98 +17,7 @@ html,body{
   z-index:0;
 }
 
-.app,.container{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  z-index:10;
-}
-
-.topbar{
-  position:fixed;
-  top:15px;
-  right:15px;
-  display:flex;
-  gap:12px;
-  z-index:100;
-}
-
-.icon{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:rgba(0,255,200,.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.main-btn{
-  padding:16px 32px;
-  background:#00ffcc;
-  border:none;
-  border-radius:10px;
-}
-
-.secondary-btn{
-  padding:12px 24px;
-  background:#111;
-  color:#00ffcc;
-  border:none;
-  border-radius:8px;
-}
-
-.omni{
-  width:320px;
-  height:320px;
-  position:relative;
-}
-
-.ring{
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:#001;
-  box-shadow:0 0 100px #00ffcc, inset 0 0 60px rgba(0,255,200,.3);
-}
-
-.wheel{ position:absolute; inset:0; }
-
-.seg{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform-origin:center;
-  opacity:.6;
-}
-
-.seg.active{
-  transform:translate(-50%,-50%) scale(1.5);
-  opacity:1;
-}
-
-.core{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.screen{
-  position:fixed;
-  bottom:60px;
-  width:100%;
-  text-align:center;
-}
-
+/* TOPBAR */
 .topbar{
   position:absolute;
   top:10px;
@@ -125,8 +35,8 @@ html,body{
 }
 
 .icon{
-  width:40px;
-  height:40px;
+  width:42px;
+  height:42px;
   border-radius:50%;
   background:rgba(0,0,0,0.6);
   display:flex;
@@ -134,9 +44,20 @@ html,body{
   justify-content:center;
   color:#00ffcc;
   font-size:18px;
+  backdrop-filter:blur(6px);
 }
 
-.seg.active{
-  transform:translate(-50%,-50%) scale(1.6);
-  filter:drop-shadow(0 0 15px #00ffff);
+/* ENTER BUTTON */
+.enter{
+  position:absolute;
+  bottom:60px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#00ffcc;
+  color:#000;
+  padding:15px 30px;
+  border-radius:30px;
+  font-weight:bold;
+  z-index:10;
+  box-shadow:0 0 20px #00ffcc;
 }
