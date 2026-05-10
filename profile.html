@@ -1,106 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>PROFILE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROFILE — RICH BIZNESS</title>
+
+<link rel="stylesheet" href="/styles/main.css">
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  background:black;
-  color:#00ffcc;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-family:sans-serif;
-}
 
-/* TITLE */
-h1{
-  font-size:32px;
-  margin-bottom:10px;
+/* PROFILE CARD */
+.profile-card{
+  text-align:center;
+  padding:30px 25px;
+  border-radius:16px;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 30px rgba(0,255,200,.25);
 }
 
 /* USER NAME */
-.user{
-  font-size:14px;
-  opacity:.7;
-  margin-bottom:30px;
+.username{
+  font-size:20px;
+  margin-bottom:6px;
 }
 
-/* MAIN BUTTON */
-.main-btn{
-  padding:18px 40px;
-  font-size:18px;
-  font-weight:bold;
+.email{
+  font-size:13px;
+  opacity:.6;
+  margin-bottom:25px;
+}
+
+/* AVATAR */
+.avatar{
+  width:90px;
+  height:90px;
+  border-radius:50%;
   background:#00ffcc;
   color:black;
-  border:none;
-  border-radius:12px;
-  box-shadow:0 0 25px #00ffcc;
-  margin-bottom:25px;
-  cursor:pointer;
-  transition:.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  font-weight:bold;
+  margin:0 auto 20px;
+  box-shadow:0 0 20px #00ffcc;
 }
 
-.main-btn:active{
-  transform:scale(.95);
-}
-
-/* SECOND BUTTON */
-.secondary-btn{
-  padding:14px 28px;
-  font-size:14px;
-  border:none;
-  border-radius:10px;
-  background:#111;
-  color:#00ffcc;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.secondary-btn:active{
-  transform:scale(.95);
-}
 </style>
 </head>
 
 <body>
 
-<h1>PROFILE</h1>
+<div class="bg"></div>
 
-<!-- 🔥 SHOW WHO LOGGED IN -->
-<div class="user" id="userName">Loading...</div>
+<div class="topbar">
+  <div class="icon" onclick="goHome()">🏠</div>
+  <div class="icon" onclick="logout()">🚪</div>
+</div>
 
-<!-- 🔥 LOGOUT -->
-<button class="main-btn" onclick="logout()">
-  I'M OUT ✌🏽
-</button>
+<div class="container">
 
-<button class="secondary-btn" onclick="goBack()">
-  GO BACK
-</button>
+  <div class="profile-card">
+
+    <h1>PROFILE</h1>
+
+    <div class="avatar" id="avatar">?</div>
+
+    <div class="username" id="username">Loading...</div>
+    <div class="email" id="email">Loading...</div>
+
+    <button class="main-btn" onclick="logout()">
+      LOG OUT ✌🏽
+    </button>
+
+    <button class="secondary-btn" onclick="goHome()">
+      GO BACK
+    </button>
+
+  </div>
+
+</div>
 
 <script>
 
-/* SHOW USER */
-const user = localStorage.getItem("rb_user");
+/* =========================
+   GET USER
+========================= */
+function getUser(){
+  const raw = localStorage.getItem("rb_user");
+  if(!raw) return null;
 
-if(user){
-  document.getElementById("userName").innerText = user;
-}else{
-  document.getElementById("userName").innerText = "Not logged in";
+  try{
+    return JSON.parse(raw);
+  }catch{
+    return null;
+  }
 }
 
-/* LOGOUT */
+/* =========================
+   INIT
+========================= */
+const user = getUser();
+
+if(!user){
+  // 🔥 protect route
+  window.location.href = "/auth.html";
+}
+
+/* =========================
+   DISPLAY USER
+========================= */
+if(user){
+
+  const username = user.username || "User";
+  const email = user.email || "No Email";
+
+  document.getElementById("username").innerText = username;
+  document.getElementById("email").innerText = email;
+
+  // 🔥 avatar letter
+  document.getElementById("avatar").innerText =
+    username.charAt(0).toUpperCase();
+}
+
+/* =========================
+   ACTIONS
+========================= */
 function logout(){
   localStorage.removeItem("rb_user");
   window.location.href = "/auth.html";
 }
 
-/* BACK */
-function goBack(){
+function goHome(){
   window.location.href = "/";
 }
 
