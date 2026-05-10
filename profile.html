@@ -7,9 +7,10 @@
 
 <link rel="stylesheet" href="/styles/main.css">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 
-/* CARD */
 .profile-card{
   text-align:center;
   padding:30px 25px;
@@ -19,7 +20,6 @@
   box-shadow:0 0 30px rgba(0,255,200,.25);
 }
 
-/* AVATAR */
 .avatar{
   width:100px;
   height:100px;
@@ -42,7 +42,6 @@
   object-fit:cover;
 }
 
-/* TEXT */
 .username{
   font-size:20px;
   margin-bottom:6px;
@@ -54,7 +53,6 @@
   margin-bottom:20px;
 }
 
-/* INPUT */
 .input{
   padding:12px;
   width:220px;
@@ -84,17 +82,12 @@
 
     <h1>PROFILE</h1>
 
-    <!-- AVATAR -->
     <div class="avatar" id="avatar">?</div>
 
-    <!-- DISPLAY -->
     <div class="username" id="username">Loading...</div>
     <div class="email" id="email">Loading...</div>
 
-    <!-- EDIT -->
     <input class="input" id="editName" placeholder="Edit username">
-
-    <input type="file" id="avatarUpload" accept="image/*">
 
     <button class="main-btn" onclick="saveProfile()">
       SAVE CHANGES 💾
@@ -114,98 +107,81 @@
 
 <script>
 
-/* =========================
-   GET USER
-========================= */
-function getUser(){
-  const raw = localStorage.getItem("rb_user");
-  if(!raw) return null;
+const supabase = window.supabase.createClient(
+  "https://zsancpcyhdidrlezggrl.supabase.co",
+  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
+);
 
-  try{
-    return JSON.parse(raw);
-  }catch{
-    return null;
+let user;
+
+/* INIT */
+async function init(){
+
+  const { data: { user: u } } = await supabase.auth.getUser();
+
+  if(!u){
+    location.href="/auth.html";
+    return;
   }
-}
 
-/* =========================
-   INIT
-========================= */
-let user = getUser();
+  user = u;
 
-if(!user){
-  window.location.href = "/auth.html";
-}
-
-/* =========================
-   RENDER
-========================= */
-function render(){
-
-  document.getElementById("username").innerText = user.username;
   document.getElementById("email").innerText = user.email;
 
-  const avatar = document.getElementById("avatar");
-
-  if(user.avatar){
-    avatar.innerHTML = `<img src="${user.avatar}" />`;
-  }else{
-    avatar.innerText = user.username.charAt(0).toUpperCase();
-  }
-
+  loadProfile();
 }
 
-render();
+init();
 
-/* =========================
-   SAVE PROFILE
-========================= */
-function saveProfile(){
+/* LOAD PROFILE */
+async function loadProfile(){
 
-  const newName = document.getElementById("editName").value.trim();
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-  if(newName){
-    user.username = newName;
+  if(data){
+    document.getElementById("username").innerText = data.username || "User";
+
+    const avatar = document.getElementById("avatar");
+
+    if(data.avatar_url){
+      avatar.innerHTML = `<img src="${data.avatar_url}">`;
+    }else{
+      avatar.innerText = data.username?.charAt(0).toUpperCase() || "U";
+    }
   }
-
-  const fileInput = document.getElementById("avatarUpload");
-  const file = fileInput.files[0];
-
-  if(file){
-
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-      user.avatar = e.target.result;
-
-      localStorage.setItem("rb_user", JSON.stringify(user));
-      render();
-
-      alert("Profile updated 🔥");
-    };
-
-    reader.readAsDataURL(file);
-
-  }else{
-
-    localStorage.setItem("rb_user", JSON.stringify(user));
-    render();
-
-    alert("Profile updated 🔥");
-  }
-
 }
 
-/* =========================
-   ACTIONS
-========================= */
-function logout(){
-  localStorage.removeItem("rb_user");
-  window.location.href = "/auth.html";
+/* SAVE */
+async function saveProfile(){
+
+  const newName = document.getElementById("editName").value;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ username: newName })
+    .eq("id", user.id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  alert("Saved 🔥");
+  loadProfile();
+}
+
+/* ACTIONS */
+async function logout(){
+  await supabase.auth.signOut();
+  location.href="/auth.html";
 }
 
 function goHome(){
-  window.location.href = "/";
+  location.href="/";
 }
 
 </script>
