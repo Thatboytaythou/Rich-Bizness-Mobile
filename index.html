@@ -7,7 +7,11 @@
 <link rel="stylesheet" href="/styles/main.css">
 
 <script type="module">
-import * as THREE from "https://cdn.skypack.dev/three@0.158.0";
+/* 🔥 DEBUG (CONFIRM SCRIPT RUNS) */
+console.log("SCRIPT STARTED");
+
+/* 🔥 FIXED THREE IMPORT (NO SKYPACK) */
+import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* =========================
@@ -44,6 +48,8 @@ const ROUTES = [
    THREE ENGINE
 ========================= */
 
+console.log("THREE LOADED:", THREE);
+
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -63,10 +69,15 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+
+/* 🔥 FORCE CANVAS STYLE */
 renderer.domElement.style.position = "fixed";
 renderer.domElement.style.top = "0";
 renderer.domElement.style.left = "0";
+renderer.domElement.style.width = "100%";
+renderer.domElement.style.height = "100%";
 renderer.domElement.style.zIndex = "2";
+renderer.domElement.style.pointerEvents = "auto";
 
 document.body.appendChild(renderer.domElement);
 
