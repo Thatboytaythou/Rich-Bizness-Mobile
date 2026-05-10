@@ -3,46 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LIVE — RICH BIZNESS</title>
 
-<style>
-body{
-  margin:0;
-  background:#000;
-  color:#00ffcc;
-  font-family:sans-serif;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-  flex-direction:column;
-}
+<title>LIVE</title>
 
-h1{
-  font-size:32px;
-}
+<!-- 🔥 LINK GLOBAL STYLE -->
+<link rel="stylesheet" href="/styles/main.css">
 
-button{
-  margin-top:20px;
-  padding:12px 20px;
-  background:#00ffcc;
-  border:none;
-  color:#000;
-  font-weight:bold;
-  cursor:pointer;
-}
-</style>
 </head>
 
 <body>
 
-<h1>LIVE PAGE</h1>
+<div class="bg"></div>
 
-<button onclick="goBack()">GO BACK</button>
+<div class="container">
+
+  <h1>LIVE</h1>
+
+  <button class="main-btn">
+    GO LIVE 🔴
+  </button>
+
+  <br>
+
+  <button class="secondary-btn" onclick="goBack()">
+    GO BACK
+  </button>
+
+</div>
 
 <script>
 function goBack(){
-  window.location.href = "/index.html";
+  window.location.href = "/";
 }
 </script>
 
