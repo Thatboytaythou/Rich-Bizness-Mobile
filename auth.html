@@ -43,9 +43,12 @@ function login(){
     return;
   }
 
-  localStorage.setItem("rb_user", JSON.stringify({
-    email: email
-  }));
+  const user = {
+    email,
+    username: email.split("@")[0]
+  };
+
+  localStorage.setItem("rb_user", JSON.stringify(user));
 
   window.location.href = "/";
 }
