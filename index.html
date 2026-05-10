@@ -6,7 +6,6 @@
 <title>RICH BIZNESS — OMNI CORE</title>
 
 <style>
-
 html,body{
   margin:0;
   height:100%;
@@ -15,7 +14,6 @@ html,body{
   font-family:sans-serif;
 }
 
-/* BG */
 .bg{
   position:fixed;
   inset:0;
@@ -25,7 +23,6 @@ html,body{
     center/cover no-repeat;
 }
 
-/* CENTER */
 .app{
   position:fixed;
   top:50%;
@@ -33,33 +30,28 @@ html,body{
   transform:translate(-50%, -50%);
 }
 
-/* WHEEL */
 .omni{
   width:340px;
   height:340px;
   position:relative;
 }
 
-/* RING */
 .ring{
   position:absolute;
   inset:0;
   border-radius:50%;
   background:#001;
-
   box-shadow:
     0 0 120px #00ffcc,
     inset 0 0 80px rgba(0,255,200,.3);
 }
 
-/* ROTATION */
 .wheel{
   position:absolute;
   inset:0;
   transition:transform .1s;
 }
 
-/* ICONS */
 .seg{
   position:absolute;
   top:50%;
@@ -77,32 +69,25 @@ html,body{
   filter:drop-shadow(0 0 20px #00ffff);
 }
 
-/* CORE BUTTON */
 .core{
   position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
-
   width:130px;
   height:130px;
-
   border-radius:50%;
   background:#000;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   color:#00ffcc;
   font-weight:bold;
   font-size:18px;
-
   box-shadow:0 0 60px #00ffcc;
   cursor:pointer;
 }
 
-/* LABEL */
 .screen{
   position:fixed;
   bottom:60px;
@@ -112,7 +97,6 @@ html,body{
   color:#00ffcc;
   letter-spacing:2px;
 }
-
 </style>
 </head>
 
@@ -132,7 +116,6 @@ html,body{
 
 <script>
 
-/* DATA */
 const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒","⬆️","👤","💬","🔔"];
 const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE","UPLOAD","PROFILE","MESSAGES","ALERTS"];
 
@@ -159,15 +142,12 @@ let vel = 0;
 const step = (Math.PI*2)/ITEMS.length;
 const radius = 120;
 
-/* BUILD */
 ITEMS.forEach((icon,i)=>{
-
   const el = document.createElement("div");
   el.className = "seg";
   el.innerText = icon;
 
   const angle = i * step - Math.PI/2;
-
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
 
@@ -183,9 +163,9 @@ ITEMS.forEach((icon,i)=>{
   wheel.appendChild(el);
 });
 
-/* UPDATE */
-function update(){
+let currentIndex = 0;
 
+function update(){
   wheel.style.transform = `rotate(${rot}rad)`;
 
   let index = Math.round(-rot/step)%ITEMS.length;
@@ -196,13 +176,9 @@ function update(){
   });
 
   screen.innerText = LABELS[index];
-
   currentIndex = index;
 }
 
-let currentIndex = 0;
-
-/* LOOP */
 function loop(){
   rot += vel;
   vel *= 0.92;
@@ -217,7 +193,6 @@ function loop(){
 }
 loop();
 
-/* TOUCH */
 let startX=0;
 
 window.addEventListener("touchstart", e=>{
@@ -229,8 +204,15 @@ window.addEventListener("touchmove", e=>{
   vel = dx * 0.0004;
 });
 
-/* ENTER BUTTON */
+/* 🔥 THIS IS THE ONLY NEW LOGIC */
 enterBtn.onclick = ()=>{
+  const user = localStorage.getItem("rb_user");
+
+  if(!user){
+    window.location.href = "/auth.html";
+    return;
+  }
+
   window.location.href = ROUTES[currentIndex];
 };
 
