@@ -1,25 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PROFILE — RICH BIZNESS</title>
+<title>PROFILE</title>
 
 <link rel="stylesheet" href="/styles/main.css">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-<style>
+const supabase = createClient(
+  "https://zsancpcyhdidrlezggrl.supabase.co",
+  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
+);
 
-.profile-card{
-  text-align:center;
-  padding:30px 25px;
-  border-radius:16px;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(10px);
-  box-shadow:0 0 30px rgba(0,255,200,.25);
+let user = null;
+
+async function loadProfile(){
+
+  const { data: { user: u } } = await supabase.auth.getUser();
+
+  if(!u){
+    window.location.href = "/auth.html";
+    return;
+  }
+
+  user = u;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", u.id)
+    .single();
+
+  document.getElementById("email").innerText = u.email;
+
+  if(data){
+    document.getElementById("username").innerText = data.username;
+    document.getElementById("avatar").innerText =
+      data.username?.charAt(0).toUpperCase() || "?";
+  } else {
+    document.getElementById("username").innerText = "No profile yet";
+  }
 }
 
+window.logout = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/auth.html";
+};
+
+window.goHome = () => {
+  window.location.href = "/";
+};
+
+loadProfile();
+</script>
+
+<style>
+.profile-card{
+  text-align:center;
+  padding:30px;
+  background:rgba(0,0,0,.6);
+  border-radius:16px;
+}
 .avatar{
   width:100px;
   height:100px;
@@ -29,42 +71,11 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:32px;
-  font-weight:bold;
-  margin:0 auto 20px;
-  box-shadow:0 0 20px #00ffcc;
-  overflow:hidden;
+  margin:auto;
+  font-size:30px;
 }
-
-.avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.username{
-  font-size:20px;
-  margin-bottom:6px;
-}
-
-.email{
-  font-size:13px;
-  opacity:.6;
-  margin-bottom:20px;
-}
-
-.input{
-  padding:12px;
-  width:220px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:12px;
-  background:#111;
-  color:#00ffcc;
-  box-shadow:0 0 10px rgba(0,255,200,.3);
-}
-
 </style>
+
 </head>
 
 <body>
@@ -82,109 +93,16 @@
 
     <h1>PROFILE</h1>
 
-    <div class="avatar" id="avatar">?</div>
+    <div id="avatar" class="avatar">?</div>
 
-    <div class="username" id="username">Loading...</div>
-    <div class="email" id="email">Loading...</div>
+    <h2 id="username">Loading...</h2>
+    <p id="email">Loading...</p>
 
-    <input class="input" id="editName" placeholder="Edit username">
-
-    <button class="main-btn" onclick="saveProfile()">
-      SAVE CHANGES 💾
-    </button>
-
-    <button class="secondary-btn" onclick="logout()">
-      LOG OUT ✌🏽
-    </button>
-
-    <button class="secondary-btn" onclick="goHome()">
-      GO BACK
-    </button>
+    <button class="main-btn" onclick="logout()">LOG OUT</button>
 
   </div>
 
 </div>
-
-<script>
-
-const supabase = window.supabase.createClient(
-  "https://zsancpcyhdidrlezggrl.supabase.co",
-  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
-);
-
-let user;
-
-/* INIT */
-async function init(){
-
-  const { data: { user: u } } = await supabase.auth.getUser();
-
-  if(!u){
-    location.href="/auth.html";
-    return;
-  }
-
-  user = u;
-
-  document.getElementById("email").innerText = user.email;
-
-  loadProfile();
-}
-
-init();
-
-/* LOAD PROFILE */
-async function loadProfile(){
-
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if(data){
-    document.getElementById("username").innerText = data.username || "User";
-
-    const avatar = document.getElementById("avatar");
-
-    if(data.avatar_url){
-      avatar.innerHTML = `<img src="${data.avatar_url}">`;
-    }else{
-      avatar.innerText = data.username?.charAt(0).toUpperCase() || "U";
-    }
-  }
-}
-
-/* SAVE */
-async function saveProfile(){
-
-  const newName = document.getElementById("editName").value;
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({ username: newName })
-    .eq("id", user.id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  alert("Saved 🔥");
-  loadProfile();
-}
-
-/* ACTIONS */
-async function logout(){
-  await supabase.auth.signOut();
-  location.href="/auth.html";
-}
-
-function goHome(){
-  location.href="/";
-}
-
-</script>
 
 </body>
 </html>
