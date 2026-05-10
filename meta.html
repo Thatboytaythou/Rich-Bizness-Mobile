@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>META</title>
 <link rel="stylesheet" href="/styles/main.css">
 </head>
@@ -20,14 +19,23 @@
   <h1>META</h1>
 
   <button class="main-btn">ENTER META 🌐</button>
-  <br>
   <button class="secondary-btn" onclick="goBack()">GO BACK</button>
 </div>
 
 <script>
-function goBack(){ window.location.href = "/"; }
-function goProfile(){ window.location.href = "/profile.html"; }
-function goSettings(){ window.location.href = "/setting.html"; }
+function getUser(){
+  const raw = localStorage.getItem("rb_user");
+  if(!raw) return null;
+  return JSON.parse(raw);
+}
+
+if(!getUser()){
+  location.href="/auth.html";
+}
+
+function goBack(){ location.href="/"; }
+function goProfile(){ location.href="/profile.html"; }
+function goSettings(){ location.href="/setting.html"; }
 </script>
 
 </body>
