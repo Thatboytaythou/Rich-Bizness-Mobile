@@ -12,7 +12,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 0, 7);
+camera.position.set(0, 1.2, 6); // 🔥 raised camera (important)
 
 /* RENDERER */
 const renderer = new THREE.WebGLRenderer({
@@ -24,47 +24,69 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 /* LIGHT */
 scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+
 const light = new THREE.PointLight(0x00ffcc, 2);
-light.position.set(4, 4, 4);
+light.position.set(4, 5, 4);
 scene.add(light);
 
 /* =========================
-   CORE HUB
+   HUB (CENTER PORTAL)
 ========================= */
 const hub = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.7, 0.7, 0.3, 64),
+  new THREE.CylinderGeometry(0.8, 0.8, 0.4, 64),
   new THREE.MeshStandardMaterial({
-    color: 0x111111,
+    color: 0x000000,
     metalness: 1,
-    roughness: 0.25,
+    roughness: 0.2,
     emissive: 0x00ffcc,
-    emissiveIntensity: 0.4
+    emissiveIntensity: 0.6
   })
 );
 scene.add(hub);
 
 /* =========================
-   WHEEL (THE ACTUAL DIAL)
+   WHEEL GROUP
 ========================= */
 const wheel = new THREE.Group();
 scene.add(wheel);
 
+/* 🔥 THIS IS THE REAL DIAL FIX */
+wheel.rotation.x = -0.35; // tilt upward like phone dial
+
+/* =========================
+   OUTER METAL RING
+========================= */
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(2.8, 0.12, 32, 200),
+  new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    metalness: 1,
+    roughness: 0.3,
+    emissive: 0x00ffcc,
+    emissiveIntensity: 0.15
+  })
+);
+ring.rotation.x = Math.PI / 2;
+wheel.add(ring);
+
+/* =========================
+   SEGMENTS (REAL PANELS)
+========================= */
 const segments = [];
 const count = 8;
-const radius = 2.6;
+const radius = 2.4;
 const step = (Math.PI * 2) / count;
 
-/* BUILD SEGMENTS */
 for (let i = 0; i < count; i++) {
 
-  const geo = new THREE.BoxGeometry(0.8, 0.8, 0.3);
+  const geo = new THREE.BoxGeometry(0.9, 0.9, 0.4);
 
   const mat = new THREE.MeshStandardMaterial({
     color: 0x1a1a1a,
     metalness: 1,
-    roughness: 0.3,
+    roughness: 0.25,
     emissive: 0x00ffcc,
-    emissiveIntensity: 0.3
+    emissiveIntensity: 0.25
   });
 
   const seg = new THREE.Mesh(geo, mat);
@@ -80,6 +102,9 @@ for (let i = 0; i < count; i++) {
   /* FACE CENTER */
   seg.lookAt(0, 0, 0);
 
+  /* 🔥 LOCK PANEL ROTATION */
+  seg.rotation.y += Math.PI;
+
   seg.userData.index = i;
 
   wheel.add(seg);
@@ -87,7 +112,7 @@ for (let i = 0; i < count; i++) {
 }
 
 /* =========================
-   ROTATION (DIAL)
+   ROTATION SYSTEM (SNAP DIAL)
 ========================= */
 let velocity = 0;
 let rotation = 0;
@@ -99,18 +124,19 @@ function animate() {
   rotation += velocity;
 
   if (!dragging) {
-    velocity *= 0.92;
+    velocity *= 0.9;
 
     if (Math.abs(velocity) < 0.001) {
       velocity = 0;
+
+      /* 🔥 HARD SNAP */
       rotation = Math.round(rotation / step) * step;
     }
   }
 
-  /* 🔒 ONLY THIS ROTATES */
   wheel.rotation.y = rotation;
 
-  /* FRONT HIGHLIGHT */
+  /* FRONT PANEL GLOW */
   let best = -Infinity;
   let active = 0;
 
@@ -123,9 +149,8 @@ function animate() {
       active = i;
     }
 
-    /* subtle glow */
     const depth = (pos.z + radius) / (radius * 2);
-    s.material.emissiveIntensity = 0.3 + depth * 0.8;
+    s.material.emissiveIntensity = 0.2 + depth * 1.2;
   });
 
   window.activeIndex = active;
@@ -146,7 +171,7 @@ window.addEventListener("touchstart", e => {
 
 window.addEventListener("touchmove", e => {
   const dx = e.touches[0].clientX - lastX;
-  velocity = dx * 0.003;
+  velocity = dx * 0.004;
   lastX = e.touches[0].clientX;
 });
 
@@ -155,7 +180,7 @@ window.addEventListener("touchend", () => {
 });
 
 /* =========================
-   CLICK NAV
+   CLICK
 ========================= */
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -169,7 +194,7 @@ window.addEventListener("click", e => {
   const hit = raycaster.intersectObjects(segments);
 
   if (hit.length) {
-    console.log("CLICKED:", hit[0].object.userData.index);
+    console.log("CLICK:", hit[0].object.userData.index);
   }
 });
 
