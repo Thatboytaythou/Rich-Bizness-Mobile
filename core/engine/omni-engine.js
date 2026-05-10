@@ -2,7 +2,8 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 /* =========================
    RICH BIZNESS OMNI ENGINE
-   FINAL WORLD MODE
+   REAL DIAL REPAIR VERSION
+   /core/engine/omni-engine.js
 ========================= */
 
 const canvas = document.getElementById("engine");
@@ -11,20 +12,21 @@ const canvas = document.getElementById("engine");
    SCENE
 ========================= */
 const scene = new THREE.Scene();
-
-scene.fog = new THREE.FogExp2(0x020402, 0.08);
+scene.background = new THREE.Color(0x020402);
+scene.fog = new THREE.FogExp2(0x020402, 0.055);
 
 /* =========================
    CAMERA
 ========================= */
 const camera = new THREE.PerspectiveCamera(
-  48,
+  38,
   window.innerWidth / window.innerHeight,
   0.1,
   200
 );
 
-camera.position.set(0, 1.2, 10);
+camera.position.set(0, 0.65, 10.6);
+camera.lookAt(0, 0.15, 0);
 
 /* =========================
    RENDERER
@@ -37,12 +39,10 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.18;
+renderer.toneMappingExposure = 1.25;
 
 /* =========================
    CLOCK
@@ -50,214 +50,214 @@ renderer.toneMappingExposure = 1.18;
 const clock = new THREE.Clock();
 
 /* =========================
-   LIGHTING
+   LIGHTS
 ========================= */
-scene.add(
-  new THREE.AmbientLight(0xffffff, 0.8)
-);
+scene.add(new THREE.AmbientLight(0xffffff, 0.78));
 
-const topLight = new THREE.PointLight(0x91ff66, 14, 100);
-topLight.position.set(0, 8, 10);
-scene.add(topLight);
+const keyLight = new THREE.PointLight(0x9eff65, 18, 80);
+keyLight.position.set(0, 6, 8);
+scene.add(keyLight);
 
-const leftLight = new THREE.PointLight(0x00ffcc, 8, 60);
-leftLight.position.set(-10, 2, 8);
+const leftLight = new THREE.PointLight(0x25ffb6, 7, 55);
+leftLight.position.set(-7, 1.5, 7);
 scene.add(leftLight);
 
-const rightLight = new THREE.PointLight(0xffd56e, 6, 60);
-rightLight.position.set(10, 2, 8);
+const rightLight = new THREE.PointLight(0xffd37a, 5, 55);
+rightLight.position.set(7, 1.5, 7);
 scene.add(rightLight);
 
+const bottomGlow = new THREE.PointLight(0x7dff4d, 9, 35);
+bottomGlow.position.set(0, -4, 5);
+scene.add(bottomGlow);
+
 /* =========================
-   STAR FIELD
+   RESPONSIVE SCALE
 ========================= */
-const starsGeo = new THREE.BufferGeometry();
+const isPhone = window.innerWidth < 700;
+const dialScale = isPhone ? 0.78 : 0.92;
 
-const starCount = 2200;
-const starPositions = [];
+/* =========================
+   WORLD BACKGROUND
+========================= */
+const backGroup = new THREE.Group();
+scene.add(backGroup);
 
-for(let i = 0; i < starCount; i++){
+const smokeGeo = new THREE.BufferGeometry();
+const smokeCount = 900;
+const smokePositions = [];
 
-  starPositions.push(
-    (Math.random() - .5) * 180,
-    (Math.random() - .5) * 180,
-    (Math.random() - .5) * 180
+for (let i = 0; i < smokeCount; i++) {
+  smokePositions.push(
+    (Math.random() - 0.5) * 30,
+    (Math.random() - 0.5) * 18,
+    -12 - Math.random() * 12
   );
 }
 
-starsGeo.setAttribute(
+smokeGeo.setAttribute(
   "position",
-  new THREE.Float32BufferAttribute(starPositions, 3)
+  new THREE.Float32BufferAttribute(smokePositions, 3)
 );
 
-const stars = new THREE.Points(
-  starsGeo,
+const smoke = new THREE.Points(
+  smokeGeo,
   new THREE.PointsMaterial({
-    color:0x91ff66,
-    size:0.08,
-    transparent:true,
-    opacity:.75
+    color: 0x6aff57,
+    size: 0.045,
+    transparent: true,
+    opacity: 0.18,
+    depthWrite: false
   })
 );
 
-scene.add(stars);
+backGroup.add(smoke);
 
 /* =========================
-   FLOOR
+   MAIN DIAL ROOT
+   This is the real Apple Watch / old phone dial angle
 ========================= */
-const floor = new THREE.Mesh(
-  new THREE.CircleGeometry(26, 120),
-  new THREE.MeshStandardMaterial({
-    color:0x030303,
-    metalness:1,
-    roughness:.25,
-    emissive:0x0b1b0a,
-    emissiveIntensity:.3
-  })
+const dialRig = new THREE.Group();
+dialRig.position.set(0, isPhone ? -0.62 : -0.42, 0);
+dialRig.scale.setScalar(dialScale);
+scene.add(dialRig);
+
+const dial = new THREE.Group();
+dial.rotation.x = -0.12;
+dialRig.add(dial);
+
+/* =========================
+   MATERIALS
+========================= */
+const blackMetal = new THREE.MeshStandardMaterial({
+  color: 0x070907,
+  metalness: 1,
+  roughness: 0.22,
+  emissive: 0x081508,
+  emissiveIntensity: 0.2
+});
+
+const gunMetal = new THREE.MeshStandardMaterial({
+  color: 0x202520,
+  metalness: 1,
+  roughness: 0.18,
+  emissive: 0x091408,
+  emissiveIntensity: 0.12
+});
+
+const deepPanel = new THREE.MeshStandardMaterial({
+  color: 0x071007,
+  metalness: 0.72,
+  roughness: 0.28,
+  emissive: 0x132510,
+  emissiveIntensity: 0.55
+});
+
+const activePanel = new THREE.MeshStandardMaterial({
+  color: 0x102010,
+  metalness: 0.82,
+  roughness: 0.2,
+  emissive: 0x7cff55,
+  emissiveIntensity: 1.15
+});
+
+const greenGlow = new THREE.MeshBasicMaterial({
+  color: 0x90ff5e,
+  transparent: true,
+  opacity: 0.95
+});
+
+const glassGreen = new THREE.MeshStandardMaterial({
+  color: 0x78ff4c,
+  emissive: 0x78ff4c,
+  emissiveIntensity: 2.8,
+  transparent: true,
+  opacity: 0.78,
+  metalness: 0.25,
+  roughness: 0.05
+});
+
+/* =========================
+   BACK PLATE — FLAT DISC, NOT CRAZY FLOOR
+========================= */
+const backPlate = new THREE.Mesh(
+  new THREE.CylinderGeometry(4.38, 4.38, 0.42, 160),
+  blackMetal
 );
 
-floor.rotation.x = -Math.PI / 2;
-floor.position.y = -3.2;
-
-scene.add(floor);
-
-/* =========================
-   MAIN OMNI GROUP
-========================= */
-const omni = new THREE.Group();
-
-omni.rotation.x = -0.48;
-
-scene.add(omni);
+backPlate.rotation.x = Math.PI / 2;
+backPlate.position.z = -0.34;
+dial.add(backPlate);
 
 /* =========================
-   ROTATING ROOT
+   RING HELPERS
 ========================= */
-const wheelRoot = new THREE.Group();
-omni.add(wheelRoot);
-
-/* =========================
-   BACK DISC
-========================= */
-const backDisc = new THREE.Mesh(
-  new THREE.CylinderGeometry(4.4,4.4,.7,100),
-  new THREE.MeshStandardMaterial({
-    color:0x090909,
-    metalness:1,
-    roughness:.28,
-    emissive:0x081108,
-    emissiveIntensity:.3
-  })
-);
-
-backDisc.rotation.x = Math.PI / 2;
-
-wheelRoot.add(backDisc);
-
-/* =========================
-   OUTER RINGS
-========================= */
-function buildRing(radius, tube, color, glow){
-
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(radius, tube, 40, 240),
-    new THREE.MeshStandardMaterial({
-      color,
-      metalness:1,
-      roughness:.22,
-      emissive:glow,
-      emissiveIntensity:.35
-    })
+function torus(radius, tube, mat, z = 0) {
+  const mesh = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, tube, 32, 240),
+    mat
   );
 
-  ring.rotation.x = Math.PI / 2;
-
-  return ring;
+  mesh.rotation.x = Math.PI / 2;
+  mesh.position.z = z;
+  dial.add(mesh);
+  return mesh;
 }
 
-const outerRing = buildRing(
-  4.6,
-  .22,
-  0x171717,
-  0x7dff54
-);
-
-wheelRoot.add(outerRing);
-
-const innerRing = buildRing(
-  3.2,
-  .12,
-  0x151515,
-  0x00ffcc
-);
-
-wheelRoot.add(innerRing);
+const outerArmor = torus(4.47, 0.23, gunMetal, 0.08);
+const outerGlow = torus(4.14, 0.035, greenGlow, 0.22);
+const midArmor = torus(3.28, 0.12, gunMetal, 0.25);
+const innerGlow = torus(1.72, 0.05, greenGlow, 0.42);
+const centerArmor = torus(1.28, 0.14, gunMetal, 0.52);
 
 /* =========================
-   GLOW RINGS
-========================= */
-const glowRing = new THREE.Mesh(
-  new THREE.TorusGeometry(2.15,.05,16,200),
-  new THREE.MeshBasicMaterial({
-    color:0x97ff68
-  })
-);
-
-glowRing.rotation.x = Math.PI / 2;
-
-wheelRoot.add(glowRing);
-
-/* =========================
-   PORTAL
+   CENTER PORTAL
 ========================= */
 const portalGroup = new THREE.Group();
+portalGroup.position.z = 0.62;
+dial.add(portalGroup);
 
-scene.add(portalGroup);
-
-const portal = new THREE.Mesh(
-  new THREE.SphereGeometry(1.3,64,64),
+const portalDisc = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.12, 1.12, 0.18, 100),
   new THREE.MeshStandardMaterial({
-    color:0x77ff44,
-    emissive:0x7dff4d,
-    emissiveIntensity:3,
-    transparent:true,
-    opacity:.92,
-    metalness:.2,
-    roughness:.1
+    color: 0x061106,
+    metalness: 0.9,
+    roughness: 0.15,
+    emissive: 0x4cff36,
+    emissiveIntensity: 1.1
   })
 );
 
-portalGroup.add(portal);
+portalDisc.rotation.x = Math.PI / 2;
+portalGroup.add(portalDisc);
 
-const portalShell = new THREE.Mesh(
-  new THREE.SphereGeometry(1.58,64,64),
-  new THREE.MeshBasicMaterial({
-    color:0x00ffcc,
-    transparent:true,
-    opacity:.08
-  })
+const portalGlass = new THREE.Mesh(
+  new THREE.SphereGeometry(0.92, 64, 64),
+  glassGreen
 );
 
-portalGroup.add(portalShell);
+portalGlass.scale.set(1, 1, 0.28);
+portalGlass.position.z = 0.1;
+portalGroup.add(portalGlass);
 
-/* =========================
-   INNER ENERGY
-========================= */
+const portalRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.08, 0.035, 16, 180),
+  greenGlow
+);
+
+portalRing.rotation.x = Math.PI / 2;
+portalRing.position.z = 0.22;
+portalGroup.add(portalRing);
+
 const energyGeo = new THREE.BufferGeometry();
-
 const energyPositions = [];
 
-for(let i = 0; i < 1400; i++){
-
-  const radius = Math.random() * 1.4;
-
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.random() * Math.PI;
-
+for (let i = 0; i < 700; i++) {
+  const r = Math.random() * 0.85;
+  const a = Math.random() * Math.PI * 2;
   energyPositions.push(
-    radius * Math.sin(phi) * Math.cos(theta),
-    radius * Math.sin(phi) * Math.sin(theta),
-    radius * Math.cos(phi)
+    Math.cos(a) * r,
+    Math.sin(a) * r,
+    0.18 + (Math.random() - 0.5) * 0.28
   );
 }
 
@@ -269,17 +269,18 @@ energyGeo.setAttribute(
 const energy = new THREE.Points(
   energyGeo,
   new THREE.PointsMaterial({
-    color:0xb4ff7e,
-    size:.03,
-    transparent:true,
-    opacity:.85
+    color: 0xc8ff9a,
+    size: 0.025,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false
   })
 );
 
 portalGroup.add(energy);
 
 /* =========================
-   SEGMENTS
+   WEDGE PANELS
 ========================= */
 const segments = [];
 
@@ -294,378 +295,385 @@ const labels = [
   "upload"
 ];
 
-const total = 8;
+const routes = {
+  gallery: "/gallery.html",
+  live: "/live.html",
+  music: "/music.html",
+  gaming: "/gaming.html",
+  store: "/store.html",
+  meta: "/metaverse.html",
+  sports: "/sports.html",
+  upload: "/upload.html"
+};
 
-const step = (Math.PI * 2) / total;
+const count = 8;
+const step = (Math.PI * 2) / count;
 
-for(let i = 0; i < total; i++){
-
+for (let i = 0; i < count; i++) {
   const shape = new THREE.Shape();
 
-  const innerRadius = 1.9;
-  const outerRadius = 4.05;
+  const innerR = 1.48;
+  const outerR = 3.92;
+  const gap = step * 0.055;
 
-  const start = i * step - step * .44;
-  const end = i * step + step * .44;
+  const a0 = i * step - step / 2 + gap;
+  const a1 = i * step + step / 2 - gap;
 
-  shape.moveTo(
-    Math.cos(start) * innerRadius,
-    Math.sin(start) * innerRadius
-  );
-
-  shape.absarc(
-    0,
-    0,
-    innerRadius,
-    start,
-    end,
-    false
-  );
-
-  shape.lineTo(
-    Math.cos(end) * outerRadius,
-    Math.sin(end) * outerRadius
-  );
-
-  shape.absarc(
-    0,
-    0,
-    outerRadius,
-    end,
-    start,
-    true
-  );
-
+  shape.moveTo(Math.cos(a0) * innerR, Math.sin(a0) * innerR);
+  shape.absarc(0, 0, innerR, a0, a1, false);
+  shape.lineTo(Math.cos(a1) * outerR, Math.sin(a1) * outerR);
+  shape.absarc(0, 0, outerR, a1, a0, true);
   shape.closePath();
 
-  const geo = new THREE.ExtrudeGeometry(shape,{
-    depth:.55,
-    bevelEnabled:true,
-    bevelSegments:4,
-    steps:2,
-    bevelSize:.04,
-    bevelThickness:.05
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.34,
+    bevelEnabled: true,
+    bevelSegments: 5,
+    bevelSize: 0.035,
+    bevelThickness: 0.04
   });
 
-  const mat = new THREE.MeshStandardMaterial({
-    color:0x111111,
-    metalness:1,
-    roughness:.24,
-    emissive:0x1f3818,
-    emissiveIntensity:.35
-  });
+  const panel = new THREE.Mesh(geo, deepPanel.clone());
+  panel.rotation.x = Math.PI / 2;
+  panel.position.z = 0.16;
+  panel.userData.index = i;
+  panel.userData.name = labels[i];
 
-  const mesh = new THREE.Mesh(geo,mat);
+  dial.add(panel);
+  segments.push(panel);
 
-  mesh.rotation.x = Math.PI / 2;
-
-  mesh.userData.index = i;
-  mesh.userData.name = labels[i];
-
-  wheelRoot.add(mesh);
-
-  segments.push(mesh);
-
-  /* EDGE LIGHT */
-
-  const edge = new THREE.Mesh(
-    new THREE.TorusGeometry(
-      3.7,
-      .02,
-      8,
-      120,
-      step * .84
-    ),
-    new THREE.MeshBasicMaterial({
-      color:0x88ff5e
+  const dividerAngle = i * step + step / 2;
+  const divider = new THREE.Mesh(
+    new THREE.BoxGeometry(0.035, 2.45, 0.18),
+    new THREE.MeshStandardMaterial({
+      color: 0x1a1a16,
+      metalness: 1,
+      roughness: 0.18,
+      emissive: 0x6dff42,
+      emissiveIntensity: 0.18
     })
   );
 
-  edge.rotation.x = Math.PI / 2;
-  edge.rotation.z = i * step;
+  divider.position.set(
+    Math.cos(dividerAngle) * 2.72,
+    Math.sin(dividerAngle) * 2.72,
+    0.55
+  );
 
-  wheelRoot.add(edge);
+  divider.rotation.z = dividerAngle;
+  dial.add(divider);
+
+  const rimLight = new THREE.Mesh(
+    new THREE.TorusGeometry(3.72, 0.012, 8, 28, step * 0.82),
+    new THREE.MeshBasicMaterial({
+      color: 0x8cff5c,
+      transparent: true,
+      opacity: 0.55
+    })
+  );
+
+  rimLight.rotation.x = Math.PI / 2;
+  rimLight.rotation.z = i * step - step * 0.41;
+  rimLight.position.z = 0.58;
+  dial.add(rimLight);
 }
 
 /* =========================
-   BOLTS
+   ARMOR BOLTS + SIDE LIGHTS
 ========================= */
-for(let i = 0; i < 16; i++){
-
+for (let i = 0; i < 16; i++) {
   const angle = (Math.PI * 2 / 16) * i;
 
   const bolt = new THREE.Mesh(
-    new THREE.CylinderGeometry(.12,.12,.22,18),
+    new THREE.CylinderGeometry(0.105, 0.105, 0.18, 24),
     new THREE.MeshStandardMaterial({
-      color:0x999999,
-      metalness:1,
-      roughness:.25
+      color: 0x9c9c8d,
+      metalness: 1,
+      roughness: 0.18,
+      emissive: 0x0b100b,
+      emissiveIntensity: 0.2
     })
   );
 
   bolt.rotation.x = Math.PI / 2;
-
   bolt.position.set(
-    Math.cos(angle) * 4.45,
-    Math.sin(angle) * 4.45,
-    .12
+    Math.cos(angle) * 4.42,
+    Math.sin(angle) * 4.42,
+    0.42
   );
 
-  wheelRoot.add(bolt);
+  dial.add(bolt);
+
+  if (i % 4 === 1) {
+    const lamp = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 24, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x9dff64,
+        emissive: 0x9dff64,
+        emissiveIntensity: 3,
+        roughness: 0.08
+      })
+    );
+
+    lamp.position.set(
+      Math.cos(angle) * 4.55,
+      Math.sin(angle) * 4.55,
+      0.58
+    );
+
+    dial.add(lamp);
+  }
+}
+
+/* =========================
+   BOTTOM MONEY STACK FEEL
+========================= */
+const moneyGroup = new THREE.Group();
+moneyGroup.position.set(0, -3.72, -2.8);
+scene.add(moneyGroup);
+
+for (let i = 0; i < 18; i++) {
+  const bill = new THREE.Mesh(
+    new THREE.BoxGeometry(1.1, 0.08, 0.5),
+    new THREE.MeshStandardMaterial({
+      color: 0x133611,
+      metalness: 0.2,
+      roughness: 0.65,
+      emissive: 0x163b10,
+      emissiveIntensity: 0.25
+    })
+  );
+
+  bill.position.set(
+    (Math.random() - 0.5) * 8,
+    i * 0.025,
+    (Math.random() - 0.5) * 1.8
+  );
+
+  bill.rotation.y = (Math.random() - 0.5) * 0.8;
+  bill.rotation.z = (Math.random() - 0.5) * 0.25;
+
+  moneyGroup.add(bill);
 }
 
 /* =========================
    ROTATION SYSTEM
 ========================= */
-let velocity = 0;
 let rotation = 0;
-
+let velocity = 0;
 let dragging = false;
+let lastX = 0;
+let moved = false;
 
-let pointerStartX = 0;
-
-let targetTiltX = -.48;
+let targetTiltX = -0.12;
 let targetTiltY = 0;
-
-let smoothTiltX = -.48;
+let smoothTiltX = -0.12;
 let smoothTiltY = 0;
 
+let activeName = "live";
+window.RB_ACTIVE_ROUTE = routes[activeName];
+
 /* =========================
-   POINTER MOVE
+   POINTER TILT
 ========================= */
-window.addEventListener("pointermove",(e)=>{
+window.addEventListener("pointermove", (event) => {
+  const nx = event.clientX / window.innerWidth - 0.5;
+  const ny = event.clientY / window.innerHeight - 0.5;
 
-  const x = (e.clientX / window.innerWidth) - .5;
-  const y = (e.clientY / window.innerHeight) - .5;
+  targetTiltY = nx * 0.16;
+  targetTiltX = -0.12 + ny * 0.06;
 
-  targetTiltY = x * .22;
-  targetTiltX = -.48 + y * .12;
+  if (!dragging) return;
+
+  const dx = event.clientX - lastX;
+  lastX = event.clientX;
+
+  if (Math.abs(dx) > 1) moved = true;
+
+  velocity = dx * 0.0032;
 });
 
-/* =========================
-   DRAG
-========================= */
-window.addEventListener("pointerdown",(e)=>{
-
+window.addEventListener("pointerdown", (event) => {
   dragging = true;
-
-  pointerStartX = e.clientX;
+  moved = false;
+  lastX = event.clientX;
 });
 
-window.addEventListener("pointermove",(e)=>{
-
-  if(!dragging) return;
-
-  const delta = e.clientX - pointerStartX;
-
-  velocity = delta * .0008;
-
-  pointerStartX = e.clientX;
-});
-
-window.addEventListener("pointerup",()=>{
-
+window.addEventListener("pointerup", () => {
   dragging = false;
 });
 
-window.addEventListener("pointercancel",()=>{
-
+window.addEventListener("pointercancel", () => {
   dragging = false;
 });
 
 /* =========================
-   CLICK / ROUTING
+   RAYCAST ACTION
 ========================= */
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+const pointer = new THREE.Vector2();
 
-window.addEventListener("click",(e)=>{
+window.addEventListener("click", (event) => {
+  if (moved) return;
 
-  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse,camera);
+  raycaster.setFromCamera(pointer, camera);
 
   const hits = raycaster.intersectObjects(segments);
 
-  if(!hits.length) return;
+  if (!hits.length) return;
 
   const name = hits[0].object.userData.name;
+  const route = routes[name];
 
-  triggerSegment(name);
+  if (route) window.location.href = route;
 });
 
 /* =========================
-   ROUTES
+   ACTIVE DETECTION
 ========================= */
-function triggerSegment(name){
+function getActiveSegment() {
+  let highestY = -Infinity;
+  let active = segments[0];
 
-  const routes = {
-    gallery:"/gallery.html",
-    live:"/live.html",
-    music:"/music.html",
-    gaming:"/gaming.html",
-    store:"/store.html",
-    meta:"/metaverse.html",
-    sports:"/sports.html",
-    upload:"/upload.html"
-  };
+  for (const segment of segments) {
+    const world = new THREE.Vector3();
+    segment.getWorldPosition(world);
 
-  const target = routes[name];
-
-  if(target){
-    window.location.href = target;
-  }
-}
-
-/* =========================
-   MENU
-========================= */
-const menuBtn = document.getElementById("menuBtn");
-const quickMenu = document.getElementById("quickMenu");
-
-menuBtn?.addEventListener("click",()=>{
-
-  quickMenu?.classList.toggle("open");
-});
-
-/* =========================
-   ACTIVATE
-========================= */
-window.enter = function(){
-
-  const active = getActiveSegment();
-
-  if(!active) return;
-
-  triggerSegment(active.userData.name);
-};
-
-/* =========================
-   ACTIVE SEGMENT
-========================= */
-function getActiveSegment(){
-
-  let best = -Infinity;
-  let active = null;
-
-  segments.forEach((segment)=>{
-
-    const position = new THREE.Vector3();
-
-    segment.getWorldPosition(position);
-
-    if(position.z > best){
-
-      best = position.z;
-
+    if (world.y > highestY) {
+      highestY = world.y;
       active = segment;
     }
-  });
+  }
 
   return active;
 }
 
 /* =========================
-   ANIMATE
+   CSS LABEL SYNC
 ========================= */
-function animate(){
+function syncHtmlLabels() {
+  const active = getActiveSegment();
+  activeName = active?.userData?.name || "live";
+  window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
 
+  document.querySelectorAll(".dial-card").forEach((card) => {
+    card.classList.remove("is-active");
+  });
+
+  const map = {
+    gallery: ".top-left-card",
+    live: ".top-card",
+    music: ".top-right-card",
+    upload: ".left-card",
+    gaming: ".right-card",
+    sports: ".bottom-left-card",
+    meta: ".bottom-card",
+    store: ".bottom-right-card"
+  };
+
+  const activeCard = document.querySelector(map[activeName]);
+  activeCard?.classList.add("is-active");
+}
+
+/* =========================
+   ACTIVATE BUTTON
+========================= */
+window.enterWorld = function () {
+  const route = window.RB_ACTIVE_ROUTE || "/feed.html";
+  window.location.href = route;
+};
+
+window.enter = window.enterWorld;
+
+/* =========================
+   CAMERA RESIZE
+========================= */
+function resize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(w, h);
+
+  const phone = w < 700;
+
+  dialRig.scale.setScalar(phone ? 0.78 : 0.92);
+  dialRig.position.set(0, phone ? -0.62 : -0.42, 0);
+
+  camera.position.set(0, phone ? 0.72 : 0.62, phone ? 10.7 : 10.1);
+  camera.lookAt(0, 0.08, 0);
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+/* =========================
+   ANIMATION LOOP
+========================= */
+function animate() {
   requestAnimationFrame(animate);
 
-  const elapsed = clock.getElapsedTime();
+  const t = clock.getElapsedTime();
 
-  /* SMOOTH TILT */
+  smoothTiltX += (targetTiltX - smoothTiltX) * 0.07;
+  smoothTiltY += (targetTiltY - smoothTiltY) * 0.07;
 
-  smoothTiltX += (targetTiltX - smoothTiltX) * .06;
-  smoothTiltY += (targetTiltY - smoothTiltY) * .06;
-
-  omni.rotation.x = smoothTiltX;
-  omni.rotation.y = smoothTiltY;
-
-  /* ROTATION */
+  dialRig.rotation.x = smoothTiltX;
+  dialRig.rotation.y = smoothTiltY;
 
   rotation += velocity;
 
-  if(!dragging){
+  if (!dragging) {
+    velocity *= 0.91;
 
-    velocity *= .93;
-
-    if(Math.abs(velocity) < .00008){
-
+    if (Math.abs(velocity) < 0.0006) {
       velocity = 0;
-
-      rotation =
-        THREE.MathUtils.lerp(
-          rotation,
-          Math.round(rotation / step) * step,
-          .08
-        );
+      const snapped = Math.round(rotation / step) * step;
+      rotation = THREE.MathUtils.lerp(rotation, snapped, 0.08);
     }
   }
 
-  wheelRoot.rotation.z = rotation;
+  dial.rotation.z = rotation;
 
-  /* PORTAL */
+  outerArmor.rotation.z = -rotation * 0.15;
+  outerGlow.rotation.z = -rotation * 0.3;
+  innerGlow.rotation.z = rotation * 0.5;
 
-  const pulse = 1 + Math.sin(elapsed * 2.4) * .05;
+  portalGlass.scale.set(
+    1 + Math.sin(t * 2.4) * 0.035,
+    1 + Math.sin(t * 2.4) * 0.035,
+    0.28
+  );
 
-  portal.scale.setScalar(pulse);
+  portalGlass.material.emissiveIntensity = 2.6 + Math.sin(t * 3.2) * 0.55;
 
-  portal.material.emissiveIntensity =
-    2.6 + Math.sin(elapsed * 3) * .6;
+  portalRing.rotation.z += 0.006;
+  energy.rotation.z -= 0.012;
 
-  portalShell.rotation.y += .004;
+  smoke.rotation.y += 0.0006;
+  moneyGroup.rotation.y = Math.sin(t * 0.35) * 0.06;
 
-  energy.rotation.y += .008;
-  energy.rotation.x += .003;
+  segments.forEach((segment) => {
+    const world = new THREE.Vector3();
+    segment.getWorldPosition(world);
 
-  /* STAR FIELD */
+    const frontDepth = (world.z + 4) / 8;
+    const topDepth = (world.y + 4) / 8;
 
-  stars.rotation.y += .0003;
+    const glow = Math.max(frontDepth, topDepth);
 
-  /* SEGMENT LIGHTING */
-
-  segments.forEach((segment)=>{
-
-    const pos = new THREE.Vector3();
-
-    segment.getWorldPosition(pos);
-
-    const depth = (pos.z + 5) / 10;
-
-    segment.material.emissiveIntensity =
-      .2 + depth * 1.2;
-
-    segment.position.z =
-      Math.max(depth * .18, 0);
+    segment.material.emissiveIntensity = 0.32 + glow * 0.72;
+    segment.position.z = 0.16 + Math.max(glow, 0) * 0.05;
   });
 
-  /* FLOAT */
+  syncHtmlLabels();
 
-  wheelRoot.position.y =
-    Math.sin(elapsed * 1.4) * .08;
-
-  portalGroup.position.y =
-    Math.sin(elapsed * 2) * .12;
-
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 
 animate();
-
-/* =========================
-   RESIZE
-========================= */
-window.addEventListener("resize",()=>{
-
-  camera.aspect =
-    window.innerWidth / window.innerHeight;
-
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(
-    window.innerWidth,
-    window.innerHeight
-  );
-});
