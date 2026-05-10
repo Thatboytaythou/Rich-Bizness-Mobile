@@ -6,17 +6,41 @@
 <title>RICH BIZNESS — OMNI CORE</title>
 
 <link rel="stylesheet" href="/styles/main.css">
+
+<style>
+
+/* 🔥 EXTRA ELITE FX */
+.ring{
+  animation: pulse 4s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1); opacity:.8;}
+  50%{transform:scale(1.05); opacity:1;}
+  100%{transform:scale(1); opacity:.8;}
+}
+
+/* smoother feel */
+.wheel{
+  transition: transform .08s linear;
+}
+
+</style>
+
 </head>
 
 <body>
 
+<!-- 🔥 BACKGROUND -->
 <div class="bg"></div>
 
+<!-- 🔥 TOP BAR -->
 <div class="topbar">
   <div class="icon" onclick="goProfile()">👤</div>
   <div class="icon" onclick="goSettings()">⚙️</div>
 </div>
 
+<!-- 🔥 OMNI CORE -->
 <div class="app">
   <div class="omni">
     <div class="ring"></div>
@@ -25,18 +49,28 @@
   </div>
 </div>
 
+<!-- 🔥 LABEL -->
 <div class="screen" id="screen">META</div>
 
 <script>
 
-/* 🔐 USER */
+/* =========================
+   USER (FIXED)
+========================= */
 function getUser(){
   const raw = localStorage.getItem("rb_user");
   if(!raw) return null;
-  return JSON.parse(raw);
+
+  try{
+    return JSON.parse(raw);
+  }catch{
+    return null;
+  }
 }
 
-/* DATA */
+/* =========================
+   DATA
+========================= */
 const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒","⬆️","👤","💬","🔔"];
 const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE","UPLOAD","PROFILE","MESSAGES","ALERTS"];
 
@@ -53,18 +87,27 @@ const ROUTES = [
   "/notifications.html"
 ];
 
+/* =========================
+   DOM
+========================= */
 const wheel = document.getElementById("wheel");
 const screen = document.getElementById("screen");
 const enterBtn = document.getElementById("enterBtn");
 
+/* =========================
+   STATE
+========================= */
 let rot = 0;
 let vel = 0;
 
-const step = (Math.PI*2)/ITEMS.length;
+const step = (Math.PI * 2) / ITEMS.length;
 const radius = 120;
 
-/* BUILD */
+/* =========================
+   BUILD WHEEL
+========================= */
 ITEMS.forEach((icon,i)=>{
+
   const el = document.createElement("div");
   el.className = "seg";
   el.innerText = icon;
@@ -78,71 +121,101 @@ ITEMS.forEach((icon,i)=>{
     translate(${x}px, ${y}px)
   `;
 
-  el.onclick = () => window.location.href = ROUTES[i];
+  el.onclick = () => {
+    window.location.href = ROUTES[i];
+  };
 
   wheel.appendChild(el);
 });
 
-/* LOOP */
+/* =========================
+   UPDATE
+========================= */
+function update(){
+
+  wheel.style.transform = `rotate(${rot}rad)`;
+
+  let index = Math.round(-rot / step) % ITEMS.length;
+  if(index < 0) index += ITEMS.length;
+
+  document.querySelectorAll(".seg").forEach((s,i)=>{
+    s.classList.toggle("active", i === index);
+  });
+
+  screen.innerText = LABELS[index];
+
+  return index;
+}
+
+/* =========================
+   LOOP
+========================= */
 function loop(){
+
   rot += vel;
   vel *= 0.92;
 
-  if(Math.abs(vel)<0.002){
-    const snap = Math.round(rot/step)*step;
-    rot += (snap-rot)*0.12;
+  if(Math.abs(vel) < 0.002){
+    const snap = Math.round(rot / step) * step;
+    rot += (snap - rot) * 0.12;
   }
 
   update();
   requestAnimationFrame(loop);
 }
 
-function update(){
-  wheel.style.transform = `rotate(${rot}rad)`;
-
-  let index = Math.round(-rot/step)%ITEMS.length;
-  if(index<0) index+=ITEMS.length;
-
-  document.querySelectorAll(".seg").forEach((s,i)=>{
-    s.classList.toggle("active", i===index);
-  });
-
-  screen.innerText = LABELS[index];
-}
-
 loop();
 
-/* TOUCH */
-let startX=0;
+/* =========================
+   TOUCH CONTROL (FIXED)
+========================= */
+let startX = 0;
+
 window.addEventListener("touchstart", e=>{
   startX = e.touches[0].clientX;
 });
+
 window.addEventListener("touchmove", e=>{
-  vel = (e.touches[0].clientX - startX) * 0.0004;
+  const dx = e.touches[0].clientX - startX;
+  vel = dx * 0.00035;
 });
 
-/* ENTER */
+/* =========================
+   ENTER BUTTON
+========================= */
 enterBtn.onclick = ()=>{
+
   const user = getUser();
+
   if(!user){
     window.location.href = "/auth.html";
     return;
   }
 
-  const index = Math.round(-rot/step)%ITEMS.length;
-  const safeIndex = (index + ITEMS.length) % ITEMS.length;
+  let index = Math.round(-rot / step) % ITEMS.length;
+  if(index < 0) index += ITEMS.length;
 
-  window.location.href = ROUTES[safeIndex];
+  window.location.href = ROUTES[index];
 };
 
-/* NAV */
-function goProfile(){ location.href="/profile.html"; }
-function goSettings(){ location.href="/setting.html"; }
+/* =========================
+   NAV
+========================= */
+function goProfile(){
+  location.href="/profile.html";
+}
 
-/* WELCOME */
+function goSettings(){
+  location.href="/setting.html";
+}
+
+/* =========================
+   WELCOME (FIXED)
+========================= */
 const user = getUser();
+
 if(user){
-  screen.innerText = "WELCOME BACK\n" + user.username;
+  screen.innerText = "WELCOME BACK\n" + (user.email || "USER");
 }
 
 </script>
