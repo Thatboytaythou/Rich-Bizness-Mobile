@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RICH BIZNESS LOGIN</title>
 
 <link rel="stylesheet" href="/styles/main.css">
@@ -10,9 +12,13 @@
   display:block;
   margin:12px auto;
   padding:12px;
-  width:220px;
-  border-radius:8px;
+  width:240px;
+  border-radius:10px;
   border:none;
+  outline:none;
+  background:#111;
+  color:#00ffcc;
+  box-shadow:0 0 10px rgba(0,255,200,.3);
 }
 </style>
 </head>
@@ -23,20 +29,33 @@
 
 <div class="container">
 
-  <h1>RICH BIZNESS LOGIN</h1>
+  <h1>TAP IN 🔥</h1>
 
   <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
 
   <button class="main-btn" onclick="login()">
-    TAP IN 🔥
+    ENTER THE SYSTEM 🚀
   </button>
 
 </div>
 
 <script>
+
+/* =========================
+   AUTO LOGIN CHECK
+========================= */
+const existing = localStorage.getItem("rb_user");
+if(existing){
+  window.location.href = "/";
+}
+
+/* =========================
+   LOGIN
+========================= */
 function login(){
-  const email = document.getElementById("email").value;
+
+  const email = document.getElementById("email").value.trim();
 
   if(!email){
     alert("Enter email");
@@ -45,13 +64,17 @@ function login(){
 
   const user = {
     email,
-    username: email.split("@")[0]
+    username: email.split("@")[0],
+    id: Date.now()
   };
 
   localStorage.setItem("rb_user", JSON.stringify(user));
 
+  alert("WELCOME TO RICH BIZNESS 🔥");
+
   window.location.href = "/";
 }
+
 </script>
 
 </body>
