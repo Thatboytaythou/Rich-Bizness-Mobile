@@ -13,13 +13,12 @@ html,body{
   font-family:sans-serif;
 }
 
-/* CANVAS */
 canvas{
   position:fixed;
   inset:0;
 }
 
-/* TOP BAR */
+/* UI */
 .topbar{
   position:fixed;
   top:15px;
@@ -41,25 +40,6 @@ canvas{
   color:#00ffcc;
 }
 
-/* CENTER */
-.center-ui{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  z-index:5;
-  text-align:center;
-  color:#00ffcc;
-  pointer-events:none;
-}
-
-.center-ui h1{
-  color:#000;
-  background:#00ffcc;
-  padding:12px 20px;
-  border-radius:50px;
-}
-
 /* BUTTON */
 .enter{
   position:fixed;
@@ -67,7 +47,6 @@ canvas{
   left:50%;
   transform:translateX(-50%);
   z-index:10;
-
   background:#00ffcc;
   color:#000;
   padding:14px 30px;
@@ -104,6 +83,8 @@ const ROUTES = [
   "/gallery.html"
 ];
 
+const labels = ["LIVE","MUSIC","GAMING","STORE","META","SPORTS","UPLOAD","GALLERY"];
+
 /* SCENE */
 const scene = new THREE.Scene();
 
@@ -122,9 +103,9 @@ const light = new THREE.PointLight(0x00ffcc,3);
 light.position.set(5,5,5);
 scene.add(light);
 
-/* CORE PORTAL */
+/* CORE */
 const core = new THREE.Mesh(
-  new THREE.SphereGeometry(0.6,32,32),
+  new THREE.SphereGeometry(0.7,32,32),
   new THREE.MeshStandardMaterial({
     color:0x00ffcc,
     emissive:0x00ffcc,
@@ -133,57 +114,36 @@ const core = new THREE.Mesh(
 );
 scene.add(core);
 
-/* METAL RING */
-const ring = new THREE.Mesh(
-  new THREE.TorusGeometry(2.6,0.15,30,100),
+/* METAL RING BASE */
+const baseRing = new THREE.Mesh(
+  new THREE.TorusGeometry(2.6,0.2,30,100),
   new THREE.MeshStandardMaterial({
-    color:0x333333,
+    color:0x222222,
     metalness:1,
-    roughness:.3
+    roughness:0.3
   })
 );
-scene.add(ring);
+scene.add(baseRing);
 
-/* INNER LIGHT RING */
-const glowRing = new THREE.Mesh(
-  new THREE.TorusGeometry(2.2,0.05,30,100),
-  new THREE.MeshStandardMaterial({
-    color:0x00ffcc,
-    emissive:0x00ffcc,
-    emissiveIntensity:2
-  })
-);
-scene.add(glowRing);
-
-/* NODES */
-const items = [];
-const labels = ["LIVE","MUSIC","GAMING","STORE","META","SPORTS","UPLOAD","GALLERY"];
-
+/* SEGMENTS */
+const panels = [];
 const radius = 2.2;
 const step = (Math.PI*2)/labels.length;
 
-let rotation = 0;
-let velocity = 0;
-let dragging = false;
-let active = 0;
+function createPanel(label){
+  const geo = new THREE.BoxGeometry(0.9,0.5,0.2);
 
-/* CREATE NODES */
-for(let i=0;i<labels.length;i++){
-  const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.18,16,16),
-    new THREE.MeshStandardMaterial({
-      color:0xffffff,
-      emissive:0x00ffcc,
-      emissiveIntensity:1
-    })
-  );
-  mesh.userData.index = i;
-  scene.add(mesh);
-  items.push(mesh);
-}
+  const mat = new THREE.MeshStandardMaterial({
+    color:0x111111,
+    metalness:1,
+    roughness:0.4,
+    emissive:0x00ffcc,
+    emissiveIntensity:0.2
+  });
 
-/* TEXT SPRITES */
-function createLabel(text){
+  const mesh = new THREE.Mesh(geo,mat);
+
+  // TEXT
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = 256;
@@ -192,20 +152,32 @@ function createLabel(text){
   ctx.fillStyle="#00ffcc";
   ctx.font="bold 40px sans-serif";
   ctx.textAlign="center";
-  ctx.fillText(text,128,64);
+  ctx.fillText(label,128,70);
 
   const tex = new THREE.CanvasTexture(canvas);
 
-  return new THREE.Sprite(
+  const sprite = new THREE.Sprite(
     new THREE.SpriteMaterial({map:tex,transparent:true})
   );
+
+  sprite.scale.set(1.2,0.6,1);
+  mesh.add(sprite);
+  sprite.position.z = 0.3;
+
+  return mesh;
 }
 
-const textSprites = labels.map(t=>{
-  const s = createLabel(t);
-  scene.add(s);
-  return s;
-});
+for(let i=0;i<labels.length;i++){
+  const p = createPanel(labels[i]);
+  scene.add(p);
+  panels.push(p);
+}
+
+/* MOTION */
+let rotation = 0;
+let velocity = 0;
+let dragging = false;
+let active = 0;
 
 /* ANIMATE */
 function animate(){
@@ -219,38 +191,37 @@ function animate(){
     if(Math.abs(velocity)<0.001){
       velocity=0;
       rotation=Math.round(rotation/step)*step;
-
       navigator.vibrate?.(10);
     }
   }
 
   let best=-Infinity;
 
-  items.forEach((m,i)=>{
+  panels.forEach((p,i)=>{
     const angle = i*step + rotation;
 
     const x = Math.cos(angle)*radius;
     const y = Math.sin(angle)*radius*0.4;
     const z = Math.sin(angle)*radius;
 
-    m.position.set(x,y,z);
-
-    textSprites[i].position.set(x,y+0.5,z);
+    p.position.set(x,y,z);
+    p.lookAt(0,0,0);
 
     const depth = (z+radius)/(radius*2);
-    const scale = 0.5 + depth*.4;
 
-    m.scale.set(scale,scale,scale);
+    p.scale.setScalar(0.8 + depth*0.4);
 
-    if(z>best){
-      best=z;
-      active=i;
+    /* 🔥 ACTIVE GLOW */
+    if(z > best){
+      best = z;
+      active = i;
     }
+
+    p.material.emissiveIntensity = (i === active) ? 1.8 : 0.2;
   });
 
-  core.rotation.y += .01;
-  ring.rotation.z += velocity*0.5;
-  glowRing.rotation.z += velocity*0.5;
+  core.rotation.y += 0.01;
+  baseRing.rotation.z += velocity*0.5;
 
   renderer.render(scene,camera);
 }
@@ -272,9 +243,26 @@ addEventListener("touchmove",e=>{
 
 addEventListener("touchend",()=>dragging=false);
 
-/* CLICK */
+/* CLICK ZOOM */
 addEventListener("click",()=>{
-  location.href = ROUTES[active];
+  const target = panels[active];
+
+  // zoom animation
+  const startZ = camera.position.z;
+  let t = 0;
+
+  function zoom(){
+    t += 0.05;
+    camera.position.z = startZ - t*3;
+
+    if(t < 1){
+      requestAnimationFrame(zoom);
+    } else {
+      location.href = ROUTES[active];
+    }
+  }
+
+  zoom();
 });
 
 /* BUTTON */
@@ -299,10 +287,6 @@ addEventListener("resize",()=>{
     <div class="icon">🔔</div>
     <div class="icon">⚙️</div>
   </div>
-</div>
-
-<div class="center-ui">
-  <h1>RICH BIZNESS</h1>
 </div>
 
 <div class="enter" onclick="enter()">ACTIVATE</div>
