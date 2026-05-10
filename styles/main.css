@@ -9,24 +9,23 @@ html,body{
 .bg{
   position:fixed;
   inset:0;
-  z-index:0;
+  z-index:1;
   background:
     radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
     url("/images/background-v2.png") center/cover no-repeat;
 }
 
-/* 🔥 CANVAS = ABOVE BACKGROUND */
+/* CANVAS */
 canvas{
   position:fixed;
   top:0;
   left:0;
   width:100%;
   height:100%;
-  z-index:1;
-  pointer-events:auto;
+  z-index:2;
 }
 
-/* 🔥 UI LAYER */
+/* TOPBAR */
 .topbar{
   position:fixed;
   top:10px;
@@ -55,13 +54,13 @@ canvas{
   font-size:18px;
 }
 
-/* 🔥 FIXED BUTTON (THIS WAS BROKEN) */
+/* BUTTON */
 .enter{
   position:fixed;
   bottom:40px;
   left:50%;
   transform:translateX(-50%);
-  z-index:5;
+  z-index:6;
 
   background:#00ffcc;
   color:#000;
