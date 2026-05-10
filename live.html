@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVE</title>
 
-<!-- ✅ FIXED CDN (your error was HERE) -->
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
-
 <link rel="stylesheet" href="/styles/main.css">
 </head>
 
 <body>
+
+<!-- 🔥 BACKGROUND FIX -->
+<div class="bg"></div>
 
 <div class="container">
 
@@ -28,17 +29,13 @@
 
 <script>
 
-/* =========================
-   MAKE SURE LIVEKIT LOADED
-========================= */
+/* ===== SAFETY CHECK ===== */
 if (typeof LivekitClient === "undefined") {
-  alert("LiveKit failed to load. Refresh the page.");
-  throw new Error("LivekitClient not found");
+  alert("LiveKit failed to load");
+  throw new Error("LivekitClient missing");
 }
 
-/* =========================
-   USER FIX
-========================= */
+/* ===== USER ===== */
 function getUsername(){
   const raw = localStorage.getItem("rb_user");
   if(!raw) return "guest";
@@ -51,9 +48,7 @@ function getUsername(){
   }
 }
 
-/* =========================
-   STATE
-========================= */
+/* ===== STATE ===== */
 let room = null;
 let isLive = false;
 
@@ -61,60 +56,43 @@ const videoEl = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const btn = document.getElementById("liveBtn");
 
-/* =========================
-   GET TOKEN
-========================= */
+/* ===== TOKEN ===== */
 async function getToken(username){
   const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
   const data = await res.json();
-
-  if(!data.token){
-    throw new Error("Token missing from API");
-  }
-
+  if(!data.token) throw new Error("Token missing");
   return data.token;
 }
 
-/* =========================
-   GO LIVE
-========================= */
+/* ===== LIVE BUTTON ===== */
 btn.onclick = async () => {
 
   if(!isLive){
 
     try {
-
       const username = getUsername();
-
-      // 🔥 GET TOKEN
       const token = await getToken(username);
 
-      // 🔥 CREATE ROOM
       room = new LivekitClient.Room();
 
-      // 🔥 CONNECT
       await room.connect(
         "wss://rich-bizness-mobile-zvq5cojk.livekit.cloud",
         token
       );
 
-      // 🔥 CAMERA (mobile safe)
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
+        video:true,
+        audio:true
       });
 
       videoEl.srcObject = stream;
 
-      // 🔥 FIXED TRACK PUBLISH
-      for (const track of stream.getTracks()) {
-
+      for(const track of stream.getTracks()){
         if(track.kind === "video"){
           await room.localParticipant.publishTrack(
             new LivekitClient.LocalVideoTrack(track)
           );
         }
-
         if(track.kind === "audio"){
           await room.localParticipant.publishTrack(
             new LivekitClient.LocalAudioTrack(track)
@@ -127,10 +105,8 @@ btn.onclick = async () => {
       isLive = true;
 
     } catch(err){
-
-      console.error("LIVE ERROR:", err);
+      console.error(err);
       alert("Stream failed: " + err.message);
-
     }
 
   } else {
