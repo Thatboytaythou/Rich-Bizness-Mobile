@@ -24,7 +24,7 @@ html, body {
 
   background:
     radial-gradient(circle at center, rgba(0,255,200,0.25), transparent 60%),
-    url("/images/rich-biz.jpeg");
+    url("./images/rich-biz.jpeg");
 
   background-size: cover;
   background-position: center;
