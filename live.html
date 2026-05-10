@@ -6,7 +6,6 @@
 
 <title>LIVE</title>
 
-<!-- 🔥 LINK GLOBAL STYLE -->
 <link rel="stylesheet" href="/styles/main.css">
 
 </head>
@@ -14,6 +13,12 @@
 <body>
 
 <div class="bg"></div>
+
+<!-- 🔥 TOP NAV -->
+<div class="topbar">
+  <div class="icon" onclick="goProfile()">👤</div>
+  <div class="icon" onclick="goSettings()">⚙️</div>
+</div>
 
 <div class="container">
 
@@ -32,9 +37,19 @@
 </div>
 
 <script>
+
 function goBack(){
   window.location.href = "/";
 }
+
+function goProfile(){
+  window.location.href = "/profile.html";
+}
+
+function goSettings(){
+  window.location.href = "/setting.html";
+}
+
 </script>
 
 </body>
