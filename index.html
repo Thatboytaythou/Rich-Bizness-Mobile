@@ -14,6 +14,7 @@ html,body{
   font-family:sans-serif;
 }
 
+/* BG */
 .bg{
   position:fixed;
   inset:0;
@@ -23,6 +24,32 @@ html,body{
     center/cover no-repeat;
 }
 
+/* TOP RIGHT BAR */
+.topbar{
+  position:fixed;
+  top:15px;
+  right:15px;
+  display:flex;
+  gap:12px;
+  z-index:100;
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:rgba(0,255,200,.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#00ffcc;
+  font-size:18px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 10px rgba(0,255,200,.3);
+  cursor:pointer;
+}
+
+/* CENTER */
 .app{
   position:fixed;
   top:50%;
@@ -30,6 +57,7 @@ html,body{
   transform:translate(-50%, -50%);
 }
 
+/* WHEEL */
 .omni{
   width:340px;
   height:340px;
@@ -69,6 +97,7 @@ html,body{
   filter:drop-shadow(0 0 20px #00ffff);
 }
 
+/* CORE BUTTON */
 .core{
   position:absolute;
   top:50%;
@@ -88,6 +117,7 @@ html,body{
   cursor:pointer;
 }
 
+/* LABEL */
 .screen{
   position:fixed;
   bottom:60px;
@@ -104,6 +134,12 @@ html,body{
 
 <div class="bg"></div>
 
+<!-- 🔥 TOP RIGHT ICONS -->
+<div class="topbar">
+  <div class="icon" onclick="goProfile()">👤</div>
+  <div class="icon" onclick="goSettings()">⚙️</div>
+</div>
+
 <div class="app">
   <div class="omni">
     <div class="ring"></div>
@@ -116,6 +152,7 @@ html,body{
 
 <script>
 
+/* DATA */
 const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒","⬆️","👤","💬","🔔"];
 const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE","UPLOAD","PROFILE","MESSAGES","ALERTS"];
 
@@ -142,6 +179,7 @@ let vel = 0;
 const step = (Math.PI*2)/ITEMS.length;
 const radius = 120;
 
+/* BUILD */
 ITEMS.forEach((icon,i)=>{
   const el = document.createElement("div");
   el.className = "seg";
@@ -165,6 +203,7 @@ ITEMS.forEach((icon,i)=>{
 
 let currentIndex = 0;
 
+/* UPDATE */
 function update(){
   wheel.style.transform = `rotate(${rot}rad)`;
 
@@ -179,6 +218,7 @@ function update(){
   currentIndex = index;
 }
 
+/* LOOP */
 function loop(){
   rot += vel;
   vel *= 0.92;
@@ -193,6 +233,7 @@ function loop(){
 }
 loop();
 
+/* TOUCH */
 let startX=0;
 
 window.addEventListener("touchstart", e=>{
@@ -204,7 +245,7 @@ window.addEventListener("touchmove", e=>{
   vel = dx * 0.0004;
 });
 
-/* 🔥 THIS IS THE ONLY NEW LOGIC */
+/* 🔥 ENTER LOGIC (LOGIN GATE) */
 enterBtn.onclick = ()=>{
   const user = localStorage.getItem("rb_user");
 
@@ -215,6 +256,15 @@ enterBtn.onclick = ()=>{
 
   window.location.href = ROUTES[currentIndex];
 };
+
+/* 🔥 TOPBAR NAV */
+function goProfile(){
+  window.location.href = "/profile.html";
+}
+
+function goSettings(){
+  window.location.href = "/setting.html";
+}
 
 </script>
 
