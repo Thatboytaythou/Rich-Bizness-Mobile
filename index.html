@@ -1,131 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RB OMNI LOCKED</title>
+<title>RB OMNI</title>
 
 <link rel="stylesheet" href="/styles/main.css">
-
-<style>
-html,body{
-  margin:0;
-  height:100%;
-  background:#000;
-  overflow:hidden;
-}
-
-/* BG */
-.bg{
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at center, rgba(0,255,200,.15), transparent 60%),
-    url("/images/background-v2.png") center/cover no-repeat;
-}
-
-/* 🔥 HARD CENTER (NO FLEX, NO SHIFT) */
-.app{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-}
-
-/* WHEEL */
-.omni{
-  width:320px;        /* 🔥 LOCKED SIZE */
-  height:320px;
-  position:relative;
-}
-
-/* RING */
-.ring{
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background:#001;
-  box-shadow:
-    0 0 100px #00ffcc,
-    inset 0 0 60px rgba(0,255,200,.3);
-}
-
-/* WHEEL ROTATION */
-.wheel{
-  position:absolute;
-  inset:0;
-}
-
-/* ICONS */
-.seg{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform-origin:center;
-  font-size:22px;
-  opacity:.6;
-}
-
-/* ACTIVE */
-.seg.active{
-  transform:translate(-50%,-50%) scale(1.5);
-  opacity:1;
-  filter:drop-shadow(0 0 15px #00ffff);
-}
-
-/* CORE */
-.core{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#00ffcc;
-  font-weight:bold;
-  box-shadow:0 0 40px #00ffcc;
-  cursor:pointer;
-}
-
-/* LABEL */
-.screen{
-  position:fixed;
-  bottom:60px;
-  width:100%;
-  text-align:center;
-  font-size:24px;
-  color:#00ffcc;
-}
-
-/* TOPBAR (kept simple so it doesn’t shift layout) */
-.topbar{
-  position:fixed;
-  top:15px;
-  right:15px;
-  display:flex;
-  gap:12px;
-  z-index:100;
-}
-.icon{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:rgba(0,255,200,.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#00ffcc;
-  font-size:18px;
-  backdrop-filter:blur(10px);
-  box-shadow:0 0 10px rgba(0,255,200,.3);
-  cursor:pointer;
-}
-</style>
 
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -135,15 +14,12 @@ const supabase = createClient(
   "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
 );
 
-// minimal auth check (NO layout impact)
 const { data: { user } } = await supabase.auth.getUser();
 window.currentUser = user || null;
 
-// nav
 window.goProfile = () => location.href="/profile.html";
 window.goSettings = () => location.href="/setting.html";
 </script>
-
 </head>
 
 <body>
@@ -166,31 +42,19 @@ window.goSettings = () => location.href="/setting.html";
 <div class="screen" id="screen">META</div>
 
 <script>
-/* DATA */
 const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒","⬆️","👤","💬","🔔"];
 const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE","UPLOAD","PROFILE","MESSAGES","ALERTS"];
 const ROUTES = [
-  "/meta.html",
-  "/live.html",
-  "/music.html",
-  "/gaming.html",
-  "/sports.html",
-  "/store.html",
-  "/upload.html",
-  "/profile.html",
-  "/messages.html",
-  "/notifications.html"
+  "/meta.html","/live.html","/music.html","/gaming.html","/sports.html",
+  "/store.html","/upload.html","/profile.html","/messages.html","/notifications.html"
 ];
 
 const wheel = document.getElementById("wheel");
 const screen = document.getElementById("screen");
 const enterBtn = document.getElementById("enterBtn");
 
-let rot = 0;
-let vel = 0;
-
+let rot = 0, vel = 0;
 const step = (Math.PI*2)/ITEMS.length;
-/* 🔥 FIXED RADIUS (NO VIEWPORT DEPENDENCY) */
 const radius = 110;
 
 /* BUILD */
@@ -203,16 +67,9 @@ ITEMS.forEach((icon,i)=>{
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
 
-  el.style.transform = `
-    translate(-50%,-50%)
-    translate(${x}px, ${y}px)
-  `;
+  el.style.transform = `translate(-50%,-50%) translate(${x}px, ${y}px)`;
 
-  el.onclick = () => {
-    // tap icon goes directly
-    window.location.href = ROUTES[i];
-  };
-
+  el.onclick = ()=> window.location.href = ROUTES[i];
   wheel.appendChild(el);
 });
 
@@ -248,9 +105,7 @@ loop();
 
 /* TOUCH */
 let startX=0;
-window.addEventListener("touchstart", e=>{
-  startX = e.touches[0].clientX;
-});
+window.addEventListener("touchstart", e=> startX = e.touches[0].clientX);
 window.addEventListener("touchmove", e=>{
   let dx = e.touches[0].clientX - startX;
   vel = dx * 0.0004;
@@ -259,11 +114,11 @@ window.addEventListener("touchmove", e=>{
 /* ENTER */
 enterBtn.onclick = ()=>{
   if(!window.currentUser){
-    window.location.href = "/auth.html";
+    location.href="/auth.html";
     return;
   }
-  const index = update();
-  window.location.href = ROUTES[index];
+  const i = update();
+  location.href = ROUTES[i];
 };
 </script>
 
