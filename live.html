@@ -20,19 +20,16 @@ html,body{
   justify-content:center;
 }
 
-/* TITLE */
 h1{
   font-size:40px;
   text-shadow:0 0 20px #00ffcc;
 }
 
-/* STATUS */
 .status{
   margin:10px 0;
   font-size:18px;
 }
 
-/* BUTTON */
 .main-btn{
   padding:18px 40px;
   font-size:18px;
@@ -45,7 +42,6 @@ h1{
   margin:20px 0;
 }
 
-/* VIDEO */
 video{
   width:90%;
   max-width:400px;
@@ -54,7 +50,6 @@ video{
   margin-top:20px;
 }
 
-/* BACK */
 .back{
   margin-top:30px;
   padding:12px 26px;
@@ -86,10 +81,15 @@ const videoEl = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const btn = document.getElementById("liveBtn");
 
-/* 🔥 GET TOKEN FROM YOUR API */
+/* 🔥 TOKEN */
 async function getToken(username){
   const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
   const data = await res.json();
+
+  if(!data.token){
+    throw new Error("No token returned");
+  }
+
   return data.token;
 }
 
@@ -105,22 +105,25 @@ btn.onclick = async () => {
 
       room = new LivekitClient.Room();
 
+      // ✅ YOUR NEW LIVEKIT URL (FIXED)
       await room.connect(
-        "wss://rich-business-app-mb97csrd.livekit.cloud",
+        "wss://rich-bizness-mobile-zvq5cojk.livekit.cloud",
         token
       );
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video:true,
-        audio:true
+      // ✅ CORRECT WAY (THIS FIXES YOUR STREAM FAIL)
+      const tracks = await LivekitClient.createLocalTracks({
+        audio: true,
+        video: true
       });
 
-      videoEl.srcObject = stream;
+      // show video
+      const videoTrack = tracks.find(t => t.kind === "video");
+      videoTrack.attach(videoEl);
 
-      for (const track of stream.getTracks()) {
-        await room.localParticipant.publishTrack(
-          new LivekitClient.LocalTrack(track)
-        );
+      // publish tracks
+      for (const track of tracks) {
+        await room.localParticipant.publishTrack(track);
       }
 
       statusEl.innerText = "LIVE 🔴";
@@ -128,7 +131,7 @@ btn.onclick = async () => {
       isLive = true;
 
     } catch (err){
-      console.error(err);
+      console.error("LIVE ERROR:", err);
       alert("Stream failed — check API / env");
     }
 
