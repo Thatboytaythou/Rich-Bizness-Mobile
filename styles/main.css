@@ -109,3 +109,83 @@ h1{
 .icon:active{
   transform:scale(.9);
 }
+
+/* =========================
+   OMNI CORE (INDEX UI)
+========================= */
+
+.app{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+
+.omni{
+  width:340px;
+  height:340px;
+  position:relative;
+}
+
+.ring{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:#001;
+  box-shadow:
+    0 0 120px #00ffcc,
+    inset 0 0 80px rgba(0,255,200,.3);
+}
+
+.wheel{
+  position:absolute;
+  inset:0;
+  transition:transform .1s;
+}
+
+.seg{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform-origin:center;
+  font-size:22px;
+  opacity:.5;
+  transition:.2s;
+  cursor:pointer;
+}
+
+.seg.active{
+  transform:translate(-50%,-50%) scale(1.6);
+  opacity:1;
+  filter:drop-shadow(0 0 20px #00ffff);
+}
+
+.core{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#00ffcc;
+  font-weight:bold;
+  font-size:18px;
+  box-shadow:0 0 60px #00ffcc;
+  cursor:pointer;
+}
+
+.screen{
+  position:fixed;
+  bottom:60px;
+  width:100%;
+  text-align:center;
+  font-size:22px;
+  color:#00ffcc;
+  letter-spacing:2px;
+  white-space:pre-line;
+}
