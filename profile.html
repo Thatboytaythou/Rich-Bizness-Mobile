@@ -2,20 +2,59 @@
 <html>
 <head>
 <title>PROFILE</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:black;
+  color:#00ffcc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:sans-serif;
+}
+
+/* TITLE */
+h1{
+  font-size:32px;
+  margin-bottom:40px;
+}
+
+/* MAIN BUTTON */
+.main-btn{
+  padding:18px 40px;
+  font-size:18px;
+  font-weight:bold;
+  background:#00ffcc;
+  color:black;
+  border:none;
+  border-radius:10px;
+  box-shadow:0 0 20px #00ffcc;
+  margin-bottom:25px;
+}
+
+/* SECOND BUTTON */
+.secondary-btn{
+  padding:14px 28px;
+  font-size:14px;
+  border:none;
+  border-radius:8px;
+}
+</style>
 </head>
 
-<body style="background:black;color:#00ffcc;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+<body>
 
 <h1>PROFILE</h1>
 
-<!-- 🔥 LOGOUT BUTTON -->
-<button onclick="logout()" style="padding:15px 25px;background:#00ffcc;color:black;border:none;border-radius:8px;font-weight:bold;">
-  I'M OUT
+<!-- 🔥 BIGGER + CLEAN -->
+<button class="main-btn" onclick="logout()">
+  I'M OUT ✌🏽
 </button>
 
-<br><br>
-
-<button onclick="goBack()" style="padding:10px 20px;">
+<button class="secondary-btn" onclick="goBack()">
   GO BACK
 </button>
 
