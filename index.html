@@ -40,46 +40,94 @@ window.goProfile = () => location.href="/profile.html";
 
 <script>
 const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒"];
+const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE"];
 const ROUTES = ["/meta.html","/live.html","/music.html","/gaming.html","/sports.html","/store.html"];
 
 const wheel = document.getElementById("wheel");
-let rot=0, vel=0;
-const step=(Math.PI*2)/ITEMS.length;
-const radius=110;
+const screen = document.getElementById("screen");
+const enterBtn = document.getElementById("enterBtn");
 
+let rot = 0;
+let vel = 0;
+
+const step = (Math.PI * 2) / ITEMS.length;
+const radius = 110;
+
+/* BUILD WHEEL */
 ITEMS.forEach((icon,i)=>{
-  const el=document.createElement("div");
-  el.className="seg";
-  el.innerText=icon;
+  const el = document.createElement("div");
+  el.className = "seg";
+  el.innerText = icon;
 
-  const angle=i*step-Math.PI/2;
-  el.style.transform=`
+  const angle = i * step - Math.PI/2;
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(angle) * radius;
+
+  el.style.transform = `
     translate(-50%,-50%)
-    translate(${Math.cos(angle)*radius}px,${Math.sin(angle)*radius}px)
+    translate(${x}px, ${y}px)
   `;
+
+  el.onclick = () => {
+    window.location.href = ROUTES[i];
+  };
 
   wheel.appendChild(el);
 });
 
+/* UPDATE STATE */
 function update(){
-  wheel.style.transform=`rotate(${rot}rad)`;
-  return Math.round(-rot/step)%ITEMS.length;
+  wheel.style.transform = `rotate(${rot}rad)`;
+
+  let index = Math.round(-rot / step) % ITEMS.length;
+  if(index < 0) index += ITEMS.length;
+
+  document.querySelectorAll(".seg").forEach((el,i)=>{
+    el.classList.toggle("active", i === index);
+  });
+
+  screen.innerText = LABELS[index];
+
+  return index;
 }
 
+/* LOOP + SNAP */
 function loop(){
-  rot+=vel;
-  vel*=0.92;
+  rot += vel;
+  vel *= 0.92;
+
+  // 🔥 snap when slowing down
+  if(Math.abs(vel) < 0.002){
+    const snap = Math.round(rot / step) * step;
+    rot += (snap - rot) * 0.12;
+  }
+
+  update();
   requestAnimationFrame(loop);
 }
 loop();
 
-enterBtn.onclick=()=>{
+/* TOUCH CONTROLS */
+let startX = 0;
+
+window.addEventListener("touchstart", e=>{
+  startX = e.touches[0].clientX;
+});
+
+window.addEventListener("touchmove", e=>{
+  const dx = e.touches[0].clientX - startX;
+  vel = dx * 0.0005;
+});
+
+/* ENTER BUTTON */
+enterBtn.onclick = ()=>{
   if(!window.user){
-    location.href="/auth.html";
+    window.location.href="/auth.html";
     return;
   }
-  const i=update();
-  location.href=ROUTES[i];
+
+  const index = update();
+  window.location.href = ROUTES[index];
 };
 </script>
 
