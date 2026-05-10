@@ -5,199 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVE</title>
 
-<link rel="stylesheet" href="/styles/main.css">
+<script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.min.js"></script>
 
 <style>
-
-/* CAMERA BOX */
-.video-box{
-  margin-top:20px;
-  width:260px;
-  height:160px;
-  border-radius:12px;
-  overflow:hidden;
-  background:black;
-  box-shadow:0 0 20px rgba(0,255,200,.3);
-}
-
-video{
-  width:100%;
+html,body{
+  margin:0;
   height:100%;
-  object-fit:cover;
+  background:black;
+  color:#00ffcc;
+  font-family:sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 }
 
-/* CHAT */
-.chat-box{
+/* TITLE */
+h1{
+  font-size:40px;
+  text-shadow:0 0 20px #00ffcc;
+}
+
+/* STATUS */
+.status{
+  margin:10px 0;
+  font-size:18px;
+}
+
+/* BUTTON */
+.main-btn{
+  padding:18px 40px;
+  font-size:18px;
+  font-weight:bold;
+  background:#00ffcc;
+  color:black;
+  border:none;
+  border-radius:14px;
+  box-shadow:0 0 30px #00ffcc;
+  margin:20px 0;
+}
+
+/* VIDEO */
+video{
+  width:90%;
+  max-width:400px;
+  border-radius:16px;
+  box-shadow:0 0 20px #00ffcc;
   margin-top:20px;
-  width:260px;
-  height:120px;
-  overflow:hidden;
+}
+
+/* BACK */
+.back{
+  margin-top:30px;
+  padding:12px 26px;
   border-radius:10px;
-  background:rgba(0,0,0,.6);
-  padding:10px;
-  font-size:12px;
-  text-align:left;
+  background:#111;
+  color:#00ffcc;
 }
-
-.chat-line{
-  opacity:.8;
-  margin-bottom:4px;
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+<h1>LIVE</h1>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div id="userEmail" style="font-size:12px;"></div>
-  <div class="icon" onclick="goProfile()">👤</div>
-  <div class="icon" onclick="goSettings()">⚙️</div>
-</div>
+<div class="status" id="status">OFFLINE</div>
 
-<div class="container">
+<button class="main-btn" id="liveBtn">GO LIVE 🔴</button>
 
-  <h1>LIVE</h1>
+<video id="video" autoplay muted playsinline></video>
 
-  <div id="statusText">OFFLINE</div>
-  <div id="viewerCount">0 watching</div>
-
-  <button class="main-btn" onclick="toggleLive()" id="liveBtn">
-    GO LIVE 🔴
-  </button>
-
-  <!-- 🎥 CAMERA -->
-  <div class="video-box">
-    <video id="video" autoplay muted playsinline></video>
-  </div>
-
-  <!-- 💬 CHAT -->
-  <div class="chat-box" id="chatBox"></div>
-
-  <br>
-
-  <button class="secondary-btn" onclick="goBack()">GO BACK</button>
-
-</div>
+<button class="back" onclick="location.href='/'">GO BACK</button>
 
 <script>
 
-/* USER */
-const user = JSON.parse(localStorage.getItem("rb_user"));
+let room = null;
+let isLive = false;
 
-if(!user){
-  window.location.href = "/auth.html";
+const videoEl = document.getElementById("video");
+const statusEl = document.getElementById("status");
+const btn = document.getElementById("liveBtn");
+
+/* 🔥 GET TOKEN FROM YOUR API */
+async function getToken(username){
+  const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
+  const data = await res.json();
+  return data.token;
 }
 
-document.getElementById("userEmail").innerText = user.email;
+/* 🔥 GO LIVE */
+btn.onclick = async () => {
 
+  if(!isLive){
 
-/* LIVE STATE */
-let isLive = false;
-let viewers = 0;
-let chatBox = document.getElementById("chatBox");
-let video = document.getElementById("video");
-let stream = null;
+    const username = localStorage.getItem("rb_user") || "guest";
 
-/* TOGGLE LIVE */
-async function toggleLive(){
+    try {
+      const token = await getToken(username);
 
-  isLive = !isLive;
+      room = new LivekitClient.Room();
 
-  if(isLive){
+      await room.connect(
+        "wss://rich-business-app-mb97csrd.livekit.cloud",
+        token
+      );
 
-    document.getElementById("statusText").innerText = "LIVE 🔴";
-    document.getElementById("liveBtn").innerText = "END STREAM ⛔";
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video:true,
+        audio:true
+      });
 
-    startViewers();
-    startCamera();
+      videoEl.srcObject = stream;
+
+      for (const track of stream.getTracks()) {
+        await room.localParticipant.publishTrack(
+          new LivekitClient.LocalTrack(track)
+        );
+      }
+
+      statusEl.innerText = "LIVE 🔴";
+      btn.innerText = "END STREAM ⛔";
+      isLive = true;
+
+    } catch (err){
+      console.error(err);
+      alert("Stream failed — check API / env");
+    }
 
   } else {
 
-    document.getElementById("statusText").innerText = "OFFLINE";
-    document.getElementById("liveBtn").innerText = "GO LIVE 🔴";
+    if(room){
+      room.disconnect();
+    }
 
-    viewers = 0;
-    updateViewers();
+    videoEl.srcObject = null;
 
-    stopCamera();
+    statusEl.innerText = "OFFLINE";
+    btn.innerText = "GO LIVE 🔴";
+    isLive = false;
+
   }
-}
 
-
-/* CAMERA */
-async function startCamera(){
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    video.srcObject = stream;
-  }catch(err){
-    alert("Camera access denied");
-  }
-}
-
-function stopCamera(){
-  if(stream){
-    stream.getTracks().forEach(track => track.stop());
-    video.srcObject = null;
-  }
-}
-
-
-/* VIEWERS */
-function updateViewers(){
-  document.getElementById("viewerCount").innerText = viewers + " watching";
-}
-
-function startViewers(){
-  setInterval(()=>{
-    if(!isLive) return;
-
-    viewers += Math.floor(Math.random()*3);
-    updateViewers();
-
-  },2000);
-}
-
-
-/* CHAT */
-const messages = [
-  "🔥 this fire",
-  "yo this crazy",
-  "we lit",
-  "drop more",
-  "W stream",
-  "nah this hard",
-  "TURN UP",
-  "😂😂😂"
-];
-
-function spawnChat(){
-  if(!isLive) return;
-
-  const msg = document.createElement("div");
-  msg.className = "chat-line";
-  msg.innerText =
-    "user" + Math.floor(Math.random()*100) +
-    ": " +
-    messages[Math.floor(Math.random()*messages.length)];
-
-  chatBox.appendChild(msg);
-
-  if(chatBox.children.length > 8){
-    chatBox.removeChild(chatBox.firstChild);
-  }
-}
-
-setInterval(spawnChat,1500);
-
-
-/* NAV */
-function goBack(){ window.location.href = "/"; }
-function goProfile(){ window.location.href = "/profile.html"; }
-function goSettings(){ window.location.href = "/setting.html"; }
+};
 
 </script>
 
