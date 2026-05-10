@@ -19,7 +19,14 @@ html,body{
 /* TITLE */
 h1{
   font-size:32px;
-  margin-bottom:40px;
+  margin-bottom:10px;
+}
+
+/* USER NAME */
+.user{
+  font-size:14px;
+  opacity:.7;
+  margin-bottom:30px;
 }
 
 /* MAIN BUTTON */
@@ -30,9 +37,15 @@ h1{
   background:#00ffcc;
   color:black;
   border:none;
-  border-radius:10px;
-  box-shadow:0 0 20px #00ffcc;
+  border-radius:12px;
+  box-shadow:0 0 25px #00ffcc;
   margin-bottom:25px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.main-btn:active{
+  transform:scale(.95);
 }
 
 /* SECOND BUTTON */
@@ -40,7 +53,15 @@ h1{
   padding:14px 28px;
   font-size:14px;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
+  background:#111;
+  color:#00ffcc;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.secondary-btn:active{
+  transform:scale(.95);
 }
 </style>
 </head>
@@ -49,7 +70,10 @@ h1{
 
 <h1>PROFILE</h1>
 
-<!-- 🔥 BIGGER + CLEAN -->
+<!-- 🔥 SHOW WHO LOGGED IN -->
+<div class="user" id="userName">Loading...</div>
+
+<!-- 🔥 LOGOUT -->
 <button class="main-btn" onclick="logout()">
   I'M OUT ✌🏽
 </button>
@@ -59,14 +83,27 @@ h1{
 </button>
 
 <script>
+
+/* SHOW USER */
+const user = localStorage.getItem("rb_user");
+
+if(user){
+  document.getElementById("userName").innerText = user;
+}else{
+  document.getElementById("userName").innerText = "Not logged in";
+}
+
+/* LOGOUT */
 function logout(){
   localStorage.removeItem("rb_user");
   window.location.href = "/auth.html";
 }
 
+/* BACK */
 function goBack(){
   window.location.href = "/";
 }
+
 </script>
 
 </body>
