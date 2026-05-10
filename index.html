@@ -123,9 +123,10 @@ html,body{
   bottom:60px;
   width:100%;
   text-align:center;
-  font-size:26px;
+  font-size:22px;
   color:#00ffcc;
   letter-spacing:2px;
+  white-space:pre-line; /* 🔥 allows line breaks */
 }
 </style>
 </head>
@@ -134,7 +135,7 @@ html,body{
 
 <div class="bg"></div>
 
-<!-- 🔥 TOP RIGHT ICONS -->
+<!-- TOP RIGHT -->
 <div class="topbar">
   <div class="icon" onclick="goProfile()">👤</div>
   <div class="icon" onclick="goSettings()">⚙️</div>
@@ -245,7 +246,7 @@ window.addEventListener("touchmove", e=>{
   vel = dx * 0.0004;
 });
 
-/* 🔥 ENTER LOGIC (LOGIN GATE) */
+/* 🔥 ENTER LOGIC */
 enterBtn.onclick = ()=>{
   const user = localStorage.getItem("rb_user");
 
@@ -264,6 +265,13 @@ function goProfile(){
 
 function goSettings(){
   window.location.href = "/setting.html";
+}
+
+/* 🔥 WELCOME MESSAGE (NEW) */
+const savedUser = localStorage.getItem("rb_user");
+
+if(savedUser){
+  screen.innerText = "WELCOME BACK\n" + savedUser;
 }
 
 </script>
