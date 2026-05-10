@@ -12,43 +12,36 @@ const supabase = createClient(
   "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
 );
 
-// LOGIN
-window.login = async () => {
+window.login = async ()=>{
   const email = emailEl.value;
   const password = passEl.value;
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email, password
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if(error){
     alert(error.message);
     return;
   }
 
-  window.location.href = "/";
+  location.href="/";
 };
 
-// SIGNUP
-window.signup = async () => {
+window.signup = async ()=>{
   const email = emailEl.value;
   const password = passEl.value;
 
-  const { error } = await supabase.auth.signUp({
-    email, password
-  });
+  const { error } = await supabase.auth.signUp({ email, password });
 
   if(error){
     alert(error.message);
     return;
   }
 
-  alert("Account created. Now login 🔥");
+  alert("Signup success 🔥 now login");
 };
 
 const emailEl = document.getElementById("email");
 const passEl = document.getElementById("password");
-
 </script>
 </head>
 
@@ -57,15 +50,12 @@ const passEl = document.getElementById("password");
 <div class="bg"></div>
 
 <div class="container">
-
   <h1>TAP IN 🔥</h1>
-
   <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
 
-  <button class="main-btn" onclick="login()">LOGIN 🚀</button>
+  <button class="main-btn" onclick="login()">LOGIN</button>
   <button class="secondary-btn" onclick="signup()">SIGN UP</button>
-
 </div>
 
 </body>
