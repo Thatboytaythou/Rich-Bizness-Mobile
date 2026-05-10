@@ -1,7 +1,3 @@
-/* =========================
-   RICH BIZNESS GLOBAL STYLE
-========================= */
-
 html,body{
   margin:0;
   height:100%;
@@ -11,7 +7,6 @@ html,body{
   color:#00ffcc;
 }
 
-/* BG */
 .bg{
   position:fixed;
   inset:0;
@@ -21,7 +16,6 @@ html,body{
   z-index:0;
 }
 
-/* CENTER LOCK */
 .app,.container{
   position:fixed;
   top:50%;
@@ -30,7 +24,6 @@ html,body{
   z-index:10;
 }
 
-/* TOPBAR */
 .topbar{
   position:fixed;
   top:15px;
@@ -48,11 +41,8 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  color:#00ffcc;
-  backdrop-filter:blur(10px);
 }
 
-/* BUTTONS */
 .main-btn{
   padding:16px 32px;
   background:#00ffcc;
@@ -68,8 +58,11 @@ html,body{
   border-radius:8px;
 }
 
-/* OMNI */
-.omni{ width:320px; height:320px; position:relative; }
+.omni{
+  width:320px;
+  height:320px;
+  position:relative;
+}
 
 .ring{
   position:absolute;
@@ -106,10 +99,8 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 40px #00ffcc;
 }
 
-/* LABEL */
 .screen{
   position:fixed;
   bottom:60px;
