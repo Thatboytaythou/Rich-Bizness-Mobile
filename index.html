@@ -4,70 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RB OMNI 3D</title>
 
-<style>
-html,body{
-  margin:0;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-}
-
-canvas{
-  display:block;
-}
-
-/* TOP BAR */
-.topbar{
-  position:absolute;
-  top:10px;
-  left:0;
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  padding:0 15px;
-  z-index:10;
-}
-
-.icon{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:rgba(0,0,0,.6);
-  color:#00ffcc;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-}
-
-.right-icons{
-  display:flex;
-  gap:10px;
-}
-
-/* ENTER BUTTON */
-.enter{
-  position:absolute;
-  bottom:60px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#00ffcc;
-  color:#000;
-  padding:15px 30px;
-  border-radius:30px;
-  font-weight:bold;
-  z-index:10;
-}
-</style>
+<link rel="stylesheet" href="/styles/main.css">
 
 <script type="module">
 import * as THREE from "https://cdn.skypack.dev/three@0.158.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* =========================
    SUPABASE
 ========================= */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const supabase = createClient(
   "https://zsancpcyhdidrlezggrl.supabase.co",
   "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
@@ -81,9 +26,8 @@ window.goSettings = () => location.href="/settings.html";
 window.goNotifications = () => location.href="/notifications.html";
 
 /* =========================
-   ROUTES
+   ROUTES (LOCKED)
 ========================= */
-
 const ROUTES = [
   "/meta.html",
   "/live.html",
@@ -93,14 +37,13 @@ const ROUTES = [
   "/store.html",
   "/gallery.html",
   "/podcast.html",
-  "/store.html",
+  "/store.html", // profile replaced like you wanted
   "/messages.html"
 ];
 
 /* =========================
    THREE SETUP
 ========================= */
-
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -110,29 +53,27 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-camera.position.z = 5;
+camera.position.z = 6;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true });
+const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* =========================
    LIGHT
 ========================= */
-
 const light = new THREE.PointLight(0x00ffcc, 2);
 light.position.set(5,5,5);
 scene.add(light);
 
 /* =========================
-   CORE (CENTER)
+   CORE (CENTER GLOW)
 ========================= */
-
-const coreGeo = new THREE.SphereGeometry(1,32,32);
+const coreGeo = new THREE.SphereGeometry(1.2,32,32);
 const coreMat = new THREE.MeshStandardMaterial({
   color:0x00ffcc,
   emissive:0x00ffcc,
-  emissiveIntensity:0.8
+  emissiveIntensity:1
 });
 
 const core = new THREE.Mesh(coreGeo, coreMat);
@@ -141,25 +82,23 @@ scene.add(core);
 /* =========================
    RING ITEMS
 ========================= */
-
 const items = [];
-const radius = 3;
+const radius = 3.2;
 const count = 10;
 
 for(let i=0;i<count;i++){
-  const geo = new THREE.SphereGeometry(0.25,16,16);
+  const geo = new THREE.SphereGeometry(0.28,16,16);
   const mat = new THREE.MeshStandardMaterial({
     color:0xffffff,
     emissive:0x00ffcc,
-    emissiveIntensity:0.3
+    emissiveIntensity:0.4
   });
 
   const mesh = new THREE.Mesh(geo, mat);
 
-  const angle = (i/count) * Math.PI * 2;
-
-  mesh.position.x = Math.cos(angle) * radius;
-  mesh.position.y = Math.sin(angle) * radius;
+  const angle = (i/count)*Math.PI*2;
+  mesh.position.x = Math.cos(angle)*radius;
+  mesh.position.y = Math.sin(angle)*radius;
 
   mesh.userData.index = i;
 
@@ -168,24 +107,44 @@ for(let i=0;i<count;i++){
 }
 
 /* =========================
-   ROTATION
+   MOTION ENGINE (LOCKED)
 ========================= */
-
 let velocity = 0;
 let rotation = 0;
+let isTouching = false;
 
 function animate(){
   requestAnimationFrame(animate);
 
   rotation += velocity;
-  velocity *= 0.95;
+  velocity *= 0.92;
+
+  // 🔥 snap when slow (NO DRIFT)
+  if(!isTouching && Math.abs(velocity) < 0.002){
+    const snap = Math.round(rotation / (Math.PI*2/count)) * (Math.PI*2/count);
+    rotation += (snap - rotation) * 0.1;
+  }
+
+  let closestIndex = 0;
+  let best = -Infinity;
 
   items.forEach((m,i)=>{
     const angle = (i/count)*Math.PI*2 + rotation;
 
     m.position.x = Math.cos(angle)*radius;
     m.position.y = Math.sin(angle)*radius;
+
+    // 🔥 highlight front
+    if(m.position.y > best){
+      best = m.position.y;
+      closestIndex = i;
+    }
+
+    const scale = 1 + (m.position.y * 0.15);
+    m.scale.set(scale, scale, scale);
   });
+
+  window.activeIndex = closestIndex;
 
   core.rotation.y += 0.01;
 
@@ -194,24 +153,30 @@ function animate(){
 animate();
 
 /* =========================
-   TOUCH CONTROL
+   TOUCH CONTROL (FIXED)
 ========================= */
-
-let startX = 0;
+let lastX = 0;
 
 window.addEventListener("touchstart", e=>{
-  startX = e.touches[0].clientX;
+  isTouching = true;
+  lastX = e.touches[0].clientX;
 });
 
 window.addEventListener("touchmove", e=>{
-  const dx = e.touches[0].clientX - startX;
-  velocity = dx * 0.0005;
+  const x = e.touches[0].clientX;
+  const dx = x - lastX;
+
+  velocity = dx * 0.003; // stronger + smooth
+  lastX = x;
+});
+
+window.addEventListener("touchend", ()=>{
+  isTouching = false;
 });
 
 /* =========================
-   CLICK DETECT (RAYCAST)
+   CLICK / TAP
 ========================= */
-
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -232,31 +197,20 @@ window.addEventListener("click", (event)=>{
 /* =========================
    ENTER BUTTON
 ========================= */
-
 window.enter = ()=>{
   if(!window.user){
     location.href="/auth.html";
     return;
   }
 
-  // pick closest front item
-  let closest = 0;
-  let best = -Infinity;
-
-  items.forEach((m,i)=>{
-    if(m.position.y > best){
-      best = m.position.y;
-      closest = i;
-    }
-  });
-
-  location.href = ROUTES[closest];
+  location.href = ROUTES[window.activeIndex];
 };
-
 </script>
 </head>
 
 <body>
+
+<div class="bg"></div>
 
 <div class="topbar">
   <div class="icon" onclick="goProfile()">👤</div>
