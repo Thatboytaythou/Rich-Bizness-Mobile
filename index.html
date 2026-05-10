@@ -7,10 +7,6 @@
 <link rel="stylesheet" href="/styles/main.css">
 
 <script type="module">
-/* 🔥 DEBUG (CONFIRM SCRIPT RUNS) */
-console.log("SCRIPT STARTED");
-
-/* 🔥 FIXED THREE IMPORT (NO SKYPACK) */
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -48,8 +44,6 @@ const ROUTES = [
    THREE ENGINE
 ========================= */
 
-console.log("THREE LOADED:", THREE);
-
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -70,14 +64,13 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 
-/* 🔥 FORCE CANVAS STYLE */
+/* FORCE CANVAS */
 renderer.domElement.style.position = "fixed";
 renderer.domElement.style.top = "0";
 renderer.domElement.style.left = "0";
 renderer.domElement.style.width = "100%";
 renderer.domElement.style.height = "100%";
 renderer.domElement.style.zIndex = "2";
-renderer.domElement.style.pointerEvents = "auto";
 
 document.body.appendChild(renderer.domElement);
 
@@ -92,11 +85,11 @@ light.position.set(0,0,5);
 scene.add(light);
 
 /* =========================
-   CORE
+   CORE (SMALLER FIXED)
 ========================= */
 
 const core = new THREE.Mesh(
-  new THREE.SphereGeometry(1.2,32,32),
+  new THREE.SphereGeometry(0.6,32,32),
   new THREE.MeshStandardMaterial({
     color:0x00ffcc,
     emissive:0x00ffcc,
@@ -117,7 +110,7 @@ const step = (Math.PI*2)/count;
 
 for(let i=0;i<count;i++){
   const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.35,16,16),
+    new THREE.SphereGeometry(0.25,16,16),
     new THREE.MeshStandardMaterial({
       color:0xffffff,
       emissive:0x00ffcc,
@@ -131,7 +124,7 @@ for(let i=0;i<count;i++){
 }
 
 /* =========================
-   MOTION
+   MOTION (FIXED SIZE)
 ========================= */
 
 let velocity = 0;
@@ -159,12 +152,16 @@ function animate(){
     const angle = i*step + rotation;
 
     m.position.x = Math.cos(angle)*radius;
-    m.position.y = Math.sin(angle)*1.2;
+    m.position.y = Math.sin(angle)*0.8;   // 🔥 less stretch
     m.position.z = Math.sin(angle)*radius;
 
     const depth = (m.position.z + radius)/(radius*2);
-    const scale = 0.7 + depth*1.2;
+
+    /* 🔥 FINAL SIZE FIX */
+    const scale = 0.4 + depth * 0.5;
     m.scale.set(scale,scale,scale);
+
+    m.material.emissiveIntensity = 0.5 + depth * 1.5;
 
     if(m.position.z > best){
       best = m.position.z;
