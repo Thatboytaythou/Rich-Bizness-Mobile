@@ -1,6 +1,5 @@
 /* =========================
    RICH BIZNESS GLOBAL STYLE
-   styles/main.css
 ========================= */
 
 /* ===== RESET ===== */
@@ -14,7 +13,7 @@ html,body{
 }
 
 /* =========================
-   🔥 BACKGROUND (FIXED + STRONG)
+   🔥 BACKGROUND (FIXED)
 ========================= */
 
 .bg{
@@ -23,12 +22,11 @@ html,body{
 
   background:
     radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
-    url("./images/background-v2.png") center/cover no-repeat;
+    url("/images/background-v2.png") center/cover no-repeat;
 
   z-index:-1;
 }
 
-/* 🔥 extra glow overlay (makes it feel alive) */
 .bg::after{
   content:"";
   position:absolute;
@@ -193,8 +191,11 @@ h1{
   cursor:pointer;
 }
 
+/* ❌ REMOVED BROKEN TRANSFORM */
+/* .seg.active{ transform:translate(-50%,-50%) scale(1.6); } */
+
+/* ✅ ONLY VISUAL CHANGE NOW */
 .seg.active{
-  transform:translate(-50%,-50%) scale(1.6);
   opacity:1;
   filter:drop-shadow(0 0 20px #00ffff);
 }
@@ -234,7 +235,7 @@ h1{
 }
 
 /* =========================
-   VIDEO (LIVE PAGE)
+   VIDEO
 ========================= */
 
 video{
