@@ -2,7 +2,6 @@
 <html>
 <head>
 <title>PROFILE</title>
-
 <link rel="stylesheet" href="/styles/main.css">
 
 <script type="module">
@@ -13,46 +12,21 @@ const supabase = createClient(
   "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
 );
 
-let user = null;
+const { data: { user } } = await supabase.auth.getUser();
 
-async function loadProfile(){
-
-  const { data: { user: u } } = await supabase.auth.getUser();
-
-  if(!u){
-    window.location.href = "/auth.html";
-    return;
-  }
-
-  user = u;
-
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", u.id)
-    .single();
-
-  document.getElementById("email").innerText = u.email;
-
-  if(data){
-    document.getElementById("username").innerText = data.username;
-    document.getElementById("avatar").innerText =
-      data.username?.charAt(0).toUpperCase() || "?";
-  } else {
-    document.getElementById("username").innerText = "No profile yet";
-  }
+if(!user){
+  location.href = "/auth.html";
 }
+
+document.getElementById("email").innerText = user.email;
+document.getElementById("username").innerText = user.email.split("@")[0];
+document.getElementById("avatar").innerText =
+  user.email.charAt(0).toUpperCase();
 
 window.logout = async () => {
   await supabase.auth.signOut();
-  window.location.href = "/auth.html";
+  location.href="/auth.html";
 };
-
-window.goHome = () => {
-  window.location.href = "/";
-};
-
-loadProfile();
 </script>
 
 <style>
@@ -67,11 +41,9 @@ loadProfile();
   height:100px;
   border-radius:50%;
   background:#00ffcc;
-  color:black;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:auto;
   font-size:30px;
 }
 </style>
@@ -82,25 +54,20 @@ loadProfile();
 
 <div class="bg"></div>
 
-<div class="topbar">
-  <div class="icon" onclick="goHome()">🏠</div>
-  <div class="icon" onclick="logout()">🚪</div>
-</div>
-
 <div class="container">
 
-  <div class="profile-card">
+<div class="profile-card">
 
-    <h1>PROFILE</h1>
+<h1>PROFILE</h1>
 
-    <div id="avatar" class="avatar">?</div>
+<div id="avatar" class="avatar">?</div>
 
-    <h2 id="username">Loading...</h2>
-    <p id="email">Loading...</p>
+<h2 id="username">Loading...</h2>
+<p id="email">Loading...</p>
 
-    <button class="main-btn" onclick="logout()">LOG OUT</button>
+<button class="main-btn" onclick="logout()">LOG OUT</button>
 
-  </div>
+</div>
 
 </div>
 
