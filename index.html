@@ -1,99 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RB OMNI ELITE</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  font-family:sans-serif;
+}
+
+/* CANVAS */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:1;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+.topbar{
+  position:fixed;
+  top:15px;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  padding:0 16px;
+  z-index:5;
+}
+
+.right-icons{
+  display:flex;
+  gap:10px;
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#00ffcc;
+  backdrop-filter:blur(6px);
+}
+
+/* =========================
+   CORE UI
+========================= */
+.core-ui{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  z-index:3;
+
+  background:radial-gradient(circle,#00ffcc,transparent);
+  box-shadow:0 0 60px #00ffcc;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.core-text{
+  color:#000;
+  font-weight:bold;
+  text-align:center;
+}
+
+/* =========================
+   RING LABELS
+========================= */
+.node{
+  position:fixed;
+  color:#00ffcc;
+  font-size:12px;
+  font-weight:bold;
+  z-index:4;
+}
+
+/* POSITION */
+.n1{ top:18%; left:50%; transform:translateX(-50%); }
+.n2{ top:30%; right:12%; }
+.n3{ top:50%; right:6%; transform:translateY(-50%); }
+.n4{ bottom:28%; right:12%; }
+.n5{ bottom:18%; left:50%; transform:translateX(-50%); }
+.n6{ bottom:28%; left:12%; }
+.n7{ top:50%; left:6%; transform:translateY(-50%); }
+.n8{ top:30%; left:12%; }
+
+/* =========================
+   ACTIVATE BUTTON
+========================= */
+.enter{
+  position:fixed;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5;
+
+  background:#00ffcc;
+  color:#000;
+  padding:14px 30px;
+  border-radius:30px;
+  font-weight:bold;
+  box-shadow:0 0 20px #00ffcc;
+}
+
+/* =========================
+   STATS BAR (🔥 LIKE IMAGE)
+========================= */
+.stats{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  padding:12px;
+  background:rgba(0,0,0,0.8);
+  display:flex;
+  justify-content:space-around;
+  color:#00ffcc;
+  font-size:12px;
+  z-index:5;
+}
+</style>
+
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* =========================
-   SUPABASE
+   SCENE
 ========================= */
-const supabase = createClient(
-  "https://zsancpcyhdidrlezggrl.supabase.co",
-  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
-);
-
-const { data } = await supabase.auth.getSession();
-window.user = data?.session?.user || null;
-
-/* NAV */
-window.goProfile = () => location.href="/profile.html";
-window.goSettings = () => location.href="/settings.html";
-window.goNotifications = () => location.href="/notifications.html";
-
-/* ROUTES */
-const ROUTES = [
-  "/meta.html",
-  "/live.html",
-  "/music.html",
-  "/gaming.html",
-  "/sports.html",
-  "/store.html",
-  "/gallery.html",
-  "/podcast.html",
-  "/store.html",
-  "/messages.html"
-];
-
-/* =========================
-   THREE ENGINE
-========================= */
-
 const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x000000, 6, 20);
 
-/* 🔥 CAMERA (FIXED PERFECTLY FOR MOBILE) */
+/* CAMERA */
 const camera = new THREE.PerspectiveCamera(
   75,
-  window.innerWidth / window.innerHeight,
+  window.innerWidth/window.innerHeight,
   0.1,
   1000
 );
 
-/* 👇 THIS IS THE REAL FIX */
-camera.position.set(0, 0.15, 7); // smooth + centered + not stretched
+camera.position.set(0,0.15,7);
 
 /* RENDERER */
-const renderer = new THREE.WebGLRenderer({
-  alpha: true,
-  antialias: true
-});
-
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
 /* LIGHT */
-scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+scene.add(new THREE.AmbientLight(0xffffff,1.2));
 
-const light = new THREE.PointLight(0x00ffcc, 2.5);
-light.position.set(4, 4, 4);
+const light = new THREE.PointLight(0x00ffcc,2.5);
+light.position.set(4,4,4);
 scene.add(light);
 
-/* CORE (SMALL + CLEAN) */
+/* CORE */
 const core = new THREE.Mesh(
-  new THREE.SphereGeometry(0.4, 32, 32),
+  new THREE.SphereGeometry(0.4,32,32),
   new THREE.MeshStandardMaterial({
-    color: 0x00ffcc,
-    emissive: 0x00ffcc,
-    emissiveIntensity: 2
+    color:0x00ffcc,
+    emissive:0x00ffcc,
+    emissiveIntensity:2
   })
 );
-
 scene.add(core);
 
-/* RING SETTINGS */
-const items = [];
-const radius = 2.2;        // 🔥 smaller = better mobile fit
-const count = 10;
-const step = (Math.PI * 2) / count;
+/* =========================
+   PARTICLES (🔥 THIS FIXES EMPTY LOOK)
+========================= */
+const starGeo = new THREE.BufferGeometry();
+const starCount = 800;
 
-/* 🔥 FINAL CENTER BALANCE */
+const positions = new Float32Array(starCount*3);
+
+for(let i=0;i<starCount;i++){
+  positions[i*3] = (Math.random()-0.5)*25;
+  positions[i*3+1] = (Math.random()-0.5)*25;
+  positions[i*3+2] = (Math.random()-0.5)*25;
+}
+
+starGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+
+const starMat = new THREE.PointsMaterial({
+  color:0x00ffcc,
+  size:0.05
+});
+
+const stars = new THREE.Points(starGeo,starMat);
+scene.add(stars);
+
+/* =========================
+   RING
+========================= */
+const items = [];
+const radius = 2.2;
+const count = 10;
+const step = (Math.PI*2)/count;
 const yOffset = -0.1;
 
-for (let i = 0; i < count; i++) {
+for(let i=0;i<count;i++){
   const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.18, 16, 16),
+    new THREE.SphereGeometry(0.18,16,16),
     new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0x00ffcc,
-      emissiveIntensity: 1
+      color:0xffffff,
+      emissive:0x00ffcc,
+      emissiveIntensity:1
     })
   );
 
@@ -107,101 +230,104 @@ let velocity = 0;
 let rotation = 0;
 let dragging = false;
 
-function animate() {
+function animate(){
   requestAnimationFrame(animate);
 
   rotation += velocity;
 
-  if (!dragging) {
+  if(!dragging){
     velocity *= 0.92;
 
-    if (Math.abs(velocity) < 0.001) {
-      velocity = 0;
-      rotation = Math.round(rotation / step) * step;
+    if(Math.abs(velocity)<0.001){
+      velocity=0;
+      rotation=Math.round(rotation/step)*step;
     }
   }
 
-  let active = 0;
-  let best = -Infinity;
+  let best=-Infinity;
 
-  items.forEach((m, i) => {
-    const angle = i * step + rotation;
+  items.forEach((m,i)=>{
+    const angle=i*step+rotation;
 
-    /* 🔥 PERFECT ORBIT */
-    m.position.x = Math.cos(angle) * radius;
-    m.position.y = Math.sin(angle) * 0.55 + yOffset; // 🔥 FIX TOP BALANCE
-    m.position.z = Math.sin(angle) * radius;
+    m.position.x=Math.cos(angle)*radius;
+    m.position.y=Math.sin(angle)*0.55+yOffset;
+    m.position.z=Math.sin(angle)*radius;
 
-    const depth = (m.position.z + radius) / (radius * 2);
+    const depth=(m.position.z+radius)/(radius*2);
 
-    /* 🔥 SMOOTH SIZE */
-    const scale = 0.5 + depth * 0.35;
-    m.scale.set(scale, scale, scale);
+    const scale=0.5+depth*0.35;
+    m.scale.set(scale,scale,scale);
 
-    m.material.emissiveIntensity = 0.5 + depth * 1;
-
-    if (m.position.z > best) {
-      best = m.position.z;
-      active = i;
-    }
+    m.material.emissiveIntensity=0.5+depth*1;
   });
 
-  window.activeIndex = active;
+  core.rotation.y+=0.01;
+  stars.rotation.y+=0.0007;
 
-  core.rotation.y += 0.01;
-
-  renderer.render(scene, camera);
+  renderer.render(scene,camera);
 }
 animate();
 
-/* CONTROLS */
-let lastX = 0;
+/* TOUCH */
+let lastX=0;
 
-window.addEventListener("touchstart", e => {
-  dragging = true;
-  lastX = e.touches[0].clientX;
+window.addEventListener("touchstart",e=>{
+  dragging=true;
+  lastX=e.touches[0].clientX;
 });
 
-window.addEventListener("touchmove", e => {
-  const dx = e.touches[0].clientX - lastX;
-  velocity = dx * 0.002;
-  lastX = e.touches[0].clientX;
+window.addEventListener("touchmove",e=>{
+  const dx=e.touches[0].clientX-lastX;
+  velocity=dx*0.002;
+  lastX=e.touches[0].clientX;
 });
 
-window.addEventListener("touchend", () => {
-  dragging = false;
-});
-
-/* CLICK */
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-window.addEventListener("click", e => {
-  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const hit = raycaster.intersectObjects(items);
-
-  if (hit.length) {
-    location.href = ROUTES[hit[0].object.userData.index];
-  }
-});
-
-/* ENTER */
-window.enter = () => {
-  if (!window.user) {
-    location.href = "/auth.html";
-    return;
-  }
-  location.href = ROUTES[window.activeIndex];
-};
+window.addEventListener("touchend",()=>dragging=false);
 
 /* RESIZE */
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+window.addEventListener("resize",()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth,window.innerHeight);
 });
 </script>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="icon">👤</div>
+  <div class="right-icons">
+    <div class="icon">🔔</div>
+    <div class="icon">⚙️</div>
+  </div>
+</div>
+
+<!-- CORE UI -->
+<div class="core-ui">
+  <div class="core-text">RICH<br>BIZNESS</div>
+</div>
+
+<!-- RING LABELS -->
+<div class="node n1">LIVE</div>
+<div class="node n2">MUSIC</div>
+<div class="node n3">GAMING</div>
+<div class="node n4">STORE</div>
+<div class="node n5">META</div>
+<div class="node n6">SPORTS</div>
+<div class="node n7">UPLOAD</div>
+<div class="node n8">GALLERY</div>
+
+<!-- BUTTON -->
+<div class="enter">ACTIVATE</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div>$10,890</div>
+  <div>28,450 pts</div>
+  <div>LEGEND</div>
+  <div>1,245 online</div>
+</div>
+
+</body>
+</html>
