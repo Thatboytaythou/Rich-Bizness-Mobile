@@ -12,50 +12,40 @@ const supabase = createClient(
   "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
 );
 
+const { data } = await supabase.auth.getSession();
+if(data?.session) location.href="/";
+
 window.login = async ()=>{
-  const email = emailEl.value;
-  const password = passEl.value;
+  const email=document.getElementById("email").value;
+  const password=document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if(error){
-    alert(error.message);
-    return;
-  }
+  const { error } = await supabase.auth.signInWithPassword({email,password});
+  if(error){ alert(error.message); return; }
 
   location.href="/";
 };
 
 window.signup = async ()=>{
-  const email = emailEl.value;
-  const password = passEl.value;
+  const email=document.getElementById("email").value;
+  const password=document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({email,password});
+  if(error){ alert(error.message); return; }
 
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  alert("Signup success 🔥 now login");
+  alert("Signup successful 🔥");
 };
-
-const emailEl = document.getElementById("email");
-const passEl = document.getElementById("password");
 </script>
 </head>
 
 <body>
-
 <div class="bg"></div>
 
 <div class="container">
   <h1>TAP IN 🔥</h1>
   <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-
-  <button class="main-btn" onclick="login()">LOGIN</button>
-  <button class="secondary-btn" onclick="signup()">SIGN UP</button>
+  <input id="password" type="password">
+  <button onclick="login()">LOGIN</button>
+  <button onclick="signup()">SIGN UP</button>
 </div>
 
 </body>
