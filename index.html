@@ -17,6 +17,8 @@ const { data } = await supabase.auth.getSession();
 window.user = data?.session?.user || null;
 
 window.goProfile = () => location.href="/profile.html";
+window.goSettings = () => location.href="/settings.html";
+window.goNotifications = () => location.href="/notifications.html";
 </script>
 </head>
 
@@ -24,8 +26,18 @@ window.goProfile = () => location.href="/profile.html";
 
 <div class="bg"></div>
 
+<!-- 🔥 TOP BAR -->
 <div class="topbar">
-  <div class="icon" onclick="goProfile()">👤</div>
+
+  <!-- LEFT -->
+  <div class="icon left" onclick="goProfile()">👤</div>
+
+  <!-- RIGHT -->
+  <div class="right-icons">
+    <div class="icon" onclick="goNotifications()">🔔</div>
+    <div class="icon" onclick="goSettings()">⚙️</div>
+  </div>
+
 </div>
 
 <div class="app">
@@ -39,27 +51,60 @@ window.goProfile = () => location.href="/profile.html";
 <div class="screen" id="screen">META</div>
 
 <script>
-const ITEMS = ["🌐","📡","🎵","🎮","🏆","🛒"];
-const LABELS = ["META","LIVE","MUSIC","GAMING","SPORTS","STORE"];
-const ROUTES = ["/meta.html","/live.html","/music.html","/gaming.html","/sports.html","/store.html"];
+
+/* =========================
+   🔥 10 SECTIONS (UPDATED)
+========================= */
+
+const ITEMS = [
+  "🌐","📡","🎵","🎮","🏆",
+  "🛒","🖼️","🎙️","🛒","💬"
+];
+
+const LABELS = [
+  "META","LIVE","MUSIC","GAMING","SPORTS",
+  "STORE","GALLERY","PODCAST","STORE","MESSAGES"
+];
+
+const ROUTES = [
+  "/meta.html",
+  "/live.html",
+  "/music.html",
+  "/gaming.html",
+  "/sports.html",
+  "/store.html",
+  "/gallery.html",
+  "/podcast.html",
+  "/store.html", // 🔥 replaced PROFILE slot
+  "/messages.html"
+];
 
 const wheel = document.getElementById("wheel");
 const screen = document.getElementById("screen");
 const enterBtn = document.getElementById("enterBtn");
 
+/* =========================
+   PHYSICS ENGINE
+========================= */
+
 let rot = 0;
 let vel = 0;
+let isTouching = false;
 
 const step = (Math.PI * 2) / ITEMS.length;
-const radius = 110;
+const radius = 130;
 
-/* BUILD WHEEL */
+/* =========================
+   BUILD WHEEL
+========================= */
+
 ITEMS.forEach((icon,i)=>{
   const el = document.createElement("div");
   el.className = "seg";
   el.innerText = icon;
 
   const angle = i * step - Math.PI/2;
+
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
 
@@ -75,7 +120,10 @@ ITEMS.forEach((icon,i)=>{
   wheel.appendChild(el);
 });
 
-/* UPDATE STATE */
+/* =========================
+   UPDATE
+========================= */
+
 function update(){
   wheel.style.transform = `rotate(${rot}rad)`;
 
@@ -91,15 +139,17 @@ function update(){
   return index;
 }
 
-/* LOOP + SNAP */
+/* =========================
+   LOOP
+========================= */
+
 function loop(){
   rot += vel;
-  vel *= 0.92;
+  vel *= 0.94;
 
-  // 🔥 snap when slowing down
-  if(Math.abs(vel) < 0.002){
+  if(!isTouching && Math.abs(vel) < 0.002){
     const snap = Math.round(rot / step) * step;
-    rot += (snap - rot) * 0.12;
+    rot += (snap - rot) * 0.15;
   }
 
   update();
@@ -107,19 +157,35 @@ function loop(){
 }
 loop();
 
-/* TOUCH CONTROLS */
+/* =========================
+   TOUCH
+========================= */
+
 let startX = 0;
+let lastX = 0;
 
 window.addEventListener("touchstart", e=>{
+  isTouching = true;
   startX = e.touches[0].clientX;
+  lastX = startX;
 });
 
 window.addEventListener("touchmove", e=>{
-  const dx = e.touches[0].clientX - startX;
-  vel = dx * 0.0005;
+  const x = e.touches[0].clientX;
+  const dx = x - lastX;
+
+  vel = dx * 0.002;
+  lastX = x;
 });
 
-/* ENTER BUTTON */
+window.addEventListener("touchend", ()=>{
+  isTouching = false;
+});
+
+/* =========================
+   ENTER
+========================= */
+
 enterBtn.onclick = ()=>{
   if(!window.user){
     window.location.href="/auth.html";
@@ -129,6 +195,7 @@ enterBtn.onclick = ()=>{
   const index = update();
   window.location.href = ROUTES[index];
 };
+
 </script>
 
 </body>
