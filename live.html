@@ -3,19 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>LIVE</title>
 
 <link rel="stylesheet" href="/styles/main.css">
-
 </head>
 
 <body>
 
 <div class="bg"></div>
 
-<!-- 🔥 TOP NAV -->
 <div class="topbar">
+  <div id="userEmail" style="font-size:12px;opacity:.7;"></div>
   <div class="icon" onclick="goProfile()">👤</div>
   <div class="icon" onclick="goSettings()">⚙️</div>
 </div>
@@ -24,31 +22,29 @@
 
   <h1>LIVE</h1>
 
-  <button class="main-btn">
-    GO LIVE 🔴
-  </button>
-
+  <button class="main-btn">GO LIVE 🔴</button>
   <br>
 
-  <button class="secondary-btn" onclick="goBack()">
-    GO BACK
-  </button>
+  <button class="secondary-btn" onclick="goBack()">GO BACK</button>
 
 </div>
 
 <script>
 
-function goBack(){
-  window.location.href = "/";
+// 🔐 USER CHECK
+const user = JSON.parse(localStorage.getItem("rb_user"));
+
+if(!user){
+  window.location.href = "/auth.html";
 }
 
-function goProfile(){
-  window.location.href = "/profile.html";
-}
+// 👤 SHOW USER
+document.getElementById("userEmail").innerText = user.email;
 
-function goSettings(){
-  window.location.href = "/setting.html";
-}
+// NAV
+function goBack(){ window.location.href = "/"; }
+function goProfile(){ window.location.href = "/profile.html"; }
+function goSettings(){ window.location.href = "/setting.html"; }
 
 </script>
 
