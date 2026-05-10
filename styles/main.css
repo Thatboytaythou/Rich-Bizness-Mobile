@@ -5,14 +5,16 @@ html,body{
   background:black;
 }
 
-/* BACKGROUND */
+/* BACKGROUND IMAGE */
 .bg{
   position:fixed;
   inset:0;
-  z-index:1;
+  z-index:0;
+
   background:
     radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
-    url("/images/background-v2.png") center/cover no-repeat;
+    url("/images/brand/19FB5229-30DD-40B0-9404-5136C27FEF6A.png")
+    center/cover no-repeat;
 }
 
 /* CANVAS */
@@ -22,10 +24,10 @@ canvas{
   left:0;
   width:100%;
   height:100%;
-  z-index:2;
+  z-index:1;
 }
 
-/* TOPBAR */
+/* UI */
 .topbar{
   position:fixed;
   top:10px;
@@ -57,14 +59,15 @@ canvas{
 /* BUTTON */
 .enter{
   position:fixed;
-  bottom:40px;
+  bottom:50px;
   left:50%;
   transform:translateX(-50%);
-  z-index:6;
+  z-index:5;
 
   background:#00ffcc;
   color:#000;
   padding:15px 30px;
   border-radius:30px;
   font-weight:bold;
+  box-shadow:0 0 20px #00ffcc;
 }
