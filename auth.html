@@ -1,89 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Rich Bizness — Auth</title>
-
-<style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#000;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-}
-
-.box{
-  background:#111;
-  padding:30px;
-  border-radius:12px;
-  width:300px;
-  box-shadow:0 0 20px #00ffcc;
-}
-
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:8px;
-}
-
-button{
-  background:#00ffcc;
-  color:#000;
-  font-weight:bold;
-}
-</style>
+  <title>Login</title>
 </head>
+<body style="background:black;color:#00ffcc;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
 
-<body>
+<h1>RICH BIZNESS LOGIN</h1>
 
-<div class="box">
-  <h2>Login</h2>
+<input id="email" placeholder="Email" style="margin:10px;padding:10px;">
+<input id="password" type="password" placeholder="Password" style="margin:10px;padding:10px;">
 
-  <input id="email" placeholder="Email"/>
-  <input id="password" type="password" placeholder="Password"/>
+<button onclick="login()" style="padding:10px 20px;">LOGIN</button>
 
-  <button id="login">Sign In</button>
-  <button id="signup">Sign Up</button>
-
-  <p id="status"></p>
-</div>
-
-<script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const supabase = createClient(
-  "https://zsancpcyhdidrlezggrl.supabase.co",
-  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
-);
-
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const status = document.getElementById("status");
-
-document.getElementById("login").onclick = async () => {
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value
-  });
-
-  status.textContent = error ? error.message : "Logged in ✅";
-};
-
-document.getElementById("signup").onclick = async () => {
-  const { error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value
-  });
-
-  status.textContent = error ? error.message : "Account created ✅";
-};
+<script>
+function login(){
+  alert("Login coming next step");
+}
 </script>
 
 </body>
