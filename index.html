@@ -21,13 +21,12 @@ const supabase = createClient(
 const { data } = await supabase.auth.getSession();
 window.user = data?.session?.user || null;
 
+/* NAV */
 window.goProfile = () => location.href="/profile.html";
 window.goSettings = () => location.href="/settings.html";
 window.goNotifications = () => location.href="/notifications.html";
 
-/* =========================
-   ROUTES
-========================= */
+/* ROUTES */
 const ROUTES = [
   "/meta.html",
   "/live.html",
@@ -42,8 +41,9 @@ const ROUTES = [
 ];
 
 /* =========================
-   THREE SETUP
+   THREE CORE
 ========================= */
+
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -53,57 +53,60 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-// 🔥 FIXED CAMERA
-camera.position.set(0, 0, 7);
+camera.position.set(0,0,7);
 
-const renderer = new THREE.WebGLRenderer({
-  alpha:true,
-  antialias:true
-});
-
+/* 🔥 FIXED RENDERER */
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0); // keeps background but not washed
 document.body.appendChild(renderer.domElement);
 
 /* =========================
-   LIGHT
+   LIGHTING (BOOSTED)
 ========================= */
-const light = new THREE.PointLight(0x00ffcc, 3);
-light.position.set(5,5,5);
-scene.add(light);
+
+const light1 = new THREE.PointLight(0x00ffcc, 3);
+light1.position.set(5,5,5);
+
+const light2 = new THREE.PointLight(0x00ffcc, 2);
+light2.position.set(-5,-5,5);
+
+scene.add(light1, light2);
 
 /* =========================
-   CORE (CENTER)
+   CORE
 ========================= */
-const coreGeo = new THREE.SphereGeometry(1.3,32,32);
-const coreMat = new THREE.MeshStandardMaterial({
-  color:0x00ffcc,
-  emissive:0x00ffcc,
-  emissiveIntensity:2
-});
 
-const core = new THREE.Mesh(coreGeo, coreMat);
+const core = new THREE.Mesh(
+  new THREE.SphereGeometry(1.3,32,32),
+  new THREE.MeshStandardMaterial({
+    color:0x00ffcc,
+    emissive:0x00ffcc,
+    emissiveIntensity:2
+  })
+);
+
 scene.add(core);
 
 /* =========================
-   ITEMS (REAL 3D RING)
+   RING NODES
 ========================= */
+
 const items = [];
 const radius = 3.2;
 const count = 10;
 
 for(let i=0;i<count;i++){
-  const geo = new THREE.SphereGeometry(0.35,16,16);
-
-  const mat = new THREE.MeshStandardMaterial({
-    color:0xffffff,
-    emissive:0x00ffcc,
-    emissiveIntensity:0.6
-  });
-
-  const mesh = new THREE.Mesh(geo, mat);
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.35,16,16),
+    new THREE.MeshStandardMaterial({
+      color:0xffffff,
+      emissive:0x00ffcc,
+      emissiveIntensity:1
+    })
+  );
 
   mesh.userData.index = i;
-
   scene.add(mesh);
   items.push(mesh);
 }
@@ -111,6 +114,7 @@ for(let i=0;i<count;i++){
 /* =========================
    MOTION ENGINE
 ========================= */
+
 let velocity = 0;
 let rotation = 0;
 let isTouching = false;
@@ -121,9 +125,9 @@ function animate(){
   rotation += velocity;
   velocity *= 0.92;
 
-  // 🔥 snap lock (NO DRIFT)
+  const step = (Math.PI*2)/count;
+
   if(!isTouching && Math.abs(velocity) < 0.002){
-    const step = (Math.PI*2)/count;
     const snap = Math.round(rotation / step) * step;
     rotation += (snap - rotation) * 0.1;
   }
@@ -134,18 +138,16 @@ function animate(){
   items.forEach((m,i)=>{
     const angle = (i/count)*Math.PI*2 + rotation;
 
-    // 🔥 TRUE 3D POSITIONS
     m.position.x = Math.cos(angle) * radius;
     m.position.y = Math.sin(angle) * 1.2;
     m.position.z = Math.sin(angle) * radius;
 
-    // 🔥 DEPTH SCALE
-    const depth = (m.position.z + radius) / (radius * 2);
-    const scale = 0.7 + depth * 0.9;
+    /* 🔥 DEPTH VISUAL */
+    const depth = (m.position.z + radius) / (radius*2);
+    const scale = 0.7 + depth * 1.2;
     m.scale.set(scale, scale, scale);
 
-    // 🔥 GLOW BASED ON FRONT
-    m.material.emissiveIntensity = 0.4 + depth * 1.5;
+    m.material.emissiveIntensity = 0.5 + depth * 2;
 
     if(m.position.z > best){
       best = m.position.z;
@@ -164,6 +166,7 @@ animate();
 /* =========================
    TOUCH CONTROL
 ========================= */
+
 let lastX = 0;
 
 window.addEventListener("touchstart", e=>{
@@ -172,11 +175,9 @@ window.addEventListener("touchstart", e=>{
 });
 
 window.addEventListener("touchmove", e=>{
-  const x = e.touches[0].clientX;
-  const dx = x - lastX;
-
+  const dx = e.touches[0].clientX - lastX;
   velocity = dx * 0.003;
-  lastX = x;
+  lastX = e.touches[0].clientX;
 });
 
 window.addEventListener("touchend", ()=>{
@@ -184,34 +185,34 @@ window.addEventListener("touchend", ()=>{
 });
 
 /* =========================
-   CLICK DETECTION
+   CLICK
 ========================= */
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-window.addEventListener("click", (event)=>{
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+window.addEventListener("click", e=>{
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
 
-  const intersects = raycaster.intersectObjects(items);
+  const hit = raycaster.intersectObjects(items);
 
-  if(intersects.length > 0){
-    const i = intersects[0].object.userData.index;
-    location.href = ROUTES[i];
+  if(hit.length){
+    location.href = ROUTES[hit[0].object.userData.index];
   }
 });
 
 /* =========================
-   ENTER BUTTON
+   ENTER
 ========================= */
+
 window.enter = ()=>{
   if(!window.user){
     location.href="/auth.html";
     return;
   }
-
   location.href = ROUTES[window.activeIndex];
 };
 </script>
