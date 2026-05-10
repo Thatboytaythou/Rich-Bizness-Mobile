@@ -1,0 +1,8 @@
+{
+  "name": "rich-bizness-mobile",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "livekit-server-sdk": "^2.13.3"
+  }
+}
