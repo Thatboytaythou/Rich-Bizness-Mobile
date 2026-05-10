@@ -26,13 +26,30 @@
 
 <script>
 
-/* USER */
-function getUser(){
+/* =========================
+   USER FIX (VERY IMPORTANT)
+========================= */
+function getUsername(){
   const raw = localStorage.getItem("rb_user");
-  if(!raw) return null;
-  return JSON.parse(raw);
+  if(!raw) return "guest";
+
+  try {
+    const user = JSON.parse(raw);
+
+    // 🔥 FIX: you were using user.username (doesn't exist)
+    const base = user.email || "guest";
+
+    // 🔥 CLEAN FOR LIVEKIT (no weird characters)
+    return base.replace(/[^a-zA-Z0-9_-]/g,"");
+
+  } catch {
+    return "guest";
+  }
 }
 
+/* =========================
+   STATE
+========================= */
 let room = null;
 let isLive = false;
 
@@ -40,61 +57,94 @@ const videoEl = document.getElementById("video");
 const statusEl = document.getElementById("status");
 const btn = document.getElementById("liveBtn");
 
+/* =========================
+   TOKEN
+========================= */
 async function getToken(username){
   const res = await fetch(`/api/livekit-token?room=richbiz&username=${username}`);
   const data = await res.json();
-  if(!data.token) throw new Error("No token");
+
+  if(!data.token){
+    throw new Error("Token not returned from API");
+  }
+
   return data.token;
 }
 
+/* =========================
+   GO LIVE
+========================= */
 btn.onclick = async () => {
 
   if(!isLive){
 
-    const user = getUser();
-    if(!user){
-      location.href="/auth.html";
-      return;
-    }
-
     try {
-      const token = await getToken(user.username);
 
+      const username = getUsername();
+
+      // 🔥 GET TOKEN
+      const token = await getToken(username);
+
+      // 🔥 CREATE ROOM
       room = new LivekitClient.Room();
 
+      // 🔥 CONNECT
       await room.connect(
         "wss://rich-bizness-mobile-zvq5cojk.livekit.cloud",
         token
       );
 
-      const tracks = await LivekitClient.createLocalTracks({
-        audio:true,
-        video:true
+      // 🔥 iPHONE SAFE CAMERA ACCESS
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
       });
 
-      const videoTrack = tracks.find(t=>t.kind==="video");
-      videoTrack.attach(videoEl);
+      // show preview
+      videoEl.srcObject = stream;
 
-      for(const t of tracks){
-        await room.localParticipant.publishTrack(t);
+      // 🔥 FIXED TRACK PUBLISH (THIS WAS BREAKING YOU)
+      for (const track of stream.getTracks()) {
+
+        if(track.kind === "video"){
+          await room.localParticipant.publishTrack(
+            new LivekitClient.LocalVideoTrack(track)
+          );
+        }
+
+        if(track.kind === "audio"){
+          await room.localParticipant.publishTrack(
+            new LivekitClient.LocalAudioTrack(track)
+          );
+        }
       }
 
-      statusEl.innerText="LIVE 🔴";
-      btn.innerText="END STREAM ⛔";
-      isLive=true;
+      statusEl.innerText = "LIVE 🔴";
+      btn.innerText = "END STREAM ⛔";
+      isLive = true;
 
     } catch(err){
-      console.error(err);
-      alert("Stream failed");
+
+      console.error("LIVE ERROR:", err);
+
+      // 🔥 REAL ERROR MESSAGE (IMPORTANT)
+      alert("Stream failed: " + err.message);
+
     }
 
   } else {
-    room.disconnect();
-    videoEl.srcObject=null;
 
-    statusEl.innerText="OFFLINE";
-    btn.innerText="GO LIVE 🔴";
-    isLive=false;
+    // 🔥 CLEAN DISCONNECT
+    if(room){
+      room.disconnect();
+      room = null;
+    }
+
+    videoEl.srcObject = null;
+
+    statusEl.innerText = "OFFLINE";
+    btn.innerText = "GO LIVE 🔴";
+    isLive = false;
   }
 
 };
