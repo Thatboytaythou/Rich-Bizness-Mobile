@@ -76,3 +76,36 @@ h1{
 .secondary-btn:active{
   transform:scale(.95);
 }
+
+/* =========================
+   TOP NAV (GLOBAL)
+========================= */
+
+.topbar{
+  position:fixed;
+  top:15px;
+  right:15px;
+  display:flex;
+  gap:12px;
+  z-index:100;
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:rgba(0,255,200,.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#00ffcc;
+  font-size:18px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 10px rgba(0,255,200,.3);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.icon:active{
+  transform:scale(.9);
+}
