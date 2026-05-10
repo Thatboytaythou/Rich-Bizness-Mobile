@@ -31,16 +31,13 @@
 
 <body>
 
-<!-- 🔥 BACKGROUND -->
 <div class="bg"></div>
 
-<!-- 🔥 TOP BAR -->
 <div class="topbar">
   <div class="icon" onclick="goProfile()">👤</div>
   <div class="icon" onclick="goSettings()">⚙️</div>
 </div>
 
-<!-- 🔥 OMNI CORE -->
 <div class="app">
   <div class="omni">
     <div class="ring"></div>
@@ -49,23 +46,17 @@
   </div>
 </div>
 
-<!-- 🔥 LABEL -->
 <div class="screen" id="screen">META</div>
 
 <script>
 
 /* =========================
-   USER (FIXED)
+   USER
 ========================= */
 function getUser(){
   const raw = localStorage.getItem("rb_user");
   if(!raw) return null;
-
-  try{
-    return JSON.parse(raw);
-  }catch{
-    return null;
-  }
+  try { return JSON.parse(raw); } catch { return null; }
 }
 
 /* =========================
@@ -104,7 +95,7 @@ const step = (Math.PI * 2) / ITEMS.length;
 const radius = 120;
 
 /* =========================
-   BUILD WHEEL
+   BUILD WHEEL (FIXED)
 ========================= */
 ITEMS.forEach((icon,i)=>{
 
@@ -113,6 +104,9 @@ ITEMS.forEach((icon,i)=>{
   el.innerText = icon;
 
   const angle = i * step - Math.PI/2;
+
+  el.dataset.angle = angle; // 🔥 key fix
+
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
 
@@ -129,7 +123,7 @@ ITEMS.forEach((icon,i)=>{
 });
 
 /* =========================
-   UPDATE
+   UPDATE (REAL FIX)
 ========================= */
 function update(){
 
@@ -139,12 +133,27 @@ function update(){
   if(index < 0) index += ITEMS.length;
 
   document.querySelectorAll(".seg").forEach((s,i)=>{
-    s.classList.toggle("active", i === index);
+
+    const baseAngle = parseFloat(s.dataset.angle);
+
+    const x = Math.cos(baseAngle) * radius;
+    const y = Math.sin(baseAngle) * radius;
+
+    const isActive = i === index;
+
+    const rotateFix = -rot;
+
+    s.style.transform = `
+      translate(-50%,-50%)
+      translate(${x}px, ${y}px)
+      rotate(${rotateFix}rad)
+      scale(${isActive ? 1.6 : 1})
+    `;
+
+    s.style.opacity = isActive ? 1 : 0.5;
   });
 
   screen.innerText = LABELS[index];
-
-  return index;
 }
 
 /* =========================
@@ -167,7 +176,7 @@ function loop(){
 loop();
 
 /* =========================
-   TOUCH CONTROL (FIXED)
+   TOUCH
 ========================= */
 let startX = 0;
 
@@ -181,7 +190,7 @@ window.addEventListener("touchmove", e=>{
 });
 
 /* =========================
-   ENTER BUTTON
+   ENTER
 ========================= */
 enterBtn.onclick = ()=>{
 
@@ -201,16 +210,11 @@ enterBtn.onclick = ()=>{
 /* =========================
    NAV
 ========================= */
-function goProfile(){
-  location.href="/profile.html";
-}
-
-function goSettings(){
-  location.href="/setting.html";
-}
+function goProfile(){ location.href="/profile.html"; }
+function goSettings(){ location.href="/setting.html"; }
 
 /* =========================
-   WELCOME (FIXED)
+   WELCOME
 ========================= */
 const user = getUser();
 
