@@ -12,9 +12,17 @@ html,body{
   position:fixed;
   inset:0;
   background:
-    radial-gradient(circle at center, rgba(0,255,200,.25), transparent 60%),
+    radial-gradient(circle at center, rgba(0,255,200,.15), transparent 70%),
     url("/images/background-v2.png") center/cover no-repeat;
   z-index:0;
+  opacity:0.55; /* 🔥 stops overpowering */
+}
+
+/* CANVAS (🔥 FIXED LAYER) */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:2;
 }
 
 /* TOPBAR */
