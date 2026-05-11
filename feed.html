@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>Rich Bizness LLC — Feed</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+      background:#020402;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+      overflow-x:hidden;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 50% 18%,rgba(145,255,89,.16),transparent 28%),
+        radial-gradient(circle at 50% 70%,rgba(80,255,70,.1),transparent 32%),
+        #020402;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
+        radial-gradient(circle at center,transparent 38%,rgba(0,0,0,.84) 100%);
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:
+        calc(18px + env(safe-area-inset-top))
+        16px
+        calc(110px + env(safe-area-inset-bottom));
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      line-height:.9;
+      font-family:Georgia,"Times New Roman",serif;
+    }
+
+    .brand strong{
+      font-size:32px;
+      letter-spacing:.05em;
+      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 12px rgba(129,255,82,.45));
+    }
+
+    .brand small{
+      color:#ffe58a;
+      letter-spacing:.22em;
+      margin-top:5px;
+      font-size:12px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+    }
+
+    .circle-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      border:1px solid rgba(255,219,123,.52);
+      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
+      color:#ffe58a;
+      font-size:21px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+
+    .hero{
+      border:1px solid rgba(151,255,97,.22);
+      border-radius:30px;
+      padding:20px;
+      background:
+        linear-gradient(145deg,rgba(12,22,12,.92),rgba(0,0,0,.72)),
+        radial-gradient(circle at top,rgba(132,255,80,.18),transparent 55%);
+      box-shadow:0 0 45px rgba(0,0,0,.8),0 0 32px rgba(122,255,77,.14);
+      margin-bottom:16px;
+    }
+
+    .hero-kicker{
+      color:#9dff67;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.16em;
+      margin-bottom:8px;
+    }
+
+    .hero h1{
+      font-size:34px;
+      line-height:.95;
+      font-family:Georgia,"Times New Roman",serif;
+      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .hero p{
+      color:#dfffd2;
+      margin-top:10px;
+      font-size:14px;
+      line-height:1.45;
+      max-width:680px;
+    }
+
+    .composer{
+      border:1px solid rgba(255,219,123,.32);
+      border-radius:26px;
+      padding:14px;
+      background:rgba(0,0,0,.56);
+      backdrop-filter:blur(18px);
+      box-shadow:0 0 32px rgba(0,0,0,.72);
+      margin-bottom:16px;
+    }
+
+    .composer-head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .avatar{
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:#9dff67;
+      background:radial-gradient(circle,rgba(120,255,80,.28),rgba(0,0,0,.78));
+      border:1px solid rgba(151,255,97,.34);
+      box-shadow:0 0 18px rgba(120,255,80,.22);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .composer-meta{
+      flex:1;
+      min-width:0;
+    }
+
+    .composer-meta strong{
+      display:block;
+      font-size:15px;
+    }
+
+    .composer-meta small{
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.12em;
+    }
+
+    textarea{
+      width:100%;
+      min-height:94px;
+      resize:none;
+      border:none;
+      outline:none;
+      color:#fff;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:14px;
+      font-size:16px;
+      line-height:1.35;
+    }
+
+    textarea::placeholder{
+      color:rgba(223,255,210,.52);
+    }
+
+    .composer-grid{
+      display:grid;
+      grid-template-columns:1fr 150px 120px;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .input{
+      width:100%;
+      border:none;
+      outline:none;
+      color:#fff;
+      border-radius:16px;
+      padding:13px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      font-size:14px;
+    }
+
+    .post-btn{
+      border:none;
+      outline:none;
+      border-radius:16px;
+      color:#081008;
+      font-weight:950;
+      letter-spacing:.08em;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 22px rgba(128,255,80,.32);
+    }
+
+    .post-btn:disabled{
+      opacity:.45;
+      filter:grayscale(1);
+    }
+
+    .feed-status{
+      margin:12px 2px;
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:850;
+      min-height:18px;
+    }
+
+    .feed-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .post-card{
+      border:1px solid rgba(151,255,97,.18);
+      border-radius:28px;
+      background:
+        linear-gradient(145deg,rgba(11,17,11,.9),rgba(0,0,0,.72)),
+        radial-gradient(circle at top left,rgba(132,255,80,.12),transparent 48%);
+      box-shadow:0 0 36px rgba(0,0,0,.78),0 0 24px rgba(128,255,80,.09);
+      padding:15px;
+      overflow:hidden;
+    }
+
+    .post-head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .post-user{
+      flex:1;
+      min-width:0;
+    }
+
+    .post-user strong{
+      display:block;
+      font-size:15px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .post-user small{
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.08em;
+    }
+
+    .post-body{
+      color:#f4fff0;
+      font-size:15px;
+      line-height:1.45;
+      white-space:pre-wrap;
+      margin-bottom:12px;
+    }
+
+    .post-media{
+      width:100%;
+      max-height:420px;
+      border-radius:20px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:12px;
+      background:#000;
+    }
+
+    .post-actions{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+    }
+
+    .action-btn{
+      border:none;
+      outline:none;
+      border-radius:16px;
+      padding:11px 8px;
+      color:#dfffd2;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.06);
+      font-weight:850;
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+
+    .action-btn.is-liked{
+      color:#9dff67;
+      box-shadow:0 0 18px rgba(128,255,80,.24);
+      border-color:rgba(151,255,97,.45);
+    }
+
+    .empty{
+      text-align:center;
+      color:#dfffd2;
+      padding:34px 18px;
+      border:1px dashed rgba(151,255,97,.26);
+      border-radius:26px;
+      background:rgba(0,0,0,.34);
+    }
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      transform:translateX(-50%);
+      z-index:40;
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:1px;
+      padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));
+      border-top:1px solid rgba(130,255,84,.16);
+      backdrop-filter:blur(18px);
+    }
+
+    .nav-item{
+      color:#dfffd2;
+      text-decoration:none;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      font-weight:850;
+      padding:8px 4px;
+      border-radius:14px;
+    }
+
+    .nav-item span{
+      display:block;
+      font-size:19px;
+      margin-bottom:3px;
+    }
+
+    .nav-item.active{
+      color:#9dff67;
+      background:rgba(128,255,80,.1);
+      box-shadow:inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    @media(max-width:640px){
+      .page{
+        padding-left:14px;
+        padding-right:14px;
+      }
+
+      .brand strong{
+        font-size:28px;
+      }
+
+      .hero{
+        border-radius:26px;
+      }
+
+      .hero h1{
+        font-size:30px;
+      }
+
+      .composer-grid{
+        grid-template-columns:1fr;
+      }
+
+      .post-actions{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <header class="topbar">
+      <a class="circle-btn" href="/index.html" aria-label="Back Home">‹</a>
+
+      <div class="brand" aria-label="Rich Bizness LLC">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
+
+      <div class="top-actions">
+        <a class="circle-btn" href="/notifications.html" aria-label="Notifications">🔔</a>
+        <a class="circle-btn" href="/profile.html" aria-label="Profile">◈</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-kicker">REALTIME SOCIAL FEED</div>
+      <h1>Rich Feed</h1>
+      <p>
+        Post updates, drops, moments, music, clips, sports talk, gaming highlights, and creator moves.
+        This section is built to connect directly to Supabase realtime.
+      </p>
+    </section>
+
+    <section class="composer" aria-label="Create Feed Post">
+      <div class="composer-head">
+        <div class="avatar" id="composerAvatar">◈</div>
+
+        <div class="composer-meta">
+          <strong id="composerName">Thatboytaythou</strong>
+          <small id="composerStatus">SIGNED IN CREATOR</small>
+        </div>
+      </div>
+
+      <textarea
+        id="postBody"
+        placeholder="What’s happening in Rich Bizness?"
+        maxlength="2000"
+      ></textarea>
+
+      <div class="composer-grid">
+        <input
+          class="input"
+          id="mediaUrl"
+          type="url"
+          placeholder="Optional media URL"
+        />
+
+        <select class="input" id="mediaType">
+          <option value="text">Text</option>
+          <option value="image">Image</option>
+          <option value="video">Video</option>
+        </select>
+
+        <button class="post-btn" id="postBtn" type="button">
+          POST
+        </button>
+      </div>
+
+      <div class="feed-status" id="feedStatus">READY</div>
+    </section>
+
+    <section class="feed-list" id="feedList" aria-label="Feed Posts">
+      <div class="empty">
+        Loading realtime feed...
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main Navigation">
+    <a class="nav-item" href="/index.html">
+      <span>⌂</span>
+      HOME
+    </a>
+
+    <a class="nav-item active" href="/feed.html">
+      <span>◆</span>
+      FEED
+    </a>
+
+    <a class="nav-item" href="/live.html">
+      <span>◉</span>
+      LIVE
+    </a>
+
+    <a class="nav-item" href="/messages.html">
+      <span>✉</span>
+      MSGS
+    </a>
+
+    <a class="nav-item" href="/profile.html">
+      <span>◈</span>
+      ME
+    </a>
+  </nav>
+
+  <script type="module" src="/core/pages/feed.js"></script>
+
+</body>
+</html>
