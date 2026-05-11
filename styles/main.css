@@ -772,3 +772,81 @@ body::before{
     font-size:11px;
   }
 }
+
+/* =========================
+   FINAL MOBILE EVEN-SCALE LOCK
+========================= */
+@media (max-width:640px){
+
+  .top-center{
+    top:118px;
+  }
+
+  .brand-rich,
+  .brand-biz{
+    font-size:39px;
+  }
+
+  .dial-card{
+    width:78px;
+    height:78px;
+  }
+
+  .top-card{
+    top:37%;
+  }
+
+  .top-left-card{
+    top:42.6%;
+    left:8%;
+  }
+
+  .top-right-card{
+    top:42.6%;
+    right:8%;
+  }
+
+  .left-card{
+    top:54.8%;
+    left:5.5%;
+  }
+
+  .right-card{
+    top:54.8%;
+    right:5.5%;
+  }
+
+  .bottom-left-card{
+    bottom:28.6%;
+    left:9%;
+  }
+
+  .bottom-card{
+    bottom:23.4%;
+  }
+
+  .bottom-right-card{
+    bottom:28.6%;
+    right:9%;
+  }
+
+  .center-ui{
+    top:54.6%;
+  }
+
+  .portal-core{
+    width:144px;
+    height:144px;
+  }
+
+  .portal-inner{
+    width:100px;
+    height:100px;
+  }
+
+  .enter{
+    bottom:103px;
+    width:84vw;
+  }
+}
+
