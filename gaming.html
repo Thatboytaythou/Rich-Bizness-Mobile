@@ -1,38 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAMING</title>
-<link rel="stylesheet" href="/styles/main.css">
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>Rich Bizness LLC — Gaming</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+      background:#020402;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+      overflow-x:hidden;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 50% 14%,rgba(145,255,89,.16),transparent 30%),
+        radial-gradient(circle at 16% 48%,rgba(0,255,190,.08),transparent 25%),
+        radial-gradient(circle at 82% 72%,rgba(255,220,120,.08),transparent 28%),
+        #020402;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
+        radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.87) 100%);
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom));
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      line-height:.9;
+      text-align:center;
+      font-family:Georgia,"Times New Roman",serif;
+    }
+
+    .brand strong{
+      font-size:32px;
+      letter-spacing:.05em;
+      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 12px rgba(129,255,82,.45));
+    }
+
+    .brand small{
+      color:#ffe58a;
+      letter-spacing:.22em;
+      margin-top:5px;
+      font-size:12px;
+    }
+
+    .circle-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      border:1px solid rgba(255,219,123,.52);
+      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
+      color:#ffe58a;
+      font-size:21px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(151,255,97,.22);
+      border-radius:32px;
+      padding:20px;
+      margin-bottom:16px;
+      background:
+        linear-gradient(145deg,rgba(12,22,12,.92),rgba(0,0,0,.74)),
+        radial-gradient(circle at top,rgba(132,255,80,.18),transparent 58%);
+      box-shadow:0 0 45px rgba(0,0,0,.82),0 0 32px rgba(122,255,77,.14);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-42px;
+      top:-52px;
+      width:200px;
+      height:200px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(157,255,99,.24),transparent 68%);
+    }
+
+    .hero-kicker{
+      color:#9dff67;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.16em;
+      margin-bottom:8px;
+    }
+
+    .hero h1{
+      font-size:38px;
+      line-height:.95;
+      font-family:Georgia,"Times New Roman",serif;
+      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .hero p{
+      color:#dfffd2;
+      margin-top:10px;
+      font-size:14px;
+      line-height:1.45;
+      max-width:720px;
+    }
+
+    .arcade-stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      min-height:82px;
+      border-radius:22px;
+      border:1px solid rgba(151,255,97,.18);
+      background:rgba(0,0,0,.5);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:0 0 28px rgba(0,0,0,.7);
+      padding:10px;
+    }
+
+    .stat small{
+      color:#9dff67;
+      font-size:10px;
+      letter-spacing:.14em;
+      font-weight:900;
+    }
+
+    .stat strong{
+      margin-top:6px;
+      font-size:17px;
+    }
+
+    .feature{
+      border:1px solid rgba(255,219,123,.32);
+      border-radius:30px;
+      padding:16px;
+      margin-bottom:16px;
+      background:
+        linear-gradient(145deg,rgba(0,0,0,.78),rgba(10,18,10,.72)),
+        radial-gradient(circle at center,rgba(132,255,80,.1),transparent 60%);
+      box-shadow:0 0 34px rgba(0,0,0,.76);
+    }
+
+    .feature-row{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .feature-cover{
+      width:96px;
+      height:96px;
+      border-radius:26px;
+      background:radial-gradient(circle,rgba(157,255,99,.26),rgba(0,0,0,.88)),#071007;
+      border:1px solid rgba(151,255,97,.28);
+      display:grid;
+      place-items:center;
+      color:#9dff67;
+      font-size:34px;
+      box-shadow:0 0 22px rgba(128,255,80,.2);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+
+    .feature-cover img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .feature-info{
+      flex:1;
+      min-width:0;
+    }
+
+    .feature-info small{
+      display:block;
+      color:#9dff67;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.14em;
+      margin-bottom:6px;
+    }
+
+    .feature-info strong{
+      display:block;
+      font-size:22px;
+    }
+
+    .feature-info p{
+      color:#dfffd2;
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .play-main{
+      margin-top:14px;
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:18px;
+      min-height:48px;
+      color:#081008;
+      font-weight:950;
+      letter-spacing:.14em;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 24px rgba(128,255,80,.34);
+    }
+
+    .tabs{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .tab-btn{
+      border:1px solid rgba(151,255,97,.18);
+      border-radius:20px;
+      min-height:64px;
+      color:#dfffd2;
+      background:rgba(0,0,0,.48);
+      box-shadow:0 0 24px rgba(0,0,0,.7);
+      font-weight:950;
+      letter-spacing:.1em;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+    }
+
+    .tab-btn span{
+      font-size:22px;
+    }
+
+    .tab-btn.is-active{
+      color:#9dff67;
+      border-color:rgba(151,255,97,.62);
+      background:rgba(128,255,80,.12);
+      box-shadow:0 0 28px rgba(128,255,80,.22),inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:18px 2px 12px;
+    }
+
+    .section-head h2{
+      font-size:14px;
+      color:#9dff67;
+      letter-spacing:.16em;
+    }
+
+    .section-head small{
+      color:#dfffd2;
+      opacity:.82;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .game-card{
+      border:1px solid rgba(151,255,97,.18);
+      border-radius:28px;
+      padding:14px;
+      background:
+        linear-gradient(145deg,rgba(11,17,11,.9),rgba(0,0,0,.72)),
+        radial-gradient(circle at top left,rgba(132,255,80,.12),transparent 48%);
+      box-shadow:0 0 34px rgba(0,0,0,.78),0 0 24px rgba(128,255,80,.08);
+    }
+
+    .game-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .game-cover{
+      width:76px;
+      height:76px;
+      border-radius:22px;
+      background:radial-gradient(circle,rgba(157,255,99,.22),rgba(0,0,0,.88)),#071007;
+      border:1px solid rgba(151,255,97,.24);
+      display:grid;
+      place-items:center;
+      color:#9dff67;
+      font-size:28px;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+
+    .game-cover img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .game-info{
+      flex:1;
+      min-width:0;
+    }
+
+    .game-info strong{
+      display:block;
+      font-size:17px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .game-info small{
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.1em;
+      display:block;
+      margin-top:4px;
+    }
+
+    .game-info p{
+      color:#dfffd2;
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .mini-play{
+      width:50px;
+      height:50px;
+      border-radius:50%;
+      border:1px solid rgba(151,255,97,.48);
+      background:rgba(128,255,80,.12);
+      color:#9dff67;
+      font-size:18px;
+      box-shadow:0 0 20px rgba(128,255,80,.2);
+      flex:0 0 auto;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .action-btn{
+      border:none;
+      outline:none;
+      border-radius:15px;
+      padding:10px 8px;
+      color:#dfffd2;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.06);
+      font-weight:850;
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+
+    .composer{
+      border:1px solid rgba(255,219,123,.32);
+      border-radius:30px;
+      padding:16px;
+      margin:16px 0;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(18px);
+      box-shadow:0 0 32px rgba(0,0,0,.72);
+    }
+
+    .composer h2{
+      color:#9dff67;
+      font-size:13px;
+      letter-spacing:.16em;
+      margin-bottom:12px;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    .field label{
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.12em;
+      font-weight:900;
+    }
+
+    .input,
+    textarea,
+    select{
+      width:100%;
+      border:none;
+      outline:none;
+      color:#fff;
+      border-radius:16px;
+      padding:13px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:86px;
+      resize:none;
+      line-height:1.4;
+    }
+
+    .submit-score{
+      margin-top:12px;
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:16px;
+      min-height:44px;
+      color:#081008;
+      font-weight:950;
+      letter-spacing:.12em;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 22px rgba(128,255,80,.32);
+    }
+
+    .status{
+      margin-top:12px;
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:850;
+      min-height:18px;
+    }
+
+    .empty{
+      text-align:center;
+      color:#dfffd2;
+      padding:34px 18px;
+      border:1px dashed rgba(151,255,97,.26);
+      border-radius:26px;
+      background:rgba(0,0,0,.34);
+    }
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      transform:translateX(-50%);
+      z-index:40;
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:1px;
+      padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));
+      border-top:1px solid rgba(130,255,84,.16);
+      backdrop-filter:blur(18px);
+    }
+
+    .nav-item{
+      color:#dfffd2;
+      text-decoration:none;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      font-weight:850;
+      padding:8px 4px;
+      border-radius:14px;
+    }
+
+    .nav-item span{
+      display:block;
+      font-size:19px;
+      margin-bottom:3px;
+    }
+
+    .nav-item.active{
+      color:#9dff67;
+      background:rgba(128,255,80,.1);
+      box-shadow:inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    @media(max-width:640px){
+      .page{
+        padding-left:14px;
+        padding-right:14px;
+      }
+
+      .brand strong{
+        font-size:28px;
+      }
+
+      .hero h1{
+        font-size:32px;
+      }
+
+      .arcade-stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .feature-row{
+        align-items:flex-start;
+      }
+
+      .feature-cover{
+        width:82px;
+        height:82px;
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .actions{
+        grid-template-columns:1fr;
+      }
+
+      .tab-btn{
+        min-height:62px;
+        font-size:11px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+  <main class="page">
 
-<div class="topbar">
-  <div id="userEmail"></div>
-  <div class="icon" onclick="goProfile()">👤</div>
-  <div class="icon" onclick="goSettings()">⚙️</div>
-</div>
+    <header class="topbar">
+      <a class="circle-btn" href="/index.html" aria-label="Back Home">‹</a>
 
-<div class="container">
-  <h1>GAMING</h1>
-  <button class="main-btn">PLAY GAME 🎮</button>
-  <br>
-  <button class="secondary-btn" onclick="goBack()">GO BACK</button>
-</div>
+      <div class="brand" aria-label="Rich Bizness LLC">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
 
-<script>
-const user = JSON.parse(localStorage.getItem("rb_user"));
-if(!user){ window.location.href="/auth.html"; }
-document.getElementById("userEmail").innerText = user.email;
+      <a class="circle-btn" href="/profile.html" aria-label="Profile">◈</a>
+    </header>
 
-function goBack(){ window.location.href="/"; }
-function goProfile(){ window.location.href="/profile.html"; }
-function goSettings(){ window.location.href="/setting.html"; }
-</script>
+    <section class="hero">
+      <div class="hero-kicker">REALTIME ARCADE WORLD</div>
+      <h1>Gaming Arena</h1>
+      <p>
+        Play Rich Chess, Money Road Runner, Smoke City Hustle, Studio Showdown, and every future Rich Bizness game from one live arcade hub.
+      </p>
+    </section>
+
+    <section class="arcade-stats">
+      <div class="stat">
+        <small>GAMES</small>
+        <strong id="statGames">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>TOP SCORE</small>
+        <strong id="statTopScore">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>PLAYS</small>
+        <strong id="statPlays">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>CHALLENGES</small>
+        <strong id="statChallenges">0</strong>
+      </div>
+    </section>
+
+    <section class="feature">
+      <div class="feature-row">
+        <div class="feature-cover" id="featuredCover">🎮</div>
+
+        <div class="feature-info">
+          <small>FEATURED GAME</small>
+          <strong id="featuredTitle">Rich Chess</strong>
+          <p id="featuredDescription">Elite Rich Bizness chess arena. Strategy, ranking, battles, and future multiplayer.</p>
+        </div>
+      </div>
+
+      <button class="play-main" id="featuredPlayBtn" type="button">
+        PLAY FEATURED
+      </button>
+    </section>
+
+    <section class="tabs" aria-label="Gaming Tabs">
+      <button class="tab-btn is-active" data-tab="games" type="button">
+        <span>🎮</span>
+        GAMES
+      </button>
+
+      <button class="tab-btn" data-tab="leaderboard" type="button">
+        <span>🏆</span>
+        SCORES
+      </button>
+
+      <button class="tab-btn" data-tab="clips" type="button">
+        <span>🎬</span>
+        CLIPS
+      </button>
+    </section>
+
+    <section class="composer">
+      <h2>SUBMIT SCORE</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>GAME</label>
+          <select id="scoreGameSelect"></select>
+        </div>
+
+        <div class="field">
+          <label>SCORE</label>
+          <input class="input" id="scoreInput" type="number" min="0" value="0" />
+        </div>
+
+        <div class="field">
+          <label>MODE</label>
+          <input class="input" id="modeInput" type="text" maxlength="40" value="Arcade" />
+        </div>
+
+        <div class="field">
+          <label>RESULT</label>
+          <input class="input" id="resultInput" type="text" maxlength="80" placeholder="Win, run, mission..." />
+        </div>
+      </div>
+
+      <button class="submit-score" id="submitScoreBtn" type="button">
+        SUBMIT SCORE
+      </button>
+
+      <div class="status" id="gamingStatus">BOOTING GAMING...</div>
+    </section>
+
+    <div class="section-head">
+      <h2 id="sectionTitle">GAMES</h2>
+      <small id="sectionCount">0 live</small>
+    </div>
+
+    <section class="list" id="gamingList">
+      <div class="empty">Loading realtime arcade...</div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main Navigation">
+    <a class="nav-item" href="/index.html">
+      <span>⌂</span>
+      HOME
+    </a>
+
+    <a class="nav-item" href="/feed.html">
+      <span>◆</span>
+      FEED
+    </a>
+
+    <a class="nav-item active" href="/gaming.html">
+      <span>🎮</span>
+      GAMING
+    </a>
+
+    <a class="nav-item" href="/live.html">
+      <span>◉</span>
+      LIVE
+    </a>
+
+    <a class="nav-item" href="/profile.html">
+      <span>◈</span>
+      ME
+    </a>
+  </nav>
+
+  <script type="module" src="/core/pages/gaming.js"></script>
 
 </body>
 </html>
