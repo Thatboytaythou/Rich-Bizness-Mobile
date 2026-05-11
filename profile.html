@@ -1,69 +1,508 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>PROFILE</title>
-<link rel="stylesheet" href="/styles/main.css">
+  <meta charset="UTF-8" />
 
-<script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
 
-const supabase = createClient(
-  "https://zsancpcyhdidrlezggrl.supabase.co",
-  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2"
-);
+  <title>Rich Bizness LLC — Profile</title>
 
-const { data } = await supabase.auth.getSession();
-const user = data?.session?.user;
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
 
-if(!user){
-  location.href="/auth.html";
-}
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+      background:#020402;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+      overflow-x:hidden;
+    }
 
-window.addEventListener("DOMContentLoaded", ()=>{
-  document.getElementById("email").innerText=user.email;
-  document.getElementById("username").innerText=user.email.split("@")[0];
-  document.getElementById("avatar").innerText=user.email.charAt(0).toUpperCase();
-});
+    body{
+      background:
+        radial-gradient(circle at 50% 18%,rgba(145,255,89,.16),transparent 28%),
+        radial-gradient(circle at 50% 76%,rgba(80,255,70,.1),transparent 34%),
+        #020402;
+    }
 
-window.logout = async ()=>{
-  await supabase.auth.signOut();
-  location.href="/auth.html";
-};
-</script>
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
+        radial-gradient(circle at center,transparent 38%,rgba(0,0,0,.86) 100%);
+    }
 
-<style>
-.profile-card{
-  padding:30px;
-  background:rgba(0,0,0,.6);
-  border-radius:16px;
-  text-align:center;
-}
-.avatar{
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background:#00ffcc;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-</style>
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:
+        calc(18px + env(safe-area-inset-top))
+        16px
+        calc(110px + env(safe-area-inset-bottom));
+    }
 
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      line-height:.9;
+      font-family:Georgia,"Times New Roman",serif;
+      text-align:center;
+    }
+
+    .brand strong{
+      font-size:32px;
+      letter-spacing:.05em;
+      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 12px rgba(129,255,82,.45));
+    }
+
+    .brand small{
+      color:#ffe58a;
+      letter-spacing:.22em;
+      margin-top:5px;
+      font-size:12px;
+    }
+
+    .circle-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      border:1px solid rgba(255,219,123,.52);
+      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
+      color:#ffe58a;
+      font-size:21px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+
+    .profile-hero{
+      overflow:hidden;
+      border:1px solid rgba(151,255,97,.22);
+      border-radius:32px;
+      background:
+        linear-gradient(145deg,rgba(12,22,12,.92),rgba(0,0,0,.74)),
+        radial-gradient(circle at top,rgba(132,255,80,.18),transparent 58%);
+      box-shadow:0 0 45px rgba(0,0,0,.82),0 0 32px rgba(122,255,77,.14);
+      margin-bottom:16px;
+    }
+
+    .banner{
+      height:150px;
+      background:
+        radial-gradient(circle at 50% 40%,rgba(157,255,99,.32),transparent 32%),
+        linear-gradient(135deg,rgba(157,255,99,.16),rgba(0,0,0,.88)),
+        #071007;
+      border-bottom:1px solid rgba(151,255,97,.18);
+      position:relative;
+    }
+
+    .banner img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:.72;
+    }
+
+    .profile-main{
+      padding:0 18px 18px;
+      margin-top:-50px;
+      position:relative;
+    }
+
+    .avatar{
+      width:104px;
+      height:104px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:#9dff67;
+      font-size:42px;
+      font-weight:950;
+      background:radial-gradient(circle,rgba(120,255,80,.32),rgba(0,0,0,.88));
+      border:2px solid rgba(151,255,97,.62);
+      box-shadow:0 0 34px rgba(120,255,80,.38),inset 0 0 24px rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-bottom:12px;
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .profile-row{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .profile-title h1{
+      font-size:32px;
+      line-height:1;
+      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-family:Georgia,"Times New Roman",serif;
+    }
+
+    .profile-title p{
+      margin-top:6px;
+      color:#dfffd2;
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .tag{
+      display:inline-flex;
+      margin-top:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      color:#9dff67;
+      border:1px solid rgba(151,255,97,.28);
+      background:rgba(128,255,80,.08);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.12em;
+    }
+
+    .logout-btn,
+    .save-btn{
+      border:none;
+      outline:none;
+      border-radius:16px;
+      padding:12px 14px;
+      color:#081008;
+      font-weight:950;
+      letter-spacing:.08em;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 22px rgba(128,255,80,.32);
+      white-space:nowrap;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      min-height:86px;
+      border-radius:22px;
+      border:1px solid rgba(151,255,97,.18);
+      background:rgba(0,0,0,.5);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:0 0 28px rgba(0,0,0,.7);
+      padding:10px;
+    }
+
+    .stat small{
+      color:#9dff67;
+      font-size:10px;
+      letter-spacing:.14em;
+      font-weight:900;
+    }
+
+    .stat strong{
+      margin-top:6px;
+      font-size:16px;
+    }
+
+    .panel{
+      border:1px solid rgba(255,219,123,.32);
+      border-radius:28px;
+      padding:16px;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(18px);
+      box-shadow:0 0 32px rgba(0,0,0,.72);
+      margin-bottom:16px;
+    }
+
+    .panel h2{
+      color:#9dff67;
+      font-size:13px;
+      letter-spacing:.16em;
+      margin-bottom:12px;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    .field label{
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.12em;
+      font-weight:900;
+    }
+
+    .input,
+    textarea{
+      width:100%;
+      border:none;
+      outline:none;
+      color:#fff;
+      border-radius:16px;
+      padding:13px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:92px;
+      resize:none;
+      line-height:1.4;
+    }
+
+    .status{
+      margin-top:12px;
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:850;
+      min-height:18px;
+    }
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      transform:translateX(-50%);
+      z-index:40;
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:1px;
+      padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));
+      border-top:1px solid rgba(130,255,84,.16);
+      backdrop-filter:blur(18px);
+    }
+
+    .nav-item{
+      color:#dfffd2;
+      text-decoration:none;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      font-weight:850;
+      padding:8px 4px;
+      border-radius:14px;
+    }
+
+    .nav-item span{
+      display:block;
+      font-size:19px;
+      margin-bottom:3px;
+    }
+
+    .nav-item.active{
+      color:#9dff67;
+      background:rgba(128,255,80,.1);
+      box-shadow:inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    @media(max-width:640px){
+      .page{
+        padding-left:14px;
+        padding-right:14px;
+      }
+
+      .brand strong{
+        font-size:28px;
+      }
+
+      .profile-row{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .profile-title h1{
+        font-size:30px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+  <main class="page">
 
-<div class="container">
-  <div class="profile-card">
-    <h1>PROFILE</h1>
-    <div id="avatar" class="avatar">?</div>
-    <h2 id="username"></h2>
-    <p id="email"></p>
-    <button onclick="logout()">LOG OUT</button>
-  </div>
-</div>
+    <header class="topbar">
+      <a class="circle-btn" href="/feed.html" aria-label="Back to Feed">‹</a>
+
+      <div class="brand" aria-label="Rich Bizness LLC">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
+
+      <a class="circle-btn" href="/notifications.html" aria-label="Notifications">🔔</a>
+    </header>
+
+    <section class="profile-hero">
+      <div class="banner" id="profileBanner"></div>
+
+      <div class="profile-main">
+        <div class="avatar" id="profileAvatar">R</div>
+
+        <div class="profile-row">
+          <div class="profile-title">
+            <h1 id="profileName">Rich Creator</h1>
+            <p id="profileBio">Building the Rich Bizness universe.</p>
+            <div class="tag" id="profileTag">@creator</div>
+          </div>
+
+          <button class="logout-btn" id="logoutBtn" type="button">
+            LOG OUT
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="stat">
+        <small>RICH LEVEL</small>
+        <strong id="statLevel">MAX</strong>
+      </div>
+
+      <div class="stat">
+        <small>POINTS</small>
+        <strong id="statPoints">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>RANK</small>
+        <strong id="statRank">BIZ LEGEND</strong>
+      </div>
+
+      <div class="stat">
+        <small>BALANCE</small>
+        <strong id="statBalance">$0.00</strong>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>EDIT PROFILE</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>USERNAME</label>
+          <input class="input" id="usernameInput" type="text" maxlength="32" />
+        </div>
+
+        <div class="field">
+          <label>DISPLAY NAME</label>
+          <input class="input" id="displayNameInput" type="text" maxlength="60" />
+        </div>
+
+        <div class="field full">
+          <label>BIO</label>
+          <textarea id="bioInput" maxlength="220"></textarea>
+        </div>
+
+        <div class="field full">
+          <label>AVATAR URL</label>
+          <input class="input" id="avatarUrlInput" type="url" placeholder="Optional image URL" />
+        </div>
+
+        <div class="field full">
+          <label>BANNER URL</label>
+          <input class="input" id="bannerUrlInput" type="url" placeholder="Optional banner image URL" />
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveProfileBtn" type="button" style="margin-top:12px;">
+        SAVE PROFILE
+      </button>
+
+      <div class="status" id="profileStatus">BOOTING PROFILE...</div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main Navigation">
+    <a class="nav-item" href="/index.html">
+      <span>⌂</span>
+      HOME
+    </a>
+
+    <a class="nav-item" href="/feed.html">
+      <span>◆</span>
+      FEED
+    </a>
+
+    <a class="nav-item" href="/live.html">
+      <span>◉</span>
+      LIVE
+    </a>
+
+    <a class="nav-item" href="/messages.html">
+      <span>✉</span>
+      MSGS
+    </a>
+
+    <a class="nav-item active" href="/profile.html">
+      <span>◈</span>
+      ME
+    </a>
+  </nav>
+
+  <script type="module" src="/core/pages/profile.js"></script>
 
 </body>
 </html>
