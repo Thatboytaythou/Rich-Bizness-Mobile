@@ -2,35 +2,23 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 /* =========================
    RICH BIZNESS OMNI ENGINE
-   REAL DIAL REPAIR VERSION
+   EXACT DIAL REPAIR / MOBILE APP VERSION
    /core/engine/omni-engine.js
 ========================= */
 
 const canvas = document.getElementById("engine");
 
-/* =========================
-   SCENE
-========================= */
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020402);
-scene.fog = new THREE.FogExp2(0x020402, 0.055);
+scene.fog = new THREE.FogExp2(0x031003, 0.052);
 
-/* =========================
-   CAMERA
-========================= */
 const camera = new THREE.PerspectiveCamera(
   38,
   window.innerWidth / window.innerHeight,
   0.1,
-  200
+  220
 );
 
-camera.position.set(0, 0.65, 10.6);
-camera.lookAt(0, 0.15, 0);
-
-/* =========================
-   RENDERER
-========================= */
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
@@ -42,126 +30,85 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.25;
+renderer.toneMappingExposure = 1.35;
 
-/* =========================
-   CLOCK
-========================= */
 const clock = new THREE.Clock();
 
-/* =========================
-   LIGHTS
-========================= */
-scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+/* LIGHTS */
+scene.add(new THREE.AmbientLight(0xffffff, 0.72));
 
-const keyLight = new THREE.PointLight(0x9eff65, 18, 80);
-keyLight.position.set(0, 6, 8);
+const keyLight = new THREE.PointLight(0x9dff55, 22, 90);
+keyLight.position.set(0, 6.4, 8.5);
 scene.add(keyLight);
 
-const leftLight = new THREE.PointLight(0x25ffb6, 7, 55);
+const leftLight = new THREE.PointLight(0x25ffb6, 8, 55);
 leftLight.position.set(-7, 1.5, 7);
 scene.add(leftLight);
 
-const rightLight = new THREE.PointLight(0xffd37a, 5, 55);
+const rightLight = new THREE.PointLight(0xffd47a, 7, 55);
 rightLight.position.set(7, 1.5, 7);
 scene.add(rightLight);
 
-const bottomGlow = new THREE.PointLight(0x7dff4d, 9, 35);
-bottomGlow.position.set(0, -4, 5);
+const bottomGlow = new THREE.PointLight(0x7dff4d, 12, 42);
+bottomGlow.position.set(0, -4.3, 5.5);
 scene.add(bottomGlow);
 
-/* =========================
-   RESPONSIVE SCALE
-========================= */
-const isPhone = window.innerWidth < 700;
-const dialScale = isPhone ? 0.78 : 0.92;
-
-/* =========================
-   WORLD BACKGROUND
-========================= */
-const backGroup = new THREE.Group();
-scene.add(backGroup);
-
-const smokeGeo = new THREE.BufferGeometry();
-const smokeCount = 900;
-const smokePositions = [];
-
-for (let i = 0; i < smokeCount; i++) {
-  smokePositions.push(
-    (Math.random() - 0.5) * 30,
-    (Math.random() - 0.5) * 18,
-    -12 - Math.random() * 12
-  );
+/* RESPONSIVE */
+function isPhone() {
+  return window.innerWidth < 700;
 }
 
-smokeGeo.setAttribute(
-  "position",
-  new THREE.Float32BufferAttribute(smokePositions, 3)
-);
+/* BACKGROUND SMOKE */
+const smokeGeo = new THREE.BufferGeometry();
+const smokePositions = [];
+for (let i = 0; i < 1200; i++) {
+  smokePositions.push(
+    (Math.random() - 0.5) * 34,
+    (Math.random() - 0.5) * 20,
+    -12 - Math.random() * 16
+  );
+}
+smokeGeo.setAttribute("position", new THREE.Float32BufferAttribute(smokePositions, 3));
 
 const smoke = new THREE.Points(
   smokeGeo,
   new THREE.PointsMaterial({
-    color: 0x6aff57,
-    size: 0.045,
+    color: 0x72ff54,
+    size: 0.05,
     transparent: true,
     opacity: 0.18,
     depthWrite: false
   })
 );
+scene.add(smoke);
 
-backGroup.add(smoke);
-
-/* =========================
-   MAIN DIAL ROOT
-   This is the real Apple Watch / old phone dial angle
-========================= */
-const dialRig = new THREE.Group();
-dialRig.position.set(0, isPhone ? -0.62 : -0.42, 0);
-dialRig.scale.setScalar(dialScale);
-scene.add(dialRig);
-
-const dial = new THREE.Group();
-dial.rotation.x = -0.12;
-dialRig.add(dial);
-
-/* =========================
-   MATERIALS
-========================= */
+/* MATERIALS */
 const blackMetal = new THREE.MeshStandardMaterial({
   color: 0x070907,
   metalness: 1,
   roughness: 0.22,
-  emissive: 0x081508,
-  emissiveIntensity: 0.2
+  emissive: 0x071307,
+  emissiveIntensity: 0.22
 });
 
 const gunMetal = new THREE.MeshStandardMaterial({
-  color: 0x202520,
+  color: 0x222820,
   metalness: 1,
-  roughness: 0.18,
+  roughness: 0.16,
   emissive: 0x091408,
-  emissiveIntensity: 0.12
+  emissiveIntensity: 0.16
 });
 
-const deepPanel = new THREE.MeshStandardMaterial({
+const panelMat = new THREE.MeshStandardMaterial({
   color: 0x071007,
-  metalness: 0.72,
-  roughness: 0.28,
-  emissive: 0x132510,
-  emissiveIntensity: 0.55
-});
-
-const activePanel = new THREE.MeshStandardMaterial({
-  color: 0x102010,
   metalness: 0.82,
-  roughness: 0.2,
-  emissive: 0x7cff55,
-  emissiveIntensity: 1.15
+  roughness: 0.24,
+  emissive: 0x153012,
+  emissiveIntensity: 0.54
 });
 
-const greenGlow = new THREE.MeshBasicMaterial({
-  color: 0x90ff5e,
+const glowMat = new THREE.MeshBasicMaterial({
+  color: 0x92ff5f,
   transparent: true,
   opacity: 0.95
 });
@@ -169,102 +116,80 @@ const greenGlow = new THREE.MeshBasicMaterial({
 const glassGreen = new THREE.MeshStandardMaterial({
   color: 0x78ff4c,
   emissive: 0x78ff4c,
-  emissiveIntensity: 2.8,
+  emissiveIntensity: 3,
   transparent: true,
-  opacity: 0.78,
-  metalness: 0.25,
-  roughness: 0.05
+  opacity: 0.76,
+  metalness: 0.2,
+  roughness: 0.04
 });
 
-/* =========================
-   BACK PLATE — FLAT DISC, NOT CRAZY FLOOR
-========================= */
+/* DIAL ROOT */
+const dialRig = new THREE.Group();
+scene.add(dialRig);
+
+const dial = new THREE.Group();
+dial.rotation.x = -0.12;
+dialRig.add(dial);
+
+/* BACK DISC */
 const backPlate = new THREE.Mesh(
-  new THREE.CylinderGeometry(4.38, 4.38, 0.42, 160),
+  new THREE.CylinderGeometry(4.45, 4.45, 0.42, 180),
   blackMetal
 );
-
 backPlate.rotation.x = Math.PI / 2;
-backPlate.position.z = -0.34;
+backPlate.position.z = -0.36;
 dial.add(backPlate);
 
-/* =========================
-   RING HELPERS
-========================= */
 function torus(radius, tube, mat, z = 0) {
-  const mesh = new THREE.Mesh(
-    new THREE.TorusGeometry(radius, tube, 32, 240),
-    mat
-  );
-
+  const mesh = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 32, 240), mat);
   mesh.rotation.x = Math.PI / 2;
   mesh.position.z = z;
   dial.add(mesh);
   return mesh;
 }
 
-const outerArmor = torus(4.47, 0.23, gunMetal, 0.08);
-const outerGlow = torus(4.14, 0.035, greenGlow, 0.22);
-const midArmor = torus(3.28, 0.12, gunMetal, 0.25);
-const innerGlow = torus(1.72, 0.05, greenGlow, 0.42);
-const centerArmor = torus(1.28, 0.14, gunMetal, 0.52);
+const outerArmor = torus(4.52, 0.23, gunMetal, 0.08);
+const outerGlow = torus(4.14, 0.036, glowMat, 0.24);
+const innerArmor = torus(3.28, 0.12, gunMetal, 0.25);
+const innerGlow = torus(1.72, 0.052, glowMat, 0.43);
+const centerArmor = torus(1.28, 0.14, gunMetal, 0.54);
 
-/* =========================
-   CENTER PORTAL
-========================= */
+/* PORTAL */
 const portalGroup = new THREE.Group();
-portalGroup.position.z = 0.62;
+portalGroup.position.z = 0.63;
 dial.add(portalGroup);
 
 const portalDisc = new THREE.Mesh(
-  new THREE.CylinderGeometry(1.12, 1.12, 0.18, 100),
+  new THREE.CylinderGeometry(1.12, 1.12, 0.18, 110),
   new THREE.MeshStandardMaterial({
     color: 0x061106,
     metalness: 0.9,
-    roughness: 0.15,
+    roughness: 0.13,
     emissive: 0x4cff36,
-    emissiveIntensity: 1.1
+    emissiveIntensity: 1.2
   })
 );
-
 portalDisc.rotation.x = Math.PI / 2;
 portalGroup.add(portalDisc);
 
-const portalGlass = new THREE.Mesh(
-  new THREE.SphereGeometry(0.92, 64, 64),
-  glassGreen
-);
-
+const portalGlass = new THREE.Mesh(new THREE.SphereGeometry(0.92, 64, 64), glassGreen);
 portalGlass.scale.set(1, 1, 0.28);
 portalGlass.position.z = 0.1;
 portalGroup.add(portalGlass);
 
-const portalRing = new THREE.Mesh(
-  new THREE.TorusGeometry(1.08, 0.035, 16, 180),
-  greenGlow
-);
-
+const portalRing = new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.035, 16, 200), glowMat);
 portalRing.rotation.x = Math.PI / 2;
 portalRing.position.z = 0.22;
 portalGroup.add(portalRing);
 
 const energyGeo = new THREE.BufferGeometry();
 const energyPositions = [];
-
-for (let i = 0; i < 700; i++) {
-  const r = Math.random() * 0.85;
+for (let i = 0; i < 850; i++) {
+  const r = Math.random() * 0.86;
   const a = Math.random() * Math.PI * 2;
-  energyPositions.push(
-    Math.cos(a) * r,
-    Math.sin(a) * r,
-    0.18 + (Math.random() - 0.5) * 0.28
-  );
+  energyPositions.push(Math.cos(a) * r, Math.sin(a) * r, 0.18 + (Math.random() - 0.5) * 0.3);
 }
-
-energyGeo.setAttribute(
-  "position",
-  new THREE.Float32BufferAttribute(energyPositions, 3)
-);
+energyGeo.setAttribute("position", new THREE.Float32BufferAttribute(energyPositions, 3));
 
 const energy = new THREE.Points(
   energyGeo,
@@ -276,24 +201,10 @@ const energy = new THREE.Points(
     depthWrite: false
   })
 );
-
 portalGroup.add(energy);
 
-/* =========================
-   WEDGE PANELS
-========================= */
-const segments = [];
-
-const labels = [
-  "gallery",
-  "live",
-  "music",
-  "gaming",
-  "store",
-  "meta",
-  "sports",
-  "upload"
-];
+/* SEGMENTS */
+const labels = ["live", "music", "gaming", "store", "meta", "sports", "upload", "gallery"];
 
 const routes = {
   gallery: "/gallery.html",
@@ -306,18 +217,18 @@ const routes = {
   upload: "/upload.html"
 };
 
-const count = 8;
+const segments = [];
+const count = labels.length;
 const step = (Math.PI * 2) / count;
 
 for (let i = 0; i < count; i++) {
   const shape = new THREE.Shape();
 
-  const innerR = 1.48;
+  const innerR = 1.5;
   const outerR = 3.92;
   const gap = step * 0.055;
-
-  const a0 = i * step - step / 2 + gap;
-  const a1 = i * step + step / 2 - gap;
+  const a0 = i * step - step / 2 + gap + Math.PI / 2;
+  const a1 = i * step + step / 2 - gap + Math.PI / 2;
 
   shape.moveTo(Math.cos(a0) * innerR, Math.sin(a0) * innerR);
   shape.absarc(0, 0, innerR, a0, a1, false);
@@ -333,132 +244,87 @@ for (let i = 0; i < count; i++) {
     bevelThickness: 0.04
   });
 
-  const panel = new THREE.Mesh(geo, deepPanel.clone());
+  const panel = new THREE.Mesh(geo, panelMat.clone());
   panel.rotation.x = Math.PI / 2;
   panel.position.z = 0.16;
-  panel.userData.index = i;
   panel.userData.name = labels[i];
-
   dial.add(panel);
   segments.push(panel);
 
-  const dividerAngle = i * step + step / 2;
+  const dividerAngle = i * step + step / 2 + Math.PI / 2;
   const divider = new THREE.Mesh(
-    new THREE.BoxGeometry(0.035, 2.45, 0.18),
+    new THREE.BoxGeometry(0.04, 2.5, 0.18),
     new THREE.MeshStandardMaterial({
-      color: 0x1a1a16,
+      color: 0x1d211b,
       metalness: 1,
-      roughness: 0.18,
-      emissive: 0x6dff42,
-      emissiveIntensity: 0.18
+      roughness: 0.15,
+      emissive: 0x72ff42,
+      emissiveIntensity: 0.16
     })
   );
-
-  divider.position.set(
-    Math.cos(dividerAngle) * 2.72,
-    Math.sin(dividerAngle) * 2.72,
-    0.55
-  );
-
+  divider.position.set(Math.cos(dividerAngle) * 2.75, Math.sin(dividerAngle) * 2.75, 0.56);
   divider.rotation.z = dividerAngle;
   dial.add(divider);
-
-  const rimLight = new THREE.Mesh(
-    new THREE.TorusGeometry(3.72, 0.012, 8, 28, step * 0.82),
-    new THREE.MeshBasicMaterial({
-      color: 0x8cff5c,
-      transparent: true,
-      opacity: 0.55
-    })
-  );
-
-  rimLight.rotation.x = Math.PI / 2;
-  rimLight.rotation.z = i * step - step * 0.41;
-  rimLight.position.z = 0.58;
-  dial.add(rimLight);
 }
 
-/* =========================
-   ARMOR BOLTS + SIDE LIGHTS
-========================= */
+/* BOLTS / LIGHTS */
 for (let i = 0; i < 16; i++) {
   const angle = (Math.PI * 2 / 16) * i;
 
   const bolt = new THREE.Mesh(
     new THREE.CylinderGeometry(0.105, 0.105, 0.18, 24),
     new THREE.MeshStandardMaterial({
-      color: 0x9c9c8d,
+      color: 0xa8a98f,
       metalness: 1,
-      roughness: 0.18,
+      roughness: 0.15,
       emissive: 0x0b100b,
       emissiveIntensity: 0.2
     })
   );
 
   bolt.rotation.x = Math.PI / 2;
-  bolt.position.set(
-    Math.cos(angle) * 4.42,
-    Math.sin(angle) * 4.42,
-    0.42
-  );
-
+  bolt.position.set(Math.cos(angle) * 4.42, Math.sin(angle) * 4.42, 0.45);
   dial.add(bolt);
 
-  if (i % 4 === 1) {
+  if (i % 2 === 1) {
     const lamp = new THREE.Mesh(
       new THREE.SphereGeometry(0.13, 24, 24),
       new THREE.MeshStandardMaterial({
         color: 0x9dff64,
         emissive: 0x9dff64,
-        emissiveIntensity: 3,
+        emissiveIntensity: 3.2,
         roughness: 0.08
       })
     );
-
-    lamp.position.set(
-      Math.cos(angle) * 4.55,
-      Math.sin(angle) * 4.55,
-      0.58
-    );
-
+    lamp.position.set(Math.cos(angle) * 4.55, Math.sin(angle) * 4.55, 0.6);
     dial.add(lamp);
   }
 }
 
-/* =========================
-   BOTTOM MONEY STACK FEEL
-========================= */
+/* MONEY STACKS */
 const moneyGroup = new THREE.Group();
 moneyGroup.position.set(0, -3.72, -2.8);
 scene.add(moneyGroup);
 
-for (let i = 0; i < 18; i++) {
+for (let i = 0; i < 24; i++) {
   const bill = new THREE.Mesh(
-    new THREE.BoxGeometry(1.1, 0.08, 0.5),
+    new THREE.BoxGeometry(1.15, 0.08, 0.5),
     new THREE.MeshStandardMaterial({
-      color: 0x133611,
-      metalness: 0.2,
-      roughness: 0.65,
+      color: 0x143811,
+      metalness: 0.25,
+      roughness: 0.6,
       emissive: 0x163b10,
-      emissiveIntensity: 0.25
+      emissiveIntensity: 0.28
     })
   );
 
-  bill.position.set(
-    (Math.random() - 0.5) * 8,
-    i * 0.025,
-    (Math.random() - 0.5) * 1.8
-  );
-
+  bill.position.set((Math.random() - 0.5) * 8.4, i * 0.022, (Math.random() - 0.5) * 1.8);
   bill.rotation.y = (Math.random() - 0.5) * 0.8;
   bill.rotation.z = (Math.random() - 0.5) * 0.25;
-
   moneyGroup.add(bill);
 }
 
-/* =========================
-   ROTATION SYSTEM
-========================= */
+/* INTERACTION */
 let rotation = 0;
 let velocity = 0;
 let dragging = false;
@@ -471,11 +337,27 @@ let smoothTiltX = -0.12;
 let smoothTiltY = 0;
 
 let activeName = "live";
+window.RB_ACTIVE_KEY = activeName;
 window.RB_ACTIVE_ROUTE = routes[activeName];
 
-/* =========================
-   POINTER TILT
-========================= */
+function setActive(name) {
+  activeName = name || "live";
+  window.RB_ACTIVE_KEY = activeName;
+  window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
+
+  if (typeof window.setActiveDial === "function") {
+    window.setActiveDial(activeName, true);
+  }
+
+  document.querySelector("[data-active-label]")?.replaceChildren(document.createTextNode(activeName.toUpperCase()));
+}
+
+window.addEventListener("pointerdown", (event) => {
+  dragging = true;
+  moved = false;
+  lastX = event.clientX;
+});
+
 window.addEventListener("pointermove", (event) => {
   const nx = event.clientX / window.innerWidth - 0.5;
   const ny = event.clientY / window.innerHeight - 0.5;
@@ -488,15 +370,8 @@ window.addEventListener("pointermove", (event) => {
   const dx = event.clientX - lastX;
   lastX = event.clientX;
 
-  if (Math.abs(dx) > 1) moved = true;
-
+  if (Math.abs(dx) > 2) moved = true;
   velocity = dx * 0.0032;
-});
-
-window.addEventListener("pointerdown", (event) => {
-  dragging = true;
-  moved = false;
-  lastX = event.clientX;
 });
 
 window.addEventListener("pointerup", () => {
@@ -507,9 +382,7 @@ window.addEventListener("pointercancel", () => {
   dragging = false;
 });
 
-/* =========================
-   RAYCAST ACTION
-========================= */
+/* CLICK RAYCAST */
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
@@ -520,101 +393,58 @@ window.addEventListener("click", (event) => {
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(pointer, camera);
-
   const hits = raycaster.intersectObjects(segments);
 
   if (!hits.length) return;
 
   const name = hits[0].object.userData.name;
-  const route = routes[name];
+  setActive(name);
 
-  if (route) window.location.href = route;
+  if (window.RB_DIAL_CLICK_TO_OPEN === true) {
+    window.location.href = routes[name];
+  }
 });
 
-/* =========================
-   ACTIVE DETECTION
-========================= */
-function getActiveSegment() {
-  let highestY = -Infinity;
-  let active = segments[0];
-
-  for (const segment of segments) {
-    const world = new THREE.Vector3();
-    segment.getWorldPosition(world);
-
-    if (world.y > highestY) {
-      highestY = world.y;
-      active = segment;
-    }
-  }
-
-  return active;
+function getActiveFromRotation() {
+  const normalized = ((-rotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  const index = Math.round(normalized / step) % count;
+  return labels[index] || "live";
 }
 
-/* =========================
-   CSS LABEL SYNC
-========================= */
-function syncHtmlLabels() {
-  const active = getActiveSegment();
-  activeName = active?.userData?.name || "live";
-  window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
-
-  document.querySelectorAll(".dial-card").forEach((card) => {
-    card.classList.remove("is-active");
-  });
-
-  const map = {
-    gallery: ".top-left-card",
-    live: ".top-card",
-    music: ".top-right-card",
-    upload: ".left-card",
-    gaming: ".right-card",
-    sports: ".bottom-left-card",
-    meta: ".bottom-card",
-    store: ".bottom-right-card"
-  };
-
-  const activeCard = document.querySelector(map[activeName]);
-  activeCard?.classList.add("is-active");
-}
-
-/* =========================
-   ACTIVATE BUTTON
-========================= */
-window.enterWorld = function () {
-  const route = window.RB_ACTIVE_ROUTE || "/feed.html";
-  window.location.href = route;
+window.RB_spinTo = function (key) {
+  const index = labels.indexOf(key);
+  if (index < 0) return;
+  rotation = -index * step;
+  velocity = 0;
+  setActive(key);
 };
 
+window.enterWorld = function () {
+  window.location.href = window.RB_ACTIVE_ROUTE || "/feed.html";
+};
 window.enter = window.enterWorld;
 
-/* =========================
-   CAMERA RESIZE
-========================= */
+/* RESIZE */
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
+  const phone = isPhone();
 
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
-
   renderer.setSize(w, h);
 
-  const phone = w < 700;
+  dialRig.scale.setScalar(phone ? 0.76 : 0.92);
+  dialRig.position.set(0, phone ? -0.72 : -0.44, 0);
 
-  dialRig.scale.setScalar(phone ? 0.78 : 0.92);
-  dialRig.position.set(0, phone ? -0.62 : -0.42, 0);
-
-  camera.position.set(0, phone ? 0.72 : 0.62, phone ? 10.7 : 10.1);
+  camera.position.set(0, phone ? 0.72 : 0.62, phone ? 10.9 : 10.1);
   camera.lookAt(0, 0.08, 0);
 }
 
 window.addEventListener("resize", resize);
 resize();
 
-/* =========================
-   ANIMATION LOOP
-========================= */
+/* LOOP */
 function animate() {
   requestAnimationFrame(animate);
 
@@ -634,7 +464,7 @@ function animate() {
     if (Math.abs(velocity) < 0.0006) {
       velocity = 0;
       const snapped = Math.round(rotation / step) * step;
-      rotation = THREE.MathUtils.lerp(rotation, snapped, 0.08);
+      rotation = THREE.MathUtils.lerp(rotation, snapped, 0.085);
     }
   }
 
@@ -642,7 +472,9 @@ function animate() {
 
   outerArmor.rotation.z = -rotation * 0.15;
   outerGlow.rotation.z = -rotation * 0.3;
+  innerArmor.rotation.z = rotation * 0.1;
   innerGlow.rotation.z = rotation * 0.5;
+  centerArmor.rotation.z = -rotation * 0.2;
 
   portalGlass.scale.set(
     1 + Math.sin(t * 2.4) * 0.035,
@@ -650,30 +482,25 @@ function animate() {
     0.28
   );
 
-  portalGlass.material.emissiveIntensity = 2.6 + Math.sin(t * 3.2) * 0.55;
-
-  portalRing.rotation.z += 0.006;
+  portalGlass.material.emissiveIntensity = 2.7 + Math.sin(t * 3.2) * 0.55;
+  portalRing.rotation.z += 0.007;
   energy.rotation.z -= 0.012;
 
   smoke.rotation.y += 0.0006;
+  smoke.rotation.x = Math.sin(t * 0.15) * 0.03;
   moneyGroup.rotation.y = Math.sin(t * 0.35) * 0.06;
 
+  const newActive = getActiveFromRotation();
+  if (newActive !== activeName) setActive(newActive);
+
   segments.forEach((segment) => {
-    const world = new THREE.Vector3();
-    segment.getWorldPosition(world);
-
-    const frontDepth = (world.z + 4) / 8;
-    const topDepth = (world.y + 4) / 8;
-
-    const glow = Math.max(frontDepth, topDepth);
-
-    segment.material.emissiveIntensity = 0.32 + glow * 0.72;
-    segment.position.z = 0.16 + Math.max(glow, 0) * 0.05;
+    const isActive = segment.userData.name === activeName;
+    segment.material.emissiveIntensity = isActive ? 1.2 : 0.46;
+    segment.position.z = THREE.MathUtils.lerp(segment.position.z, isActive ? 0.25 : 0.16, 0.12);
   });
-
-  syncHtmlLabels();
 
   renderer.render(scene, camera);
 }
 
+setActive("live");
 animate();
