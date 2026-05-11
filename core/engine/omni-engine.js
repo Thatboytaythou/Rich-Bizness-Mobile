@@ -2,7 +2,7 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 /* =========================
    RICH BIZNESS OMNI ENGINE
-   PORTAL CORE / HARD DIAL ALIGNMENT VERSION
+   FINAL ARMORED PORTAL DIAL VERSION
    /core/engine/omni-engine.js
 ========================= */
 
@@ -60,7 +60,7 @@ const rightLight = new THREE.PointLight(0xffd47a, 7, 65);
 rightLight.position.set(7.2, 1.8, 7.8);
 scene.add(rightLight);
 
-const portalLight = new THREE.PointLight(0x82ff45, 18, 55);
+const portalLight = new THREE.PointLight(0x82ff45, 20, 58);
 portalLight.position.set(0, -0.2, 4.6);
 scene.add(portalLight);
 
@@ -91,6 +91,14 @@ const gunMetal = new THREE.MeshStandardMaterial({
   emissiveIntensity: 0.18
 });
 
+const hardMetal = new THREE.MeshStandardMaterial({
+  color: 0x3a4035,
+  metalness: 1,
+  roughness: 0.18,
+  emissive: 0x182814,
+  emissiveIntensity: 0.24
+});
+
 const darkPanel = new THREE.MeshStandardMaterial({
   color: 0x071007,
   metalness: 0.82,
@@ -108,9 +116,9 @@ const glowMat = new THREE.MeshBasicMaterial({
 const portalGlassMat = new THREE.MeshStandardMaterial({
   color: 0x78ff4c,
   emissive: 0x78ff4c,
-  emissiveIntensity: 3.35,
+  emissiveIntensity: 3.45,
   transparent: true,
-  opacity: 0.72,
+  opacity: 0.74,
   metalness: 0.2,
   roughness: 0.035
 });
@@ -188,10 +196,120 @@ const innerGlow = torus(1.74, 0.055, glowMat, 0.47);
 const centerArmor = torus(1.31, 0.15, gunMetal, 0.58);
 
 /* =========================
+   FINAL ELITE METAL CORE
+========================= */
+const armorRing = new THREE.Mesh(
+  new THREE.TorusGeometry(2.16, 0.34, 32, 240),
+  hardMetal
+);
+
+armorRing.rotation.x = Math.PI / 2;
+armorRing.position.z = 0.49;
+dial.add(armorRing);
+
+const armorRingBack = new THREE.Mesh(
+  new THREE.TorusGeometry(2.34, 0.12, 24, 220),
+  gunMetal
+);
+
+armorRingBack.rotation.x = Math.PI / 2;
+armorRingBack.position.z = 0.34;
+dial.add(armorRingBack);
+
+const innerArmorGlow = new THREE.Mesh(
+  new THREE.TorusGeometry(1.82, 0.06, 20, 220),
+  new THREE.MeshStandardMaterial({
+    color: 0x8dff63,
+    emissive: 0x8dff63,
+    emissiveIntensity: 3.2,
+    roughness: 0.1,
+    metalness: 0.3
+  })
+);
+
+innerArmorGlow.rotation.x = Math.PI / 2;
+innerArmorGlow.position.z = 0.57;
+dial.add(innerArmorGlow);
+
+const outerArmorGlow = new THREE.Mesh(
+  new THREE.TorusGeometry(2.48, 0.035, 18, 220),
+  new THREE.MeshStandardMaterial({
+    color: 0x8dff63,
+    emissive: 0x8dff63,
+    emissiveIntensity: 2.6,
+    roughness: 0.12,
+    metalness: 0.25
+  })
+);
+
+outerArmorGlow.rotation.x = Math.PI / 2;
+outerArmorGlow.position.z = 0.56;
+dial.add(outerArmorGlow);
+
+const innerShadow = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.56, 1.56, 0.3, 90),
+  new THREE.MeshStandardMaterial({
+    color: 0x020302,
+    roughness: 1,
+    metalness: 0,
+    emissive: 0x041004,
+    emissiveIntensity: 0.25
+  })
+);
+
+innerShadow.rotation.x = Math.PI / 2;
+innerShadow.position.z = 0.31;
+dial.add(innerShadow);
+
+/* =========================
+   CORE BOLTS
+========================= */
+const coreBolts = [];
+
+for (let i = 0; i < 8; i++) {
+  const angle = (Math.PI * 2 / 8) * i;
+
+  const bolt = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.085, 0.085, 0.15, 20),
+    new THREE.MeshStandardMaterial({
+      color: 0xbfc5ae,
+      metalness: 1,
+      roughness: 0.16,
+      emissive: 0x0b100b,
+      emissiveIntensity: 0.18
+    })
+  );
+
+  bolt.rotation.x = Math.PI / 2;
+  bolt.position.set(
+    Math.cos(angle) * 2.04,
+    Math.sin(angle) * 2.04,
+    0.68
+  );
+
+  dial.add(bolt);
+  coreBolts.push(bolt);
+
+  const socket = new THREE.Mesh(
+    new THREE.TorusGeometry(0.12, 0.018, 10, 28),
+    glowMat
+  );
+
+  socket.rotation.x = Math.PI / 2;
+  socket.position.set(
+    Math.cos(angle) * 2.04,
+    Math.sin(angle) * 2.04,
+    0.665
+  );
+
+  dial.add(socket);
+}
+
+/* =========================
    PORTAL CORE
 ========================= */
 const portalGroup = new THREE.Group();
-portalGroup.position.z = 0.7;
+portalGroup.position.z = 0.74;
 dial.add(portalGroup);
 
 const portalBase = new THREE.Mesh(
@@ -239,7 +357,9 @@ portalRing2.rotation.x = Math.PI / 2;
 portalRing2.position.z = 0.34;
 portalGroup.add(portalRing2);
 
-/* PORTAL ENERGY PARTICLES */
+/* =========================
+   PORTAL ENERGY
+========================= */
 const energyGeo = new THREE.BufferGeometry();
 const energyPositions = [];
 
@@ -272,28 +392,18 @@ const energy = new THREE.Points(
 
 portalGroup.add(energy);
 
-/* PORTAL LIGHTNING LINES */
+/* =========================
+   PORTAL LIGHTNING
+========================= */
 const lightningGroup = new THREE.Group();
 lightningGroup.position.z = 0.38;
 portalGroup.add(lightningGroup);
 
 for (let i = 0; i < 18; i++) {
   const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(
-      (Math.random() - 0.5) * 1.4,
-      (Math.random() - 0.5) * 1.4,
-      0
-    ),
-    new THREE.Vector3(
-      (Math.random() - 0.5) * 1.6,
-      (Math.random() - 0.5) * 1.6,
-      0.02
-    ),
-    new THREE.Vector3(
-      (Math.random() - 0.5) * 1.4,
-      (Math.random() - 0.5) * 1.4,
-      0
-    )
+    new THREE.Vector3((Math.random() - 0.5) * 1.4, (Math.random() - 0.5) * 1.4, 0),
+    new THREE.Vector3((Math.random() - 0.5) * 1.6, (Math.random() - 0.5) * 1.6, 0.02),
+    new THREE.Vector3((Math.random() - 0.5) * 1.4, (Math.random() - 0.5) * 1.4, 0)
   ]);
 
   const tube = new THREE.Mesh(
@@ -682,6 +792,11 @@ function animate() {
   innerGlow.rotation.z = rotation * 0.52;
   centerArmor.rotation.z = -rotation * 0.2;
 
+  armorRing.rotation.z = rotation * 0.06;
+  armorRingBack.rotation.z = -rotation * 0.04;
+  innerArmorGlow.rotation.z = rotation * 0.4;
+  outerArmorGlow.rotation.z = -rotation * 0.32;
+
   portalGlass.scale.set(
     1 + Math.sin(t * 2.6) * 0.04,
     1 + Math.sin(t * 2.6) * 0.04,
@@ -699,6 +814,11 @@ function animate() {
   lightningGroup.children.forEach((line, index) => {
     line.material.opacity =
       0.18 + Math.abs(Math.sin(t * 2.2 + index)) * 0.38;
+  });
+
+  coreBolts.forEach((bolt, index) => {
+    bolt.material.emissiveIntensity =
+      0.14 + Math.abs(Math.sin(t * 2 + index)) * 0.12;
   });
 
   smoke.rotation.y += 0.0006;
@@ -728,7 +848,7 @@ function animate() {
     );
   });
 
-  portalLight.intensity = 16 + Math.sin(t * 2.8) * 3.4;
+  portalLight.intensity = 17 + Math.sin(t * 2.8) * 3.4;
   bottomGlow.intensity = 10 + Math.sin(t * 2.2) * 2.2;
 
   renderer.render(scene, camera);
