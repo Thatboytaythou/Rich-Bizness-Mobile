@@ -1,76 +1,90 @@
 import { AccessToken } from "livekit-server-sdk";
 
+/* =========================
+   RICH BIZNESS MOBILE
+   LIVEKIT TOKEN API
+   /api/livekit-token.js
+========================= */
+
+function cleanValue(value = "guest") {
+  return String(value)
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .slice(0, 80) || "guest";
+}
+
+function readParam(value) {
+  if (!value) return "";
+
+  if (Array.isArray(value)) return value[0] || "";
+
+  try {
+    const parsed = JSON.parse(value);
+    return parsed?.email || parsed?.username || parsed?.id || value;
+  } catch {
+    return value;
+  }
+}
+
 export default async function handler(req, res) {
   try {
-    const { room, username } = req.query;
-
-    // ✅ Validate input
-    if (!room) {
-      return res.status(400).json({
-        error: "Missing room"
-      });
+    if (req.method !== "GET" && req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
     }
 
-    // 🔥 Clean username (VERY IMPORTANT)
-    let identity = "guest";
+    const input = req.method === "POST" ? req.body || {} : req.query || {};
 
-    if (username) {
-      try {
-        // If it's JSON (from localStorage), parse it
-        const parsed = JSON.parse(username);
-        identity = parsed.email || "guest";
-      } catch {
-        // If it's already a string, use it
-        identity = username;
-      }
-    }
+    const room = cleanValue(readParam(input.room || input.roomName || "richbiz-live"));
+    const username = cleanValue(readParam(input.username || input.identity || "guest"));
+    const role = cleanValue(readParam(input.role || "viewer"));
 
-    // 🔥 Clean identity (no weird characters)
-    identity = identity.toString().replace(/[^a-zA-Z0-9_-]/g, "");
+    const canPublish =
+      role === "host" ||
+      role === "cohost" ||
+      input.canPublish === true ||
+      input.canPublish === "true";
 
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      console.error("❌ Missing ENV:", {
-        apiKey: !!apiKey,
-        apiSecret: !!apiSecret
-      });
-
       return res.status(500).json({
         error: "Missing LiveKit env vars"
       });
     }
 
-    // ✅ Create token
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity,
-      ttl: "10m",
+    const token = new AccessToken(apiKey, apiSecret, {
+      identity: username,
+      name: username,
+      ttl: "2h",
+      metadata: JSON.stringify({
+        app: "Rich Bizness Mobile",
+        role
+      })
     });
 
-    // ✅ Permissions
-    at.addGrant({
+    token.addGrant({
       roomJoin: true,
       room,
-      canPublish: true,
+      canPublish,
       canSubscribe: true,
+      canPublishData: true,
+      canUpdateOwnMetadata: true
     });
 
-    const token = await at.toJwt();
+    const jwt = await token.toJwt();
 
-    // 🔥 Debug log (shows in Vercel logs)
-    console.log("✅ Token created:", {
+    return res.status(200).json({
+      token: jwt,
       room,
-      identity
+      identity: username,
+      role,
+      canPublish
     });
-
-    return res.status(200).json({ token });
-
-  } catch (err) {
-    console.error("❌ LiveKit Token Error:", err);
+  } catch (error) {
+    console.error("LiveKit token error:", error);
 
     return res.status(500).json({
-      error: "Token generation failed"
+      error: error.message || "Token generation failed"
     });
   }
 }
