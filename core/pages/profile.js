@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE PROFILE
    /core/pages/profile.js
+   Avatar + Banner Upload + Meta Sync
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -29,6 +30,12 @@ const els = {
   statPoints: $("statPoints"),
   statRank: $("statRank"),
   statBalance: $("statBalance"),
+
+  avatarFileInput: $("avatarFileInput"),
+  bannerFileInput: $("bannerFileInput"),
+  uploadAvatarBtn: $("uploadAvatarBtn"),
+  uploadBannerBtn: $("uploadBannerBtn"),
+  syncMetaBtn: $("syncMetaBtn"),
 
   usernameInput: $("usernameInput"),
   displayNameInput: $("displayNameInput"),
@@ -78,6 +85,14 @@ function getInitial(name = "R") {
   return String(name || "R").trim().slice(0, 1).toUpperCase();
 }
 
+function escapePath(value = "") {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 80);
+}
+
 function renderProfile() {
   if (!currentUser || !currentProfile) return;
 
@@ -89,9 +104,9 @@ function renderProfile() {
   els.profileBio.textContent = bio;
   els.profileTag.textContent = `@${username}`;
 
-  els.statLevel.textContent = safeText(currentProfile.rich_level, "MAX");
+  els.statLevel.textContent = safeText(currentProfile.rich_level, "STARTER").toUpperCase();
   els.statPoints.textContent = Number(currentProfile.rich_points || 0).toLocaleString();
-  els.statRank.textContent = safeText(currentProfile.rank_title, "BIZ LEGEND");
+  els.statRank.textContent = safeText(currentProfile.rank_title, "NEW CREATOR").toUpperCase();
   els.statBalance.textContent = money(currentProfile.balance_cents);
 
   if (currentProfile.avatar_url) {
@@ -116,9 +131,7 @@ function renderProfile() {
 async function loadUser() {
   const { data, error } = await supabase.auth.getUser();
 
-  if (error) {
-    console.warn("Auth error:", error);
-  }
+  if (error) console.warn("Auth error:", error.message);
 
   currentUser = data?.user || null;
 
@@ -145,7 +158,6 @@ async function ensureProfile() {
     .maybeSingle();
 
   if (error) {
-    console.error("Profile load error:", error);
     setStatus(`PROFILE ERROR: ${error.message}`);
     return;
   }
@@ -162,8 +174,8 @@ async function ensureProfile() {
       username: fallbackUsername,
       display_name: fallbackUsername,
       bio: "Building the Rich Bizness universe.",
-      rich_level: "MAX",
-      rank_title: "BIZ LEGEND",
+      rich_level: "starter",
+      rank_title: "new creator",
       rich_points: 0,
       balance_cents: 0,
       online_status: "online",
@@ -177,12 +189,93 @@ async function ensureProfile() {
     .single();
 
   if (createError) {
-    console.error("Profile create error:", createError);
     setStatus(`CREATE PROFILE ERROR: ${createError.message}`);
     return;
   }
 
   currentProfile = created;
+}
+
+async function updateProfileFields(fields) {
+  if (!currentUser) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      ...fields,
+      online_status: "online",
+      last_seen_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", currentUser.id)
+    .select("*")
+    .single();
+
+  if (error) {
+    setStatus(`SAVE ERROR: ${error.message}`);
+    return null;
+  }
+
+  currentProfile = data;
+  renderProfile();
+  return data;
+}
+
+async function uploadProfileFile(file, bucket, fieldName) {
+  if (!file || !currentUser) return;
+
+  if (!file.type.startsWith("image/")) {
+    setStatus("IMAGE FILE ONLY FOR PROFILE MEDIA");
+    return;
+  }
+
+  setStatus(`UPLOADING ${fieldName === "avatar_url" ? "AVATAR" : "BANNER"}...`);
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const safeName = escapePath(file.name.replace(/\.[^/.]+$/, ""));
+  const path = `${currentUser.id}/${Date.now()}-${safeName}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(bucket)
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: file.type
+    });
+
+  if (uploadError) {
+    setStatus(`UPLOAD ERROR: ${uploadError.message}`);
+    return;
+  }
+
+  const { data: publicData } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(path);
+
+  const publicUrl = publicData?.publicUrl;
+
+  if (!publicUrl) {
+    setStatus("PUBLIC URL ERROR");
+    return;
+  }
+
+  if (fieldName === "avatar_url") {
+    els.avatarUrlInput.value = publicUrl;
+  }
+
+  if (fieldName === "banner_url") {
+    els.bannerUrlInput.value = publicUrl;
+  }
+
+  await updateProfileFields({
+    [fieldName]: publicUrl
+  });
+
+  if (fieldName === "avatar_url") {
+    await syncMetaAvatar(false);
+  }
+
+  setStatus(`${fieldName === "avatar_url" ? "AVATAR" : "BANNER"} UPLOADED REALTIME`);
 }
 
 async function saveProfile() {
@@ -202,33 +295,52 @@ async function saveProfile() {
   els.saveProfileBtn.disabled = true;
   setStatus("SAVING PROFILE...");
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({
-      username,
-      display_name: displayName || username,
-      bio: bio || null,
-      avatar_url: avatarUrl || null,
-      banner_url: bannerUrl || null,
-      online_status: "online",
-      last_seen_at: new Date().toISOString()
-    })
-    .eq("id", currentUser.id)
-    .select("*")
-    .single();
+  const data = await updateProfileFields({
+    username,
+    display_name: displayName || username,
+    bio: bio || null,
+    avatar_url: avatarUrl || null,
+    banner_url: bannerUrl || null
+  });
+
+  if (data) {
+    await syncMetaAvatar(false);
+    setStatus("PROFILE SAVED + META SYNCED");
+  }
+
+  els.saveProfileBtn.disabled = false;
+}
+
+async function syncMetaAvatar(showStatus = true) {
+  if (!currentUser || !currentProfile) return;
+
+  if (showStatus) setStatus("SYNCING TO META AVATAR...");
+
+  const payload = {
+    user_id: currentUser.id,
+    display_name: getName(currentProfile, currentUser),
+    avatar_url: currentProfile.avatar_url || null,
+    aura: "green",
+    rank: currentProfile.rank_title || "new creator",
+    level: Number(currentProfile.rich_points || 0) >= 100 ? 2 : 1,
+    xp: Number(currentProfile.rich_points || 0),
+    metadata: {
+      source: "profile.html",
+      synced_at: new Date().toISOString()
+    },
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await supabase
+    .from("meta_avatars")
+    .upsert(payload, { onConflict: "user_id" });
 
   if (error) {
-    console.error("Save profile error:", error);
-    setStatus(`SAVE ERROR: ${error.message}`);
-    els.saveProfileBtn.disabled = false;
+    setStatus(`META SYNC ERROR: ${error.message}`);
     return;
   }
 
-  currentProfile = data;
-  renderProfile();
-
-  setStatus("PROFILE SAVED REALTIME");
-  els.saveProfileBtn.disabled = false;
+  if (showStatus) setStatus("META AVATAR SYNCED");
 }
 
 async function updatePresence() {
@@ -276,12 +388,47 @@ function startRealtime() {
 }
 
 async function logout() {
+  await supabase
+    .from("profiles")
+    .update({
+      online_status: "offline",
+      last_seen_at: new Date().toISOString()
+    })
+    .eq("id", currentUser.id);
+
   await supabase.auth.signOut();
   window.location.href = "/auth.html";
 }
 
+els.uploadAvatarBtn?.addEventListener("click", () => els.avatarFileInput?.click());
+els.uploadBannerBtn?.addEventListener("click", () => els.bannerFileInput?.click());
+
+els.avatarFileInput?.addEventListener("change", async () => {
+  const file = els.avatarFileInput.files?.[0];
+  await uploadProfileFile(file, "avatars", "avatar_url");
+  els.avatarFileInput.value = "";
+});
+
+els.bannerFileInput?.addEventListener("change", async () => {
+  const file = els.bannerFileInput.files?.[0];
+  await uploadProfileFile(file, "profile-banners", "banner_url");
+  els.bannerFileInput.value = "";
+});
+
+els.syncMetaBtn?.addEventListener("click", () => syncMetaAvatar(true));
 els.saveProfileBtn?.addEventListener("click", saveProfile);
 els.logoutBtn?.addEventListener("click", logout);
+
+window.addEventListener("beforeunload", () => {
+  if (!currentUser) return;
+  supabase
+    .from("profiles")
+    .update({
+      online_status: "away",
+      last_seen_at: new Date().toISOString()
+    })
+    .eq("id", currentUser.id);
+});
 
 async function bootProfile() {
   setStatus("BOOTING PROFILE...");
@@ -292,6 +439,8 @@ async function bootProfile() {
   await ensureProfile();
   renderProfile();
   await updatePresence();
+  await syncMetaAvatar(false);
+
   startRealtime();
 
   setStatus("PROFILE READY");
