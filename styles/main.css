@@ -21,9 +21,7 @@ body{
   touch-action:none;
 }
 
-body{
-  color:#fff;
-}
+body{color:#fff}
 
 #engine{
   position:fixed;
@@ -41,7 +39,7 @@ body::before{
   z-index:2;
   pointer-events:none;
   background:
-    radial-gradient(circle at 50% 53%,rgba(128,255,72,.18),transparent 26%),
+    radial-gradient(circle at 50% 53%,rgba(128,255,72,.20),transparent 26%),
     radial-gradient(circle at center,rgba(0,0,0,.04),rgba(0,0,0,.82) 100%);
 }
 
@@ -58,7 +56,7 @@ body::before{
   inset:0;
   z-index:4;
   pointer-events:none;
-  opacity:.04;
+  opacity:.045;
   background-image:repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.55),transparent 1px);
 }
 
@@ -119,6 +117,7 @@ body::before{
   background:linear-gradient(145deg,rgba(24,24,24,.96),rgba(0,0,0,.78));
   border:1px solid rgba(255,218,118,.58);
   box-shadow:inset 0 0 16px rgba(255,255,255,.08),0 0 22px rgba(0,0,0,.9),0 0 18px rgba(130,255,82,.22);
+  color:inherit;
 }
 
 .rank-icon{
@@ -132,24 +131,19 @@ body::before{
   background:radial-gradient(circle at center,rgba(0,255,174,.28),rgba(0,0,0,.2));
   border:1px solid rgba(145,255,104,.35);
   box-shadow:0 0 18px rgba(97,255,84,.28);
+  overflow:hidden;
+  font-weight:950;
 }
 
-.rank-copy{
-  display:flex;
-  flex-direction:column;
+.rank-icon img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.rank-copy small{
-  color:#97ff67;
-  font-size:11px;
-  letter-spacing:.08em;
-}
-
-.rank-copy strong{
-  color:#9eff6f;
-  font-size:26px;
-  line-height:1;
-}
+.rank-copy{display:flex;flex-direction:column}
+.rank-copy small{color:#97ff67;font-size:11px;letter-spacing:.08em}
+.rank-copy strong{color:#9eff6f;font-size:26px;line-height:1}
 
 .brand-lockup{
   display:flex;
@@ -194,9 +188,7 @@ body::before{
   box-shadow:inset 0 0 12px rgba(255,255,255,.08),0 0 16px rgba(0,0,0,.85),0 0 18px rgba(132,255,85,.2);
 }
 
-.icon:active{
-  transform:scale(.9);
-}
+.icon:active{transform:scale(.9)}
 
 .notification::after{
   content:"";
@@ -210,6 +202,32 @@ body::before{
   box-shadow:0 0 16px #97ff67;
 }
 
+.notification.has-unread::after{
+  width:15px;
+  height:15px;
+  background:#b8ff4f;
+  box-shadow:0 0 24px #b8ff4f,0 0 42px rgba(157,255,99,.7);
+  animation:rbPing 1.25s ease-in-out infinite;
+}
+
+.notification.has-unread::before{
+  content:attr(data-count);
+  position:absolute;
+  top:-5px;
+  right:-4px;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:#9dff63;
+  color:#071007;
+  font-size:10px;
+  font-weight:950;
+  box-shadow:0 0 18px rgba(157,255,99,.75);
+}
+
 /* QUICK MENU */
 .quick-menu{
   position:fixed;
@@ -217,6 +235,8 @@ body::before{
   right:18px;
   z-index:60;
   width:230px;
+  max-height:calc(100vh - 120px);
+  overflow:auto;
   padding:14px;
   border-radius:24px;
   display:none;
@@ -228,9 +248,7 @@ body::before{
   backdrop-filter:blur(22px);
 }
 
-.quick-menu.open{
-  display:flex;
-}
+.quick-menu.open{display:flex}
 
 .quick-menu a{
   color:#eaffdc;
@@ -242,9 +260,7 @@ body::before{
   font-weight:850;
 }
 
-.quick-menu a:active{
-  background:rgba(128,255,80,.18);
-}
+.quick-menu a:active{background:rgba(128,255,80,.18)}
 
 /* DIAL TAP ZONES */
 .dial-ui{
@@ -288,9 +304,7 @@ body::before{
   filter:brightness(1.25);
 }
 
-.dial-card:active{
-  scale:.94;
-}
+.dial-card:active{scale:.94}
 
 .dial-icon{
   font-size:31px;
@@ -309,52 +323,21 @@ body::before{
   color:#9eff75;
   letter-spacing:.12em;
   font-weight:850;
+  max-width:94%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 /* ALIGNED TO HARD DIAL */
-.top-card{
-  top:33.8%;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.top-left-card{
-  top:39.3%;
-  left:23%;
-}
-
-.top-right-card{
-  top:39.3%;
-  right:23%;
-}
-
-.left-card{
-  top:53.4%;
-  left:18.3%;
-  transform:translateY(-50%);
-}
-
-.right-card{
-  top:53.4%;
-  right:18.3%;
-  transform:translateY(-50%);
-}
-
-.bottom-left-card{
-  bottom:27.4%;
-  left:23%;
-}
-
-.bottom-card{
-  bottom:22.3%;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.bottom-right-card{
-  bottom:27.4%;
-  right:23%;
-}
+.top-card{top:33.8%;left:50%;transform:translateX(-50%)}
+.top-left-card{top:39.3%;left:23%}
+.top-right-card{top:39.3%;right:23%}
+.left-card{top:53.4%;left:18.3%;transform:translateY(-50%)}
+.right-card{top:53.4%;right:18.3%;transform:translateY(-50%)}
+.bottom-left-card{bottom:27.4%;left:23%}
+.bottom-card{bottom:22.3%;left:50%;transform:translateX(-50%)}
+.bottom-right-card{bottom:27.4%;right:23%}
 
 /* CENTER PORTAL OVERLAY */
 .center-ui{
@@ -483,9 +466,7 @@ body::before{
   box-shadow:inset 0 0 18px rgba(255,255,255,.08),0 0 42px rgba(122,255,77,.34);
 }
 
-.enter:active{
-  transform:translateX(-50%) scale(.94);
-}
+.enter:active{transform:translateX(-50%) scale(.94)}
 
 .enter-main{
   display:block;
@@ -536,60 +517,51 @@ body::before{
   border-right:1px solid rgba(255,255,255,.06);
 }
 
-.stat-card:last-child{
-  border-right:none;
-}
+.stat-card:last-child{border-right:none}
+.stat-icon{font-size:24px;color:#9eff6d}
+.stat-card small{font-size:11px;letter-spacing:.14em;color:#8fff67;font-weight:850}
+.stat-card strong{font-size:18px}
 
-.stat-icon{
-  font-size:24px;
-  color:#9eff6d;
-}
-
-.stat-card small{
-  font-size:11px;
-  letter-spacing:.14em;
-  color:#8fff67;
-  font-weight:850;
+/* REALTIME VISUAL ENERGY */
+.stat-card strong,
+.dial-sub,
+.rank-copy strong,
+.portal-title small{
+  transition:color .25s ease,text-shadow .25s ease,filter .25s ease;
 }
 
 .stat-card strong{
-  font-size:18px;
+  text-shadow:0 0 12px rgba(157,255,99,.18);
+}
+
+.dial-card.is-active .dial-sub,
+#portalStatus{
+  text-shadow:0 0 14px rgba(157,255,99,.8);
+}
+
+@keyframes rbPing{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.25);opacity:.72}
 }
 
 @keyframes portalPulse{
-  0%,100%{
-    opacity:.62;
-    transform:scale(.98);
-  }
-  50%{
-    opacity:1;
-    transform:scale(1.03);
-  }
+  0%,100%{opacity:.62;transform:scale(.98)}
+  50%{opacity:1;transform:scale(1.03)}
 }
 
 @keyframes portalSpin{
-  to{
-    transform:rotate(360deg);
-  }
+  to{transform:rotate(360deg)}
 }
 
 @keyframes portalBeam{
-  0%,100%{
-    opacity:.15;
-    translate:-55% 0;
-  }
-  50%{
-    opacity:.72;
-    translate:55% 0;
-  }
+  0%,100%{opacity:.15;translate:-55% 0}
+  50%{opacity:.72;translate:55% 0}
 }
 
 /* TABLET */
 @media (max-width:900px){
   .brand-rich,
-  .brand-biz{
-    font-size:54px;
-  }
+  .brand-biz{font-size:54px}
 
   .dial-card{
     width:104px;
@@ -606,9 +578,7 @@ body::before{
     height:140px;
   }
 
-  .portal-title span{
-    font-size:27px;
-  }
+  .portal-title span{font-size:27px}
 }
 
 /* PHONE */
@@ -627,26 +597,18 @@ body::before{
   }
 
   .brand-rich,
-  .brand-biz{
-    font-size:43px;
-  }
+  .brand-biz{font-size:43px}
 
-  .brand-llc{
-    font-size:17px;
-  }
+  .brand-llc{font-size:17px}
 
-  .rank-panel{
-    padding:8px 12px;
-  }
+  .rank-panel{padding:8px 12px}
 
   .rank-icon{
     width:38px;
     height:38px;
   }
 
-  .rank-copy strong{
-    font-size:22px;
-  }
+  .rank-copy strong{font-size:22px}
 
   .icon{
     width:52px;
@@ -665,59 +627,20 @@ body::before{
     border-radius:14px;
   }
 
-  .dial-title{
-    font-size:12px;
-  }
+  .dial-title{font-size:12px}
+  .dial-sub{font-size:8px}
+  .dial-icon{font-size:21px}
 
-  .dial-sub{
-    font-size:8px;
-  }
+  .top-card{top:35.8%}
+  .top-left-card{top:41.2%;left:8.5%}
+  .top-right-card{top:41.2%;right:8.5%}
+  .left-card{top:54.6%;left:5%}
+  .right-card{top:54.6%;right:5%}
+  .bottom-left-card{bottom:27.8%;left:9.5%}
+  .bottom-card{bottom:22.5%}
+  .bottom-right-card{bottom:27.8%;right:9.5%}
 
-  .dial-icon{
-    font-size:21px;
-  }
-
-  .top-card{
-    top:35.8%;
-  }
-
-  .top-left-card{
-    top:41.2%;
-    left:8.5%;
-  }
-
-  .top-right-card{
-    top:41.2%;
-    right:8.5%;
-  }
-
-  .left-card{
-    top:54.6%;
-    left:5%;
-  }
-
-  .right-card{
-    top:54.6%;
-    right:5%;
-  }
-
-  .bottom-left-card{
-    bottom:27.8%;
-    left:9.5%;
-  }
-
-  .bottom-card{
-    bottom:22.5%;
-  }
-
-  .bottom-right-card{
-    bottom:27.8%;
-    right:9.5%;
-  }
-
-  .center-ui{
-    top:54.3%;
-  }
+  .center-ui{top:54.3%}
 
   .portal-core{
     width:154px;
@@ -729,26 +652,16 @@ body::before{
     height:108px;
   }
 
-  .portal-title span{
-    font-size:20px;
-  }
-
-  .portal-title small{
-    font-size:9px;
-  }
+  .portal-title span{font-size:20px}
+  .portal-title small{font-size:9px}
 
   .enter{
     bottom:98px;
     padding:15px;
   }
 
-  .enter-main{
-    font-size:27px;
-  }
-
-  .enter-sub{
-    font-size:11px;
-  }
+  .enter-main{font-size:27px}
+  .enter-sub{font-size:11px}
 
   .stats{
     grid-template-columns:repeat(4,1fr);
@@ -756,83 +669,34 @@ body::before{
     padding-right:4px;
   }
 
-  .stat-card{
-    min-height:76px;
-  }
-
-  .stat-icon{
-    font-size:18px;
-  }
-
-  .stat-card small{
-    font-size:8px;
-  }
-
-  .stat-card strong{
-    font-size:11px;
-  }
+  .stat-card{min-height:76px}
+  .stat-icon{font-size:18px}
+  .stat-card small{font-size:8px}
+  .stat-card strong{font-size:11px}
 }
 
-/* =========================
-   FINAL MOBILE EVEN-SCALE LOCK
-========================= */
+/* FINAL MOBILE EVEN-SCALE LOCK */
 @media (max-width:640px){
-
-  .top-center{
-    top:118px;
-  }
+  .top-center{top:118px}
 
   .brand-rich,
-  .brand-biz{
-    font-size:39px;
-  }
+  .brand-biz{font-size:39px}
 
   .dial-card{
     width:78px;
     height:78px;
   }
 
-  .top-card{
-    top:37%;
-  }
+  .top-card{top:37%}
+  .top-left-card{top:42.6%;left:8%}
+  .top-right-card{top:42.6%;right:8%}
+  .left-card{top:54.8%;left:5.5%}
+  .right-card{top:54.8%;right:5.5%}
+  .bottom-left-card{bottom:28.6%;left:9%}
+  .bottom-card{bottom:23.4%}
+  .bottom-right-card{bottom:28.6%;right:9%}
 
-  .top-left-card{
-    top:42.6%;
-    left:8%;
-  }
-
-  .top-right-card{
-    top:42.6%;
-    right:8%;
-  }
-
-  .left-card{
-    top:54.8%;
-    left:5.5%;
-  }
-
-  .right-card{
-    top:54.8%;
-    right:5.5%;
-  }
-
-  .bottom-left-card{
-    bottom:28.6%;
-    left:9%;
-  }
-
-  .bottom-card{
-    bottom:23.4%;
-  }
-
-  .bottom-right-card{
-    bottom:28.6%;
-    right:9%;
-  }
-
-  .center-ui{
-    top:54.6%;
-  }
+  .center-ui{top:54.6%}
 
   .portal-core{
     width:144px;
@@ -849,4 +713,3 @@ body::before{
     width:84vw;
   }
 }
-
