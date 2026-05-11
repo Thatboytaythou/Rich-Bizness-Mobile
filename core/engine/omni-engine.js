@@ -292,7 +292,7 @@ const routes = {
   music: "/music.html",
   gaming: "/gaming.html",
   store: "/store.html",
-  meta: "/metaverse.html",
+  meta: "/meta.html",
   sports: "/sports.html",
   upload: "/upload.html"
 };
