@@ -1,91 +1,540 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>META</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Rich Bizness LLC — Meta World</title>
 
-<link rel="stylesheet" href="/styles/main.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;min-height:100%;background:#020402;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;overflow-x:hidden}
+    body{
+      background:
+        radial-gradient(circle at 50% 8%,rgba(150,255,90,.24),transparent 30%),
+        radial-gradient(circle at 18% 42%,rgba(0,255,190,.12),transparent 28%),
+        radial-gradient(circle at 84% 75%,rgba(255,220,120,.10),transparent 32%),
+        #020402;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 35%,rgba(255,220,120,.05)),
+        repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 1px,transparent 1px 9px),
+        radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.92) 100%);
+    }
+
+    .world-glow{
+      position:fixed;
+      inset:-20%;
+      z-index:0;
+      pointer-events:none;
+      background:
+        conic-gradient(from 180deg at 50% 50%,rgba(157,255,103,.08),transparent,rgba(0,255,190,.08),transparent,rgba(255,219,123,.08),transparent);
+      filter:blur(30px);
+      animation:spin 18s linear infinite;
+      opacity:.9;
+    }
+
+    @keyframes spin{
+      from{transform:rotate(0deg) scale(1)}
+      to{transform:rotate(360deg) scale(1)}
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom));
+    }
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+    .circle-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      border:1px solid rgba(255,219,123,.52);
+      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
+      color:#ffe58a;
+      font-size:21px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+
+    .brand{display:flex;flex-direction:column;line-height:.9;text-align:center;font-family:Georgia,"Times New Roman",serif}
+    .brand strong{
+      font-size:32px;
+      letter-spacing:.05em;
+      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 12px rgba(129,255,82,.45));
+    }
+    .brand small{color:#ffe58a;letter-spacing:.22em;margin-top:5px;font-size:12px}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(151,255,97,.24);
+      border-radius:34px;
+      padding:22px;
+      margin-bottom:16px;
+      background:
+        linear-gradient(145deg,rgba(12,22,12,.94),rgba(0,0,0,.76)),
+        radial-gradient(circle at top,rgba(132,255,80,.22),transparent 58%);
+      box-shadow:0 0 45px rgba(0,0,0,.84),0 0 34px rgba(122,255,77,.16);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-52px;
+      top:-60px;
+      width:260px;
+      height:260px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(157,255,99,.32),transparent 68%);
+    }
+
+    .kicker{color:#9dff67;font-size:12px;font-weight:950;letter-spacing:.18em;margin-bottom:8px}
+    .hero h1{
+      font-size:38px;
+      line-height:.95;
+      font-family:Georgia,"Times New Roman",serif;
+      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .hero p{color:#dfffd2;margin-top:10px;font-size:15px;line-height:1.45}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+    .stat{
+      min-height:82px;
+      border-radius:22px;
+      border:1px solid rgba(151,255,97,.18);
+      background:rgba(0,0,0,.5);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:0 0 28px rgba(0,0,0,.7);
+      padding:10px;
+    }
+    .stat small{color:#9dff67;font-size:10px;letter-spacing:.14em;font-weight:900}
+    .stat strong{margin-top:6px;font-size:17px}
+
+    .panel{
+      border:1px solid rgba(255,219,123,.3);
+      border-radius:30px;
+      padding:16px;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(18px);
+      box-shadow:0 0 32px rgba(0,0,0,.72);
+      margin-bottom:16px;
+    }
+    .panel h2{color:#9dff67;font-size:13px;letter-spacing:.16em;margin-bottom:12px}
+
+    .avatar-core{
+      display:grid;
+      grid-template-columns:110px 1fr;
+      gap:14px;
+      align-items:center;
+    }
+
+    .avatar-orb{
+      width:110px;
+      height:110px;
+      border-radius:34px;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 50% 30%,rgba(223,255,188,.22),transparent 40%),
+        linear-gradient(145deg,rgba(157,255,103,.16),rgba(0,0,0,.82));
+      border:1px solid rgba(151,255,97,.3);
+      box-shadow:0 0 35px rgba(157,255,103,.18),inset 0 0 22px rgba(255,255,255,.05);
+      overflow:hidden;
+      font-size:44px;
+      color:#9dff67;
+      font-weight:950;
+    }
+
+    .avatar-orb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .avatar-info h3{font-size:24px;margin-bottom:6px}
+    .avatar-info p{color:#dfffd2;font-size:14px;line-height:1.4}
+    .xp-shell{
+      height:14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(151,255,97,.14);
+      overflow:hidden;
+      margin-top:12px;
+    }
+    .xp-bar{
+      height:100%;
+      width:12%;
+      background:linear-gradient(to right,#4c7618,#9dff67,#dfffbc);
+      border-radius:999px;
+      box-shadow:0 0 18px rgba(157,255,103,.35);
+    }
+
+    .meta-stage{
+      position:relative;
+      min-height:360px;
+      overflow:hidden;
+      border-radius:32px;
+      border:1px solid rgba(151,255,97,.18);
+      background:
+        radial-gradient(circle at 50% 48%,rgba(157,255,99,.18),transparent 42%),
+        radial-gradient(circle at 80% 20%,rgba(255,219,123,.12),transparent 24%),
+        linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.82));
+    }
+
+    .grid-floor{
+      position:absolute;
+      left:-20%;
+      right:-20%;
+      bottom:-28%;
+      height:70%;
+      background:
+        linear-gradient(rgba(157,255,103,.22) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(157,255,103,.22) 1px,transparent 1px);
+      background-size:38px 38px;
+      transform:perspective(420px) rotateX(62deg);
+      transform-origin:center bottom;
+      opacity:.28;
+    }
+
+    .portal-ring{
+      position:absolute;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      width:210px;
+      height:210px;
+      border-radius:50%;
+      border:2px solid rgba(157,255,103,.45);
+      box-shadow:
+        0 0 35px rgba(157,255,103,.34),
+        inset 0 0 45px rgba(157,255,103,.12);
+      animation:pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.8}
+      50%{transform:translate(-50%,-50%) scale(1.08);opacity:1}
+    }
+
+    .meta-player{
+      position:absolute;
+      left:50%;
+      top:48%;
+      transform:translate(-50%,-50%);
+      width:96px;
+      height:96px;
+      border-radius:32px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(145deg,rgba(157,255,103,.24),rgba(0,0,0,.76));
+      border:1px solid rgba(255,219,123,.36);
+      box-shadow:0 0 35px rgba(255,219,123,.18);
+      font-size:38px;
+      font-weight:950;
+      color:#dfffbc;
+      z-index:2;
+    }
+
+    .stage-label{
+      position:absolute;
+      left:16px;
+      top:16px;
+      color:#9dff67;
+      font-size:11px;
+      letter-spacing:.15em;
+      font-weight:950;
+    }
+
+    .stage-status{
+      position:absolute;
+      right:16px;
+      top:16px;
+      padding:8px 11px;
+      border-radius:999px;
+      background:rgba(0,0,0,.62);
+      border:1px solid rgba(255,219,123,.3);
+      color:#ffe58a;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.12em;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .control-btn,.main-btn,.ghost-btn{
+      border:none;
+      outline:none;
+      border-radius:18px;
+      min-height:50px;
+      font-weight:950;
+      letter-spacing:.12em;
+      font-size:12px;
+      width:100%;
+    }
+
+    .main-btn,.control-btn{
+      color:#081008;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 24px rgba(128,255,80,.3);
+    }
+
+    .ghost-btn{
+      color:#dfffd2;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(151,255,97,.2);
+    }
+
+    .portal-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    .portal-card{
+      text-decoration:none;
+      color:#fff;
+      border:1px solid rgba(151,255,97,.18);
+      border-radius:24px;
+      padding:14px;
+      background:rgba(0,0,0,.52);
+      box-shadow:0 0 26px rgba(0,0,0,.68);
+      min-height:118px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .portal-card span{
+      font-size:31px;
+      display:block;
+      margin-bottom:10px;
+    }
+
+    .portal-card strong{
+      color:#dfffd2;
+      font-size:16px;
+      display:block;
+      margin-bottom:5px;
+    }
+
+    .portal-card small{
+      color:#9dff67;
+      font-size:10px;
+      letter-spacing:.12em;
+      font-weight:950;
+      text-transform:uppercase;
+    }
+
+    .visitors{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .visitor{
+      display:grid;
+      grid-template-columns:50px 1fr;
+      gap:10px;
+      align-items:center;
+      border:1px solid rgba(151,255,97,.16);
+      border-radius:20px;
+      padding:10px;
+      background:rgba(255,255,255,.035);
+    }
+
+    .visitor-avatar{
+      width:50px;
+      height:50px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background:rgba(157,255,103,.12);
+      border:1px solid rgba(151,255,97,.22);
+      color:#9dff67;
+      font-weight:950;
+    }
+
+    .visitor strong{display:block}
+    .visitor small{color:#9dff67;letter-spacing:.09em;font-size:11px}
+
+    .empty{
+      border:1px dashed rgba(151,255,97,.28);
+      border-radius:24px;
+      padding:28px;
+      text-align:center;
+      color:#dfffd2;
+      font-size:16px;
+    }
+
+    .status{
+      margin-top:12px;
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:850;
+      min-height:18px;
+    }
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      transform:translateX(-50%);
+      z-index:40;
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:1px;
+      padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));
+      border-top:1px solid rgba(130,255,84,.16);
+      backdrop-filter:blur(18px);
+    }
+
+    .nav-item{
+      color:#dfffd2;
+      text-decoration:none;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      font-weight:850;
+      padding:8px 4px;
+      border-radius:14px;
+    }
+
+    .nav-item span{display:block;font-size:19px;margin-bottom:3px}
+    .nav-item.active{
+      color:#9dff67;
+      background:rgba(128,255,80,.1);
+      box-shadow:inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    @media(max-width:720px){
+      .brand strong{font-size:28px}
+      .hero h1{font-size:31px}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .avatar-core{grid-template-columns:86px 1fr}
+      .avatar-orb{width:86px;height:86px;border-radius:28px}
+      .portal-grid{grid-template-columns:1fr}
+      .controls{grid-template-columns:repeat(2,1fr)}
+      .meta-stage{min-height:330px}
+    }
+  </style>
 </head>
 
 <body>
+  <div class="world-glow"></div>
 
-<!-- 🔥 BACKGROUND -->
-<div class="bg"></div>
+  <main class="page">
+    <header class="topbar">
+      <a class="circle-btn" href="/index.html">‹</a>
 
-<!-- 🔥 TOP BAR -->
-<div class="topbar">
-  <div class="icon" onclick="goProfile()">👤</div>
-  <div class="icon" onclick="goSettings()">⚙️</div>
-</div>
+      <div class="brand">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
 
-<!-- 🔥 CONTENT -->
-<div class="container">
+      <a class="circle-btn" href="/profile.html">◈</a>
+    </header>
 
-  <h1>META</h1>
+    <section class="hero">
+      <div class="kicker">RICH BIZNESS VIRTUAL REALITY</div>
+      <h1>Enter The Meta World</h1>
+      <p>Step inside the Rich Bizness universe. Your avatar becomes the source of truth across live, music, gaming, sports, gallery, marketplace, messages, and future VR worlds.</p>
+    </section>
 
-  <button class="main-btn" onclick="enterMeta()">
-    ENTER META 🌐
-  </button>
+    <section class="stats">
+      <div class="stat"><small>WORLD</small><strong id="statWorld">MAIN</strong></div>
+      <div class="stat"><small>VISITS</small><strong id="statVisits">0</strong></div>
+      <div class="stat"><small>LEVEL</small><strong id="statLevel">1</strong></div>
+      <div class="stat"><small>STATUS</small><strong id="statStatus">READY</strong></div>
+    </section>
 
-  <button class="secondary-btn" onclick="goBack()">
-    GO BACK
-  </button>
+    <section class="panel">
+      <h2>AVATAR CORE</h2>
+      <div class="avatar-core">
+        <div class="avatar-orb" id="avatarOrb">◈</div>
+        <div class="avatar-info">
+          <h3 id="avatarName">Rich Avatar</h3>
+          <p id="avatarBio">Syncing profile identity into the Meta World...</p>
+          <div class="xp-shell">
+            <div class="xp-bar" id="xpBar"></div>
+          </div>
+          <div class="status" id="metaStatus">META BOOTING...</div>
+        </div>
+      </div>
+    </section>
 
-</div>
+    <section class="panel">
+      <h2>VIRTUAL WORLD STAGE</h2>
 
-<script>
+      <div class="meta-stage">
+        <div class="stage-label">RICH BIZNESS MAIN WORLD</div>
+        <div class="stage-status" id="stageStatus">ONLINE</div>
 
-/* =========================
-   USER CHECK
-========================= */
-function getUser(){
-  const raw = localStorage.getItem("rb_user");
-  if(!raw) return null;
+        <div class="portal-ring"></div>
+        <div class="grid-floor"></div>
 
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
+        <div class="meta-player" id="metaPlayer">◈</div>
+      </div>
 
-const user = getUser();
+      <div class="controls">
+        <button class="control-btn" id="enterWorldBtn">ENTER</button>
+        <button class="ghost-btn" id="levelUpBtn">LEVEL UP</button>
+        <button class="ghost-btn" id="syncAvatarBtn">SYNC</button>
+        <button class="ghost-btn" id="exitWorldBtn">EXIT</button>
+      </div>
+    </section>
 
-if(!user){
-  location.href="/auth.html";
-}
+    <section class="panel">
+      <h2>WORLD PORTALS</h2>
+      <div class="portal-grid" id="portalGrid">
+        <div class="empty">Loading Rich Bizness portals...</div>
+      </div>
+    </section>
 
-/* =========================
-   META ACTION (🔥 REAL CONNECTION)
-========================= */
-function enterMeta(){
+    <section class="panel">
+      <h2>LIVE META VISITORS</h2>
+      <div class="visitors" id="visitorsList">
+        <div class="empty">No visitors loaded yet.</div>
+      </div>
+    </section>
+  </main>
 
-  // Example system entry
-  // You can change this later to VR / dashboard / hub
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/index.html"><span>⌂</span>HOME</a>
+    <a class="nav-item" href="/feed.html"><span>◆</span>FEED</a>
+    <a class="nav-item" href="/live.html"><span>◉</span>LIVE</a>
+    <a class="nav-item active" href="/meta.html"><span>🌐</span>META</a>
+    <a class="nav-item" href="/profile.html"><span>◈</span>ME</a>
+  </nav>
 
-  alert("Entering META SYSTEM...");
-
-  // 🔥 redirect to core hub (change later)
-  location.href = "/live.html";
-}
-
-/* =========================
-   NAV
-========================= */
-function goBack(){
-  location.href = "/";
-}
-
-function goProfile(){
-  location.href = "/profile.html";
-}
-
-function goSettings(){
-  location.href = "/setting.html";
-}
-
-</script>
-
+  <script type="module" src="/core/pages/meta.js"></script>
 </body>
 </html>
