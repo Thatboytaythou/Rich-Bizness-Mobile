@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>Rich Bizness LLC — Watch</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+      background:#020402;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+      overflow-x:hidden;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 50% 10%,rgba(145,255,89,.18),transparent 30%),
+        radial-gradient(circle at 15% 48%,rgba(0,255,190,.08),transparent 28%),
+        radial-gradient(circle at 86% 72%,rgba(255,220,120,.08),transparent 30%),
+        #020402;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
+        radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.9) 100%);
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom));
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .circle-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      border:1px solid rgba(255,219,123,.52);
+      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
+      color:#ffe58a;
+      font-size:21px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      line-height:.9;
+      text-align:center;
+      font-family:Georgia,"Times New Roman",serif;
+    }
+
+    .brand strong{
+      font-size:32px;
+      letter-spacing:.05em;
+      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 12px rgba(129,255,82,.45));
+    }
+
+    .brand small{
+      color:#ffe58a;
+      letter-spacing:.22em;
+      margin-top:5px;
+      font-size:12px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(151,255,97,.24);
+      border-radius:34px;
+      padding:20px;
+      margin-bottom:16px;
+      background:
+        linear-gradient(145deg,rgba(12,22,12,.94),rgba(0,0,0,.76)),
+        radial-gradient(circle at top,rgba(132,255,80,.18),transparent 58%);
+      box-shadow:0 0 45px rgba(0,0,0,.84),0 0 34px rgba(122,255,77,.16);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-42px;
+      top:-52px;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(157,255,99,.25),transparent 68%);
+      pointer-events:none;
+    }
+
+    .kicker{
+      color:#9dff67;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.18em;
+      margin-bottom:8px;
+    }
+
+    .hero h1{
+      font-size:36px;
+      line-height:.95;
+      font-family:Georgia,"Times New Roman",serif;
+      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .hero p{
+      color:#dfffd2;
+      margin-top:10px;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      min-height:82px;
+      border-radius:22px;
+      border:1px solid rgba(151,255,97,.18);
+      background:rgba(0,0,0,.5);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:0 0 28px rgba(0,0,0,.7);
+      padding:10px;
+    }
+
+    .stat small{
+      color:#9dff67;
+      font-size:10px;
+      letter-spacing:.14em;
+      font-weight:900;
+    }
+
+    .stat strong{
+      margin-top:6px;
+      font-size:17px;
+    }
+
+    .stage{
+      border:1px solid rgba(255,219,123,.34);
+      border-radius:32px;
+      padding:16px;
+      margin-bottom:16px;
+      background:
+        linear-gradient(145deg,rgba(0,0,0,.8),rgba(10,18,10,.72)),
+        radial-gradient(circle at center,rgba(132,255,80,.1),transparent 60%);
+      box-shadow:0 0 34px rgba(0,0,0,.76);
+    }
+
+    .video-wrap{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      border:1px solid rgba(151,255,97,.25);
+      background:
+        radial-gradient(circle at center,rgba(145,255,89,.14),transparent 48%),
+        #000;
+      min-height:360px;
+      display:grid;
+      place-items:center;
+    }
+
+    #watchVideo{
+      width:100%;
+      height:100%;
+      min-height:360px;
+      object-fit:cover;
+      background:#000;
+      display:block;
+    }
+
+    .video-empty{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:24px;
+      color:#dfffd2;
+      pointer-events:none;
+    }
+
+    .video-empty strong{
+      font-size:26px;
+      color:#9dff67;
+      font-family:Georgia,"Times New Roman",serif;
+    }
+
+    .video-empty span{
+      margin-top:8px;
+      font-size:14px;
+      opacity:.88;
+    }
+
+    .live-badge{
+      position:absolute;
+      top:14px;
+      left:14px;
+      z-index:5;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(0,0,0,.72);
+      border:1px solid rgba(255,219,123,.34);
+      color:#9dff67;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.12em;
+      box-shadow:0 0 20px rgba(128,255,80,.18);
+    }
+
+    .access-badge{
+      position:absolute;
+      top:14px;
+      right:14px;
+      z-index:5;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(0,0,0,.72);
+      border:1px solid rgba(151,255,97,.24);
+      color:#ffe58a;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.12em;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .main-btn,
+    .ghost-btn,
+    .money-btn{
+      border:none;
+      outline:none;
+      border-radius:18px;
+      min-height:50px;
+      font-weight:950;
+      letter-spacing:.12em;
+      font-size:13px;
+    }
+
+    .main-btn,
+    .money-btn{
+      color:#081008;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+      box-shadow:0 0 24px rgba(128,255,80,.36);
+    }
+
+    .ghost-btn{
+      color:#dfffd2;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(151,255,97,.2);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+
+    .panel{
+      border:1px solid rgba(255,219,123,.3);
+      border-radius:30px;
+      padding:16px;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(18px);
+      box-shadow:0 0 32px rgba(0,0,0,.72);
+    }
+
+    .panel h2{
+      color:#9dff67;
+      font-size:13px;
+      letter-spacing:.16em;
+      margin-bottom:12px;
+    }
+
+    .chat-box{
+      height:310px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:9px;
+      padding:10px;
+      border-radius:20px;
+      border:1px solid rgba(151,255,97,.16);
+      background:rgba(255,255,255,.025);
+      margin-bottom:10px;
+    }
+
+    .chat-message{
+      padding:10px;
+      border-radius:16px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .chat-message strong{
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.06em;
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .chat-message p{
+      color:#dfffd2;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .chat-form{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+    }
+
+    input{
+      width:100%;
+      border:none;
+      outline:none;
+      color:#fff;
+      border-radius:16px;
+      padding:13px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.07);
+      font-size:15px;
+    }
+
+    .send-btn{
+      width:56px;
+      border-radius:16px;
+      border:none;
+      color:#081008;
+      font-weight:950;
+      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
+    }
+
+    .emoji-row{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .emoji-btn{
+      min-height:44px;
+      border-radius:16px;
+      border:1px solid rgba(151,255,97,.2);
+      background:rgba(255,255,255,.045);
+      font-size:20px;
+    }
+
+    .members{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .member{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .member strong{
+      font-size:14px;
+    }
+
+    .member small{
+      color:#9dff67;
+      letter-spacing:.08em;
+      font-weight:800;
+    }
+
+    .status{
+      margin-top:12px;
+      color:#9dff67;
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:850;
+      min-height:18px;
+    }
+
+    .vip-card{
+      padding:14px;
+      border-radius:22px;
+      border:1px solid rgba(151,255,97,.18);
+      background:rgba(255,255,255,.035);
+      margin-bottom:12px;
+    }
+
+    .vip-card strong{
+      display:block;
+      font-size:21px;
+      margin-bottom:6px;
+    }
+
+    .vip-card p{
+      color:#dfffd2;
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .bottom-nav{
+      position:fixed;
+      left:50%;
+      bottom:0;
+      transform:translateX(-50%);
+      z-index:40;
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:1px;
+      padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));
+      border-top:1px solid rgba(130,255,84,.16);
+      backdrop-filter:blur(18px);
+    }
+
+    .nav-item{
+      color:#dfffd2;
+      text-decoration:none;
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.08em;
+      font-weight:850;
+      padding:8px 4px;
+      border-radius:14px;
+    }
+
+    .nav-item span{
+      display:block;
+      font-size:19px;
+      margin-bottom:3px;
+    }
+
+    .nav-item.active{
+      color:#9dff67;
+      background:rgba(128,255,80,.1);
+      box-shadow:inset 0 0 18px rgba(128,255,80,.08);
+    }
+
+    @media(max-width:720px){
+      .brand strong{ font-size:28px; }
+      .hero h1{ font-size:30px; }
+      .stats{ grid-template-columns:repeat(2,1fr); }
+      .grid{ grid-template-columns:1fr; }
+      .controls{ grid-template-columns:1fr; }
+      .video-wrap,
+      #watchVideo{
+        min-height:300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <header class="topbar">
+      <a class="circle-btn" href="/index.html" aria-label="Back Home">‹</a>
+
+      <div class="brand">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
+
+      <a class="circle-btn" href="/live.html" aria-label="Go Live">◉</a>
+    </header>
+
+    <section class="hero">
+      <div class="kicker">WATCH POWER HOUSE</div>
+      <h1 id="watchTitle">Rich Bizness Live</h1>
+      <p id="watchDescription">
+        Watch live streams, VIP rooms, co-host broadcasts, realtime chat, reactions, and Rich Bizness money moments.
+      </p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <small>STATUS</small>
+        <strong id="statStatus">OFFLINE</strong>
+      </div>
+
+      <div class="stat">
+        <small>VIEWERS</small>
+        <strong id="statViewers">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>CHAT</small>
+        <strong id="statChat">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>REACTIONS</small>
+        <strong id="statReactions">0</strong>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="video-wrap">
+        <div class="live-badge" id="liveBadge">OFFLINE</div>
+        <div class="access-badge" id="accessBadge">FREE</div>
+
+        <video id="watchVideo" autoplay playsinline controls></video>
+
+        <div class="video-empty" id="videoEmpty">
+          <strong>Waiting on the live room</strong>
+          <span id="emptyText">Open a live link or connect to the latest stream.</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="main-btn" id="joinBtn" type="button">JOIN LIVE 🚀</button>
+        <button class="ghost-btn" id="latestBtn" type="button">FIND LATEST LIVE</button>
+        <button class="money-btn" id="unlockBtn" type="button">UNLOCK VIP 💰</button>
+        <button class="ghost-btn" id="requestCohostBtn" type="button">REQUEST CO-HOST</button>
+      </div>
+
+      <div class="status" id="watchStatus">BOOTING WATCH...</div>
+    </section>
+
+    <section class="grid">
+
+      <section class="panel">
+        <h2>REALTIME CHAT</h2>
+
+        <div class="chat-box" id="chatBox">
+          <div class="chat-message">
+            <strong>RICH BIZNESS</strong>
+            <p>Chat loads when the stream connects.</p>
+          </div>
+        </div>
+
+        <div class="chat-form">
+          <input id="chatInput" type="text" maxlength="240" placeholder="Talk in the live..." />
+          <button class="send-btn" id="sendChatBtn" type="button">➤</button>
+        </div>
+
+        <div class="emoji-row">
+          <button class="emoji-btn" data-emoji="🔥" type="button">🔥</button>
+          <button class="emoji-btn" data-emoji="💰" type="button">💰</button>
+          <button class="emoji-btn" data-emoji="🚀" type="button">🚀</button>
+          <button class="emoji-btn" data-emoji="👑" type="button">👑</button>
+          <button class="emoji-btn" data-emoji="🫶🏾" type="button">🫶🏾</button>
+          <button class="emoji-btn" data-emoji="😮‍💨" type="button">😮‍💨</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>VIP + LIVE ACCESS</h2>
+
+        <div class="vip-card">
+          <strong id="vipTitle">Free Room</strong>
+          <p id="vipCopy">
+            If this live is VIP or paid, unlock access here. Stripe checkout connects next.
+          </p>
+        </div>
+
+        <div class="members" id="membersList">
+          <div class="member">
+            <strong>Waiting</strong>
+            <small>VIEWERS</small>
+          </div>
+        </div>
+
+        <div class="status" id="moneyStatus">VIP SYSTEM READY</div>
+      </section>
+
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/index.html">
+      <span>⌂</span>
+      HOME
+    </a>
+
+    <a class="nav-item" href="/feed.html">
+      <span>◆</span>
+      FEED
+    </a>
+
+    <a class="nav-item" href="/live.html">
+      <span>◉</span>
+      LIVE
+    </a>
+
+    <a class="nav-item active" href="/watch.html">
+      <span>📺</span>
+      WATCH
+    </a>
+
+    <a class="nav-item" href="/profile.html">
+      <span>◈</span>
+      ME
+    </a>
+  </nav>
+
+  <script type="module" src="/core/pages/watch.js"></script>
+
+</body>
+</html>
