@@ -23,17 +23,17 @@
 
     <div class="top-left">
       <div class="welcome-block">
-        <div class="welcome-text">WELCOME BACK</div>
-        <div class="welcome-name" data-user-name>Thatboytaythou</div>
+        <div class="welcome-text" id="welcomeStatus">WELCOME BACK</div>
+        <div class="welcome-name" id="homeUserName" data-user-name>Thatboytaythou</div>
       </div>
 
-      <div class="rank-panel">
-        <div class="rank-icon">◈</div>
+      <button class="rank-panel" id="profileShortcut" data-route="/profile.html" type="button">
+        <div class="rank-icon" id="homeAvatar">◈</div>
         <div class="rank-copy">
           <small>RICH LEVEL</small>
-          <strong>MAX</strong>
+          <strong id="homeRichLevel">MAX</strong>
         </div>
-      </div>
+      </button>
     </div>
 
     <div class="top-center">
@@ -45,7 +45,13 @@
     </div>
 
     <div class="top-right">
-      <button class="icon notification" data-route="/notifications.html" type="button" aria-label="Notifications">
+      <button
+        class="icon notification"
+        id="notificationBtn"
+        data-route="/notifications.html"
+        type="button"
+        aria-label="Notifications"
+      >
         🔔
       </button>
 
@@ -78,49 +84,49 @@
     <button class="dial-card top-card" data-dial-card="live" data-route="/live.html" type="button">
       <div class="dial-icon">◉</div>
       <div class="dial-title">LIVE</div>
-      <div class="dial-sub">STREAM</div>
+      <div class="dial-sub" id="liveDialSub">STREAM</div>
     </button>
 
     <button class="dial-card top-left-card" data-dial-card="gallery" data-route="/gallery.html" type="button">
       <div class="dial-icon">▣</div>
       <div class="dial-title">GALLERY</div>
-      <div class="dial-sub">PHOTOS</div>
+      <div class="dial-sub" id="galleryDialSub">PHOTOS</div>
     </button>
 
     <button class="dial-card top-right-card" data-dial-card="music" data-route="/music.html" type="button">
       <div class="dial-icon">♪</div>
       <div class="dial-title">MUSIC</div>
-      <div class="dial-sub">VIBES</div>
+      <div class="dial-sub" id="musicDialSub">VIBES</div>
     </button>
 
     <button class="dial-card left-card" data-dial-card="upload" data-route="/upload.html" type="button">
       <div class="dial-icon">⬆</div>
       <div class="dial-title">UPLOAD</div>
-      <div class="dial-sub">CONTENT</div>
+      <div class="dial-sub" id="uploadDialSub">CONTENT</div>
     </button>
 
     <button class="dial-card right-card" data-dial-card="gaming" data-route="/gaming.html" type="button">
       <div class="dial-icon">🎮</div>
       <div class="dial-title">GAMING</div>
-      <div class="dial-sub">PLAY</div>
+      <div class="dial-sub" id="gamingDialSub">PLAY</div>
     </button>
 
     <button class="dial-card bottom-left-card" data-dial-card="sports" data-route="/sports.html" type="button">
       <div class="dial-icon">🏆</div>
       <div class="dial-title">SPORTS</div>
-      <div class="dial-sub">HIGHLIGHTS</div>
+      <div class="dial-sub" id="sportsDialSub">HIGHLIGHTS</div>
     </button>
 
-    <button class="dial-card bottom-card" data-dial-card="meta" data-route="/metaverse.html" type="button">
+    <button class="dial-card bottom-card" data-dial-card="meta" data-route="/meta.html" type="button">
       <div class="dial-icon">◎</div>
       <div class="dial-title">META</div>
-      <div class="dial-sub">VERSE</div>
+      <div class="dial-sub" id="metaDialSub">VERSE</div>
     </button>
 
     <button class="dial-card bottom-right-card" data-dial-card="store" data-route="/store.html" type="button">
       <div class="dial-icon">🛒</div>
       <div class="dial-title">STORE</div>
-      <div class="dial-sub">SHOP</div>
+      <div class="dial-sub" id="storeDialSub">SHOP</div>
     </button>
 
   </main>
@@ -131,40 +137,40 @@
         <div class="portal-title">
           <span>RICH</span>
           <span>BIZNESS</span>
-          <small>LLC</small>
+          <small id="portalStatus">LLC</small>
         </div>
       </div>
     </div>
   </section>
 
   <button class="enter" id="activateBtn" type="button">
-    <span class="enter-main">ACTIVATE</span>
-    <span class="enter-sub">TAP TO ENTER</span>
+    <span class="enter-main" id="activateMain">ACTIVATE</span>
+    <span class="enter-sub" id="activateSub">TAP TO ENTER</span>
   </button>
 
   <footer class="stats">
     <div class="stat-card">
       <span class="stat-icon">▰</span>
       <small>BALANCE</small>
-      <strong>$10,890.00</strong>
+      <strong id="homeBalance">$0.00</strong>
     </div>
 
     <div class="stat-card">
       <span class="stat-icon">♛</span>
       <small>RICH POINTS</small>
-      <strong>28,450</strong>
+      <strong id="homeRichPoints">0</strong>
     </div>
 
     <div class="stat-card">
       <span class="stat-icon">🛡</span>
       <small>RANK</small>
-      <strong>BIZ LEGEND</strong>
+      <strong id="homeRank">BIZ LEGEND</strong>
     </div>
 
     <div class="stat-card">
       <span class="stat-icon">👥</span>
       <small>ONLINE</small>
-      <strong>1,245</strong>
+      <strong id="homeOnline">0</strong>
     </div>
   </footer>
 
@@ -198,6 +204,12 @@
         card.classList.toggle("is-active", card.dataset.dialCard === key);
       });
 
+      const activeCard = document.querySelector(`[data-dial-card="${key}"]`);
+      const title = activeCard?.querySelector(".dial-title")?.textContent || "RICH";
+
+      const activateSub = document.getElementById("activateSub");
+      if (activateSub) activateSub.textContent = `ENTER ${title}`;
+
       if (!fromEngine && typeof window.RB_spinTo === "function") {
         window.RB_spinTo(key);
       }
@@ -229,6 +241,15 @@
         return;
       }
 
+      const quickMenu = document.getElementById("quickMenu");
+      if (
+        quickMenu?.classList.contains("open") &&
+        !event.target.closest("#quickMenu") &&
+        !event.target.closest("#menuBtn")
+      ) {
+        quickMenu.classList.remove("open");
+      }
+
       const activateBtn = event.target.closest("#activateBtn");
 
       if (activateBtn) {
@@ -256,6 +277,7 @@
     setActiveDial("live");
   </script>
 
+  <script type="module" src="/core/pages/index.js"></script>
   <script type="module" src="/core/engine/omni-engine.js"></script>
 
 </body>
