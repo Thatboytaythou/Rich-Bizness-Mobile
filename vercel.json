@@ -1,1 +1,35 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
 
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+
+    { "source": "/", "destination": "/index.html" },
+
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/feed", "destination": "/feed.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+
+    { "source": "/live", "destination": "/live.html" },
+    { "source": "/watch", "destination": "/watch.html" },
+
+    { "source": "/music", "destination": "/music.html" },
+    { "source": "/gaming", "destination": "/gaming.html" },
+    { "source": "/sports", "destination": "/sports.html" },
+
+    { "source": "/gallery", "destination": "/gallery.html" },
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/store", "destination": "/store.html" },
+
+    { "source": "/messages", "destination": "/messages.html" },
+    { "source": "/notifications", "destination": "/notifications.html" },
+
+    { "source": "/meta", "destination": "/meta.html" },
+
+    { "source": "/games/:path*", "destination": "/games/:path*" },
+    { "source": "/images/:path*", "destination": "/images/:path*" },
+    { "source": "/styles/:path*", "destination": "/styles/:path*" },
+    { "source": "/core/:path*", "destination": "/core/:path*" }
+  ]
+}
