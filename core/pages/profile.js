@@ -188,28 +188,28 @@ function buildMetaPayload(extra = {}) {
   const config = extra.outfit || getAvatarConfig();
   const extraMetadata = extra.metadata || {};
 
-  return {
+  const payload = {
     user_id: currentUser.id,
     display_name: getName(),
     avatar_url: cleanUrl(els.avatarUrlInput?.value) || currentProfile?.avatar_url || null,
     model_url: cleanUrl(els.modelUrlInput?.value) || currentMetaAvatar?.model_url || null,
 
     avatar_type: extra.avatar_type || currentMetaAvatar?.avatar_type || "created",
-    aura: els.auraInput?.value || currentMetaAvatar?.aura || "green",
+    aura: extra.aura || els.auraInput?.value || currentMetaAvatar?.aura || "green",
     rank: currentProfile?.rank_title || currentMetaAvatar?.rank || "new creator",
     level: Number(currentMetaAvatar?.level || Math.max(1, Math.floor(richPoints / 100) + 1)),
     xp: richPoints,
 
-    idle_animation: config.motion || currentMetaAvatar?.idle_animation || "idle_breathe",
-    motion_state: config.motion || currentMetaAvatar?.motion_state || "idle_breathe",
-    emote: els.emoteInput?.value || currentMetaAvatar?.emote || "neutral",
-    theme: els.themeInput?.value || currentMetaAvatar?.theme || "rich_green",
-    presence_state: "online",
+    idle_animation: extra.idle_animation || config.motion || currentMetaAvatar?.idle_animation || "idle_breathe",
+    motion_state: extra.motion_state || config.motion || currentMetaAvatar?.motion_state || "idle_breathe",
+    emote: extra.emote || els.emoteInput?.value || currentMetaAvatar?.emote || "neutral",
+    theme: extra.theme || els.themeInput?.value || currentMetaAvatar?.theme || "rich_green",
+    presence_state: extra.presence_state || "online",
 
     outfit: config,
-    equipped_items: currentMetaAvatar?.equipped_items || [],
-    equipped_effects: currentMetaAvatar?.equipped_effects || [],
-    position: currentMetaAvatar?.position || {},
+    equipped_items: extra.equipped_items || currentMetaAvatar?.equipped_items || [],
+    equipped_effects: extra.equipped_effects || currentMetaAvatar?.equipped_effects || [],
+    position: extra.position || currentMetaAvatar?.position || {},
 
     metadata: {
       ...(currentMetaAvatar?.metadata || {}),
@@ -221,18 +221,11 @@ function buildMetaPayload(extra = {}) {
       ...extraMetadata
     },
 
-    updated_at: new Date().toISOString(),
-    ...extra,
-    metadata: {
-      ...(currentMetaAvatar?.metadata || {}),
-      source: "profile.html",
-      app: "Rich Bizness Mobile",
-      avatar_config: config,
-      avatar_prompt: avatarPromptFromConfig(config),
-      synced_at: new Date().toISOString(),
-      ...extraMetadata
-    }
+    updated_at: new Date().toISOString()
   };
+
+  delete extra.metadata;
+  return { ...payload, ...extra, metadata: payload.metadata };
 }
 
 function renderProfile() {
@@ -283,6 +276,7 @@ function renderProfile() {
 
   syncCreatorInputsFromMeta();
   renderMetaAvatar();
+  broadcastAvatarIdentity();
 }
 
 function syncCreatorInputsFromMeta() {
@@ -341,6 +335,34 @@ function renderMetaAvatar() {
     els.auraRing.style.borderColor = glow;
     els.auraRing.style.boxShadow = `0 0 70px ${glow}`;
   }
+}
+
+function getPublicIdentityPayload() {
+  if (!currentUser || !currentProfile) return null;
+
+  return {
+    user_id: currentUser.id,
+    username: getUsername(),
+    display_name: getName(),
+    bio: currentProfile.bio || "",
+    avatar_url: currentProfile.avatar_url || currentMetaAvatar?.avatar_url || null,
+    banner_url: currentProfile.banner_url || null,
+    online_status: currentProfile.online_status || "online",
+    rich_level: currentProfile.rich_level || "starter",
+    rank_title: currentProfile.rank_title || "new creator",
+    rich_points: Number(currentProfile.rich_points || 0),
+    meta_avatar: currentMetaAvatar || null,
+    avatar_config: getAvatarConfig(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function broadcastAvatarIdentity() {
+  const payload = getPublicIdentityPayload();
+  if (!payload) return;
+
+  localStorage.setItem("rb_current_identity", JSON.stringify(payload));
+  window.dispatchEvent(new CustomEvent("rb:identity-updated", { detail: payload }));
 }
 
 async function loadUser() {
