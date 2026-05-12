@@ -48,7 +48,7 @@
     .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .tag{display:inline-flex;padding:8px 12px;border-radius:999px;color:#9dff67;border:1px solid rgba(151,255,97,.28);background:rgba(128,255,80,.08);font-size:12px;font-weight:900;letter-spacing:.1em}
 
-    .btn,.logout-btn,.save-btn,.upload-btn{border:none;outline:none;border-radius:16px;padding:12px 14px;color:#081008;font-weight:950;letter-spacing:.08em;background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);box-shadow:0 0 22px rgba(128,255,80,.32);text-decoration:none;text-align:center;white-space:nowrap}
+    .logout-btn,.save-btn,.upload-btn,.creator-btn{border:none;outline:none;border-radius:16px;padding:12px 14px;color:#081008;font-weight:950;letter-spacing:.08em;background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);box-shadow:0 0 22px rgba(128,255,80,.32);text-decoration:none;text-align:center;white-space:nowrap}
     .ghost-btn{border-radius:16px;padding:12px 14px;color:#dfffd2;background:rgba(255,255,255,.045);border:1px solid rgba(151,255,97,.2);font-weight:950;letter-spacing:.08em;text-decoration:none;text-align:center}
 
     .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
@@ -60,17 +60,47 @@
     .panel{border:1px solid rgba(255,219,123,.32);border-radius:30px;padding:16px;background:rgba(0,0,0,.58);backdrop-filter:blur(18px);box-shadow:0 0 34px rgba(0,0,0,.72);margin-bottom:16px}
     .panel h2{color:#9dff67;font-size:13px;letter-spacing:.16em;margin-bottom:12px}
 
-    .avatar-stage{min-height:390px;border-radius:30px;border:1px solid rgba(151,255,97,.22);background:radial-gradient(circle at 50% 28%,rgba(157,255,99,.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.68));position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;padding:18px}
+    .avatar-stage{min-height:430px;border-radius:30px;border:1px solid rgba(151,255,97,.22);background:radial-gradient(circle at 50% 28%,rgba(157,255,99,.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.68));position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;padding:18px}
     .avatar-stage::before{content:"";position:absolute;inset:22px;border-radius:28px;border:1px dashed rgba(151,255,97,.24)}
 
-    .avatar-character{position:relative;z-index:3;width:180px;height:240px;border-radius:90px 90px 56px 56px;background:radial-gradient(circle at 50% 18%,#dfffbc,#9dff67 28%,#17340f 70%,#050805);box-shadow:0 0 60px rgba(157,255,103,.32),inset 0 -20px 40px rgba(0,0,0,.48);animation:avatarIdle 3.2s ease-in-out infinite;display:grid;place-items:center;font-size:60px;color:#061006;font-weight:950}
-    .avatar-character img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
-
     .meta-model-viewer{position:relative;z-index:4;width:100%;height:320px;display:none;--poster-color:transparent;filter:drop-shadow(0 0 34px rgba(157,255,103,.35))}
-    .avatar-fallback{position:relative;z-index:3}
+    .aura-ring{position:absolute;width:280px;height:280px;border-radius:50%;border:1px solid rgba(157,255,103,.28);box-shadow:0 0 60px rgba(157,255,103,.22);animation:auraPulse 2.4s ease-in-out infinite}
 
-    .aura-ring{position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid rgba(157,255,103,.28);box-shadow:0 0 60px rgba(157,255,103,.22);animation:auraPulse 2.4s ease-in-out infinite}
+    .created-avatar{position:relative;z-index:4;width:190px;height:270px;display:grid;place-items:center;animation:avatarIdle 3.2s ease-in-out infinite}
+    .created-avatar[data-motion="turnt_up"]{animation:avatarTurnt .9s ease-in-out infinite}
+    .created-avatar[data-motion="walking"]{animation:avatarWalk 1.2s ease-in-out infinite}
+    .created-avatar[data-motion="boss_mode"]{animation:avatarBoss 2.2s ease-in-out infinite}
+    .created-avatar[data-motion="celebrate"]{animation:avatarCelebrate .8s ease-in-out infinite}
+
+    .avatar-body{position:absolute;bottom:18px;width:118px;height:170px;border-radius:58px 58px 42px 42px;background:linear-gradient(to bottom,#dfffbc,#9dff67 36%,#17340f 88%);box-shadow:0 0 60px rgba(157,255,103,.34),inset 0 -20px 38px rgba(0,0,0,.45)}
+    .avatar-head{position:absolute;top:16px;width:102px;height:102px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#fff2c4,#b87944 55%,#4a2415);border:2px solid rgba(255,229,138,.55);box-shadow:0 0 24px rgba(255,229,138,.25)}
+    .avatar-hair{position:absolute;top:7px;width:108px;height:48px;border-radius:52px 52px 20px 20px;background:#111;box-shadow:0 8px 0 rgba(0,0,0,.38)}
+    .avatar-face{position:absolute;top:48px;width:72px;height:32px;display:flex;align-items:center;justify-content:space-around;color:#061006;font-weight:950}
+    .avatar-face::before,.avatar-face::after{content:"";width:9px;height:9px;border-radius:50%;background:#061006;box-shadow:0 0 4px rgba(0,0,0,.35)}
+    .avatar-mouth{position:absolute;top:75px;width:28px;height:10px;border-bottom:3px solid #061006;border-radius:0 0 20px 20px}
+    .avatar-chain{position:absolute;top:126px;width:54px;height:18px;border-radius:999px;border:2px solid #ffe58a;box-shadow:0 0 16px rgba(255,229,138,.5)}
+    .avatar-fit{position:absolute;bottom:28px;width:92px;height:92px;border-radius:34px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12)}
+    .avatar-shadow{position:absolute;bottom:0;width:160px;height:26px;border-radius:50%;background:rgba(0,0,0,.52);filter:blur(4px)}
+
+    .created-avatar[data-body="athletic"] .avatar-body{width:126px}
+    .created-avatar[data-body="heavy"] .avatar-body{width:142px}
+    .created-avatar[data-body="slim"] .avatar-body{width:102px}
+
+    .created-avatar[data-hair="waves"] .avatar-hair{background:repeating-linear-gradient(90deg,#050505 0 10px,#202020 10px 18px)}
+    .created-avatar[data-hair="locs"] .avatar-hair{height:64px;border-radius:52px 52px 30px 30px;background:repeating-linear-gradient(90deg,#050505 0 7px,#1d1d1d 7px 12px)}
+    .created-avatar[data-hair="afro"] .avatar-hair{top:-2px;height:68px;border-radius:50%;background:#050505}
+    .created-avatar[data-hair="fade"] .avatar-hair{height:34px;border-radius:52px 52px 12px 12px}
+
+    .created-avatar[data-outfit="money"] .avatar-body{background:linear-gradient(to bottom,#efffdc,#9dff67 35%,#0c2b08 88%)}
+    .created-avatar[data-outfit="vip"] .avatar-body{background:linear-gradient(to bottom,#fff4b8,#ffe58a 32%,#4f3503 88%)}
+    .created-avatar[data-outfit="smoke"] .avatar-body{background:linear-gradient(to bottom,#e6fff0,#7d8c7d 35%,#101510 88%)}
+    .created-avatar[data-outfit="ninja"] .avatar-body{background:linear-gradient(to bottom,#222,#050505 45%,#000 88%)}
+
     @keyframes avatarIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.025)}}
+    @keyframes avatarTurnt{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-14px) rotate(2deg)}}
+    @keyframes avatarWalk{0%,100%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+    @keyframes avatarBoss{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    @keyframes avatarCelebrate{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-18px) scale(1.06)}}
     @keyframes auraPulse{0%,100%{opacity:.36;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
 
     .avatar-meta{position:relative;z-index:5;margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
@@ -78,7 +108,7 @@
     .meta-pill small{display:block;color:#9dff67;font-size:9px;letter-spacing:.12em;font-weight:900}
     .meta-pill strong{display:block;margin-top:4px;font-size:13px}
 
-    .upload-row,.portal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .upload-row,.creator-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .field{display:flex;flex-direction:column;gap:6px}
     .field.full{grid-column:1 / -1}
@@ -97,7 +127,7 @@
       .brand strong{font-size:28px}
       .identity-row{align-items:flex-start;flex-direction:column}
       .quick-actions,.grid{grid-template-columns:repeat(2,1fr)}
-      .form-grid,.upload-row,.portal-grid{grid-template-columns:1fr}
+      .form-grid,.upload-row,.creator-grid{grid-template-columns:1fr}
       .profile-title h1{font-size:30px}
       .avatar-meta{grid-template-columns:1fr}
       .meta-model-viewer{height:300px}
@@ -118,7 +148,6 @@
 
     <section class="profile-hero">
       <div class="banner" id="profileBanner"></div>
-
       <div class="profile-main">
         <div class="identity-row">
           <div class="avatar-wrap">
@@ -132,7 +161,6 @@
               </div>
             </div>
           </div>
-
           <button class="logout-btn" id="logoutBtn" type="button">I’M OUT ✌🏽</button>
         </div>
       </div>
@@ -169,10 +197,19 @@
           environment-image="neutral"
         ></model-viewer>
 
-        <div class="avatar-character avatar-fallback" id="metaAvatarPreview">R</div>
+        <div class="created-avatar" id="generatedAvatarPreview" data-body="athletic" data-hair="waves" data-outfit="money" data-motion="idle_breathe">
+          <div class="avatar-shadow"></div>
+          <div class="avatar-body"></div>
+          <div class="avatar-fit"></div>
+          <div class="avatar-chain"></div>
+          <div class="avatar-head"></div>
+          <div class="avatar-hair"></div>
+          <div class="avatar-face"></div>
+          <div class="avatar-mouth"></div>
+        </div>
 
         <div class="avatar-meta">
-          <div class="meta-pill"><small>TYPE</small><strong id="avatarType">3D</strong></div>
+          <div class="meta-pill"><small>TYPE</small><strong id="avatarType">CREATED</strong></div>
           <div class="meta-pill"><small>MOTION</small><strong id="avatarMotion">IDLE</strong></div>
           <div class="meta-pill"><small>EMOTE</small><strong id="avatarEmote">NEUTRAL</strong></div>
         </div>
@@ -180,16 +217,66 @@
     </section>
 
     <section class="panel">
-      <h2>PROFILE MEDIA + META MODEL</h2>
+      <h2>CREATE MY AVATAR</h2>
+
+      <div class="creator-grid">
+        <div class="field">
+          <label>BODY</label>
+          <select id="creatorBodyInput">
+            <option value="athletic">Athletic</option>
+            <option value="slim">Slim</option>
+            <option value="heavy">Heavy</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>HAIR</label>
+          <select id="creatorHairInput">
+            <option value="waves">Waves</option>
+            <option value="locs">Locs</option>
+            <option value="afro">Afro</option>
+            <option value="fade">Fade</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>OUTFIT</label>
+          <select id="creatorOutfitInput">
+            <option value="money">Money Fit</option>
+            <option value="vip">Gold VIP</option>
+            <option value="smoke">Smoke City</option>
+            <option value="ninja">Ninja Black</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>MOTION</label>
+          <select id="creatorMotionInput">
+            <option value="idle_breathe">Idle Breathe</option>
+            <option value="walking">Walking</option>
+            <option value="turnt_up">Turnt Up</option>
+            <option value="boss_mode">Boss Mode</option>
+            <option value="celebrate">Celebrate</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="creator-btn" id="generateAvatarBtn" type="button" style="width:100%;">
+        GENERATE MY AVATAR ⚡
+      </button>
+    </section>
+
+    <section class="panel">
+      <h2>PROFILE MEDIA + OPTIONAL 3D MODEL</h2>
 
       <input id="avatarFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" />
       <input id="bannerFileInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" />
-      <input id="modelFileInput" type="file" accept=".glb,.gltf,.vrm,.fbx,.obj,.usdz" />
+      <input id="modelFileInput" type="file" accept=".glb,.gltf" />
 
       <div class="upload-row">
-        <button class="upload-btn" id="uploadAvatarBtn" type="button">UPLOAD AVATAR 🖼️</button>
+        <button class="upload-btn" id="uploadAvatarBtn" type="button">UPLOAD AVATAR IMAGE 🖼️</button>
         <button class="upload-btn" id="uploadBannerBtn" type="button">UPLOAD BANNER 🌌</button>
-        <button class="upload-btn" id="uploadModelBtn" type="button">UPLOAD 3D MODEL 🧍🏽‍♂️</button>
+        <button class="upload-btn" id="uploadModelBtn" type="button">UPLOAD GLB/GLTF 🧍🏽‍♂️</button>
         <button class="ghost-btn" id="syncMetaBtn" type="button">SYNC META 🌐</button>
       </div>
     </section>
@@ -224,17 +311,6 @@
         </div>
 
         <div class="field">
-          <label>MOTION STATE</label>
-          <select id="motionInput">
-            <option value="idle_breathe">Idle Breathe</option>
-            <option value="standing">Standing</option>
-            <option value="walking">Walking</option>
-            <option value="turnt_up">Turnt Up</option>
-            <option value="boss_mode">Boss Mode</option>
-          </select>
-        </div>
-
-        <div class="field">
           <label>EMOTE</label>
           <select id="emoteInput">
             <option value="neutral">Neutral</option>
@@ -255,19 +331,19 @@
           </select>
         </div>
 
+        <div class="field">
+          <label>3D MODEL URL</label>
+          <input class="input" id="modelUrlInput" type="url" placeholder="Optional GLB/GLTF URL" />
+        </div>
+
         <div class="field full">
           <label>AVATAR URL</label>
-          <input class="input" id="avatarUrlInput" type="url" placeholder="Auto-filled after avatar upload" />
+          <input class="input" id="avatarUrlInput" type="url" placeholder="Optional profile image URL" />
         </div>
 
         <div class="field full">
           <label>BANNER URL</label>
           <input class="input" id="bannerUrlInput" type="url" placeholder="Auto-filled after banner upload" />
-        </div>
-
-        <div class="field full">
-          <label>3D MODEL URL</label>
-          <input class="input" id="modelUrlInput" type="url" placeholder="Auto-filled after 3D model upload" />
         </div>
       </div>
 
