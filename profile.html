@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Rich Bizness LLC — Profile</title>
 
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{width:100%;min-height:100%;background:#020402;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;overflow-x:hidden}
@@ -58,15 +60,20 @@
     .panel{border:1px solid rgba(255,219,123,.32);border-radius:30px;padding:16px;background:rgba(0,0,0,.58);backdrop-filter:blur(18px);box-shadow:0 0 34px rgba(0,0,0,.72);margin-bottom:16px}
     .panel h2{color:#9dff67;font-size:13px;letter-spacing:.16em;margin-bottom:12px}
 
-    .avatar-stage{min-height:360px;border-radius:30px;border:1px solid rgba(151,255,97,.22);background:radial-gradient(circle at 50% 28%,rgba(157,255,99,.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.68));position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;padding:18px}
+    .avatar-stage{min-height:390px;border-radius:30px;border:1px solid rgba(151,255,97,.22);background:radial-gradient(circle at 50% 28%,rgba(157,255,99,.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.68));position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;padding:18px}
     .avatar-stage::before{content:"";position:absolute;inset:22px;border-radius:28px;border:1px dashed rgba(151,255,97,.24)}
-    .avatar-character{position:relative;z-index:2;width:180px;height:240px;border-radius:90px 90px 56px 56px;background:radial-gradient(circle at 50% 18%,#dfffbc,#9dff67 28%,#17340f 70%,#050805);box-shadow:0 0 60px rgba(157,255,103,.32),inset 0 -20px 40px rgba(0,0,0,.48);animation:avatarIdle 3.2s ease-in-out infinite;display:grid;place-items:center;font-size:60px;color:#061006;font-weight:950}
+
+    .avatar-character{position:relative;z-index:3;width:180px;height:240px;border-radius:90px 90px 56px 56px;background:radial-gradient(circle at 50% 18%,#dfffbc,#9dff67 28%,#17340f 70%,#050805);box-shadow:0 0 60px rgba(157,255,103,.32),inset 0 -20px 40px rgba(0,0,0,.48);animation:avatarIdle 3.2s ease-in-out infinite;display:grid;place-items:center;font-size:60px;color:#061006;font-weight:950}
     .avatar-character img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+
+    .meta-model-viewer{position:relative;z-index:4;width:100%;height:320px;display:none;--poster-color:transparent;filter:drop-shadow(0 0 34px rgba(157,255,103,.35))}
+    .avatar-fallback{position:relative;z-index:3}
+
     .aura-ring{position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid rgba(157,255,103,.28);box-shadow:0 0 60px rgba(157,255,103,.22);animation:auraPulse 2.4s ease-in-out infinite}
     @keyframes avatarIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.025)}}
     @keyframes auraPulse{0%,100%{opacity:.36;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
 
-    .avatar-meta{position:relative;z-index:2;margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+    .avatar-meta{position:relative;z-index:5;margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
     .meta-pill{border-radius:18px;border:1px solid rgba(151,255,97,.18);background:rgba(0,0,0,.5);padding:10px}
     .meta-pill small{display:block;color:#9dff67;font-size:9px;letter-spacing:.12em;font-weight:900}
     .meta-pill strong{display:block;margin-top:4px;font-size:13px}
@@ -93,6 +100,7 @@
       .form-grid,.upload-row,.portal-grid{grid-template-columns:1fr}
       .profile-title h1{font-size:30px}
       .avatar-meta{grid-template-columns:1fr}
+      .meta-model-viewer{height:300px}
     }
   </style>
 </head>
@@ -149,7 +157,19 @@
 
       <div class="avatar-stage">
         <div class="aura-ring" id="auraRing"></div>
-        <div class="avatar-character" id="metaAvatarPreview">R</div>
+
+        <model-viewer
+          id="metaModelViewer"
+          class="meta-model-viewer"
+          camera-controls
+          auto-rotate
+          autoplay
+          shadow-intensity="1"
+          exposure="1.1"
+          environment-image="neutral"
+        ></model-viewer>
+
+        <div class="avatar-character avatar-fallback" id="metaAvatarPreview">R</div>
 
         <div class="avatar-meta">
           <div class="meta-pill"><small>TYPE</small><strong id="avatarType">3D</strong></div>
