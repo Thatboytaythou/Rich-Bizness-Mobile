@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE PROFILE
    /core/pages/profile.js
-   Identity Engine + Real Meta Avatar Sync
+   Identity Engine + Real 3D Meta Avatar Viewer
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -33,6 +33,7 @@ const els = {
   statBalance: $("statBalance"),
 
   auraRing: $("auraRing"),
+  metaModelViewer: $("metaModelViewer"),
   metaAvatarPreview: $("metaAvatarPreview"),
   avatarType: $("avatarType"),
   avatarMotion: $("avatarMotion"),
@@ -99,20 +100,11 @@ function safeText(value, fallback = "") {
 }
 
 function getName(profile = currentProfile, user = currentUser) {
-  return (
-    profile?.display_name ||
-    profile?.username ||
-    user?.email?.split("@")[0] ||
-    "Rich Creator"
-  );
+  return profile?.display_name || profile?.username || user?.email?.split("@")[0] || "Rich Creator";
 }
 
 function getUsername(profile = currentProfile, user = currentUser) {
-  return (
-    profile?.username ||
-    user?.email?.split("@")[0] ||
-    "creator"
-  );
+  return profile?.username || user?.email?.split("@")[0] || "creator";
 }
 
 function getInitial(name = "R") {
@@ -156,7 +148,7 @@ function buildMetaPayload(extra = {}) {
     avatar_url: cleanUrl(els.avatarUrlInput?.value) || currentProfile?.avatar_url || null,
     model_url: cleanUrl(els.modelUrlInput?.value) || currentMetaAvatar?.model_url || null,
 
-    avatar_type: currentMetaAvatar?.avatar_type || "3d",
+    avatar_type: "3d",
     aura: els.auraInput?.value || currentMetaAvatar?.aura || "green",
     rank: currentProfile?.rank_title || currentMetaAvatar?.rank || "new creator",
     level,
@@ -200,7 +192,10 @@ function renderProfile() {
   els.profileTag.textContent = `@${username}`;
 
   if (els.presenceTag) {
-    els.presenceTag.textContent = safeText(currentMetaAvatar?.presence_state, currentProfile.online_status || "online").toUpperCase();
+    els.presenceTag.textContent = safeText(
+      currentMetaAvatar?.presence_state,
+      currentProfile.online_status || "online"
+    ).toUpperCase();
   }
 
   els.statLevel.textContent = safeText(currentProfile.rich_level, "STARTER").toUpperCase();
@@ -238,18 +233,33 @@ function renderProfile() {
 function renderMetaAvatar() {
   const name = getName();
   const avatarUrl = currentMetaAvatar?.avatar_url || currentProfile?.avatar_url || null;
+  const modelUrl = cleanUrl(currentMetaAvatar?.model_url) || cleanUrl(els.modelUrlInput?.value);
   const aura = getMetaValue("aura");
   const motion = getMetaValue("motion_state") || getMetaValue("idle_animation");
   const emote = getMetaValue("emote");
-  const avatarType = getMetaValue("avatar_type");
 
-  if (avatarUrl) {
-    els.metaAvatarPreview.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="Digital avatar preview" />`;
+  if (modelUrl && els.metaModelViewer) {
+    els.metaModelViewer.src = modelUrl;
+    els.metaModelViewer.style.display = "block";
+    els.metaAvatarPreview.style.display = "none";
+    els.avatarType.textContent = "3D MODEL";
   } else {
-    els.metaAvatarPreview.textContent = getInitial(name);
+    if (els.metaModelViewer) {
+      els.metaModelViewer.removeAttribute("src");
+      els.metaModelViewer.style.display = "none";
+    }
+
+    els.metaAvatarPreview.style.display = "grid";
+
+    if (avatarUrl) {
+      els.metaAvatarPreview.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="Digital avatar preview" />`;
+    } else {
+      els.metaAvatarPreview.textContent = getInitial(name);
+    }
+
+    els.avatarType.textContent = "3D READY";
   }
 
-  els.avatarType.textContent = String(avatarType || "3d").toUpperCase();
   els.avatarMotion.textContent = String(motion || "idle").replaceAll("_", " ").toUpperCase();
   els.avatarEmote.textContent = String(emote || "neutral").replaceAll("_", " ").toUpperCase();
 
@@ -269,7 +279,6 @@ function renderMetaAvatar() {
 
 async function loadUser() {
   const { data, error } = await supabase.auth.getUser();
-
   if (error) console.warn("Auth error:", error.message);
 
   currentUser = data?.user || null;
@@ -456,10 +465,7 @@ async function uploadFileToBucket(file, bucket, folder = "") {
     return null;
   }
 
-  const { data: publicData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(path);
-
+  const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(path);
   return publicData?.publicUrl || null;
 }
 
@@ -474,7 +480,6 @@ async function uploadProfileFile(file, bucket, fieldName) {
   setStatus(`UPLOADING ${fieldName === "avatar_url" ? "AVATAR" : "BANNER"}...`);
 
   const publicUrl = await uploadFileToBucket(file, bucket, "profile");
-
   if (!publicUrl) {
     setStatus("PUBLIC URL ERROR");
     return;
@@ -488,9 +493,7 @@ async function uploadProfileFile(file, bucket, fieldName) {
   if (updated && fieldName === "avatar_url") {
     await updateMetaAvatar({
       avatar_url: publicUrl,
-      metadata: {
-        avatar_source: "profile_upload"
-      }
+      metadata: { avatar_source: "profile_upload" }
     });
   }
 
@@ -500,10 +503,10 @@ async function uploadProfileFile(file, bucket, fieldName) {
 async function uploadModelFile(file) {
   if (!file || !currentUser) return;
 
-  const allowed = /\.(glb|gltf|vrm|fbx|obj|usdz)$/i.test(file.name);
+  const allowed = /\.(glb|gltf)$/i.test(file.name);
 
   if (!allowed) {
-    setStatus("3D MODEL ONLY: GLB, GLTF, VRM, FBX, OBJ, USDZ");
+    setStatus("MODEL VIEWER NEEDS GLB OR GLTF FIRST");
     return;
   }
 
@@ -521,12 +524,10 @@ async function uploadModelFile(file) {
   await updateMetaAvatar({
     avatar_type: "3d",
     model_url: publicUrl,
-    metadata: {
-      model_source: "profile_model_upload"
-    }
+    metadata: { model_source: "profile_model_upload" }
   }, true);
 
-  setStatus("3D MODEL UPLOADED + META AVATAR SYNCED");
+  setStatus("3D MODEL UPLOADED + LIVE PREVIEW ACTIVE");
 }
 
 async function saveProfile() {
@@ -560,15 +561,14 @@ async function saveProfile() {
       display_name: displayName || username,
       avatar_url: avatarUrl || null,
       model_url: modelUrl || null,
+      avatar_type: "3d",
       aura: els.auraInput.value,
       idle_animation: els.motionInput.value,
       motion_state: els.motionInput.value,
       emote: els.emoteInput.value,
       theme: els.themeInput.value,
       presence_state: "online",
-      metadata: {
-        saved_from: "profile_save"
-      }
+      metadata: { saved_from: "profile_save" }
     }, true);
 
     setStatus("IDENTITY SAVED + DIGITAL AVATAR LIVE");
@@ -582,15 +582,14 @@ async function syncMetaAvatar(showStatus = true) {
     display_name: getName(),
     avatar_url: currentProfile?.avatar_url || cleanUrl(els.avatarUrlInput?.value) || null,
     model_url: cleanUrl(els.modelUrlInput?.value) || currentMetaAvatar?.model_url || null,
+    avatar_type: "3d",
     aura: els.auraInput?.value || "green",
     idle_animation: els.motionInput?.value || "idle_breathe",
     motion_state: els.motionInput?.value || "idle_breathe",
     emote: els.emoteInput?.value || "neutral",
     theme: els.themeInput?.value || "rich_green",
     presence_state: "online",
-    metadata: {
-      manual_sync: showStatus
-    }
+    metadata: { manual_sync: showStatus }
   }, showStatus);
 }
 
@@ -612,65 +611,46 @@ async function updatePresence(state = "online") {
 
 function startPresenceHeartbeat() {
   if (presenceTimer) clearInterval(presenceTimer);
-
-  presenceTimer = setInterval(() => {
-    updatePresence("online");
-  }, 45000);
+  presenceTimer = setInterval(() => updatePresence("online"), 45000);
 }
 
 function startRealtime() {
   if (!currentUser) return;
-
-  if (realtimeChannel) {
-    supabase.removeChannel(realtimeChannel);
-  }
+  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
 
   realtimeChannel = supabase
     .channel("rich-bizness-profile-identity-realtime")
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "profiles",
-        filter: `id=eq.${currentUser.id}`
-      },
-      async (payload) => {
-        if (payload.new) {
-          currentProfile = payload.new;
-          renderProfile();
-          setStatus("PROFILE UPDATED LIVE");
-        }
+    .on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "profiles",
+      filter: `id=eq.${currentUser.id}`
+    }, async (payload) => {
+      if (payload.new) {
+        currentProfile = payload.new;
+        renderProfile();
+        setStatus("PROFILE UPDATED LIVE");
       }
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "meta_avatars",
-        filter: `user_id=eq.${currentUser.id}`
-      },
-      async (payload) => {
-        if (payload.new) {
-          currentMetaAvatar = payload.new;
-          renderProfile();
-          setStatus("DIGITAL AVATAR UPDATED LIVE");
-        }
+    })
+    .on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "meta_avatars",
+      filter: `user_id=eq.${currentUser.id}`
+    }, async (payload) => {
+      if (payload.new) {
+        currentMetaAvatar = payload.new;
+        renderProfile();
+        setStatus("DIGITAL AVATAR UPDATED LIVE");
       }
-    )
+    })
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setStatus("IDENTITY REALTIME CONNECTED");
-      }
+      if (status === "SUBSCRIBED") setStatus("IDENTITY REALTIME CONNECTED");
     });
 }
 
 async function logout() {
-  if (currentUser) {
-    await updatePresence("offline");
-  }
-
+  if (currentUser) await updatePresence("offline");
   await supabase.auth.signOut();
   window.location.href = "/auth.html";
 }
