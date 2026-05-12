@@ -1,1 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Rich Bizness LLC — Settings</title>
 
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;min-height:100%;background:#020402;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;overflow-x:hidden}
+    body{
+      background:
+        radial-gradient(circle at 50% 10%,rgba(145,255,89,.18),transparent 30%),
+        radial-gradient(circle at 18% 55%,rgba(0,255,190,.10),transparent 30%),
+        radial-gradient(circle at 82% 80%,rgba(255,220,120,.10),transparent 34%),
+        #020402;
+    }
+    body::before{
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:
+        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
+        repeating-linear-gradient(135deg,rgba(255,255,255,.016) 0 1px,transparent 1px 9px),
+        radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.9) 100%);
+    }
+
+    .page{position:relative;z-index:1;width:min(980px,100%);margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom))}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+    .brand{display:flex;flex-direction:column;line-height:.9;font-family:Georgia,"Times New Roman",serif;text-align:center}
+    .brand strong{font-size:30px;letter-spacing:.05em;background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(129,255,82,.45))}
+    .brand small{color:#ffe58a;letter-spacing:.22em;margin-top:5px;font-size:12px}
+    .circle-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,219,123,.52);background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));color:#ffe58a;font-size:21px;display:grid;place-items:center;box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);text-decoration:none}
+
+    .hero{border:1px solid rgba(151,255,97,.24);border-radius:34px;padding:20px;background:linear-gradient(145deg,rgba(12,22,12,.94),rgba(0,0,0,.76)),radial-gradient(circle at top,rgba(132,255,80,.20),transparent 58%);box-shadow:0 0 48px rgba(0,0,0,.84),0 0 36px rgba(122,255,77,.16);margin-bottom:16px}
+    .kicker{color:#9dff67;font-size:12px;font-weight:950;letter-spacing:.18em;margin-bottom:8px}
+    .hero h1{font-size:34px;line-height:.95;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{color:#dfffd2;margin-top:10px;font-size:14px;line-height:1.45}
+
+    .panel{border:1px solid rgba(255,219,123,.32);border-radius:30px;padding:16px;background:rgba(0,0,0,.58);backdrop-filter:blur(18px);box-shadow:0 0 34px rgba(0,0,0,.72);margin-bottom:16px}
+    .panel h2{color:#9dff67;font-size:13px;letter-spacing:.16em;margin-bottom:12px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field.full{grid-column:1 / -1}
+    .field label{color:#9dff67;font-size:11px;letter-spacing:.12em;font-weight:900}
+    .input,select{width:100%;border:none;outline:none;color:#fff;border-radius:16px;padding:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font-size:15px}
+
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid rgba(151,255,97,.16);border-radius:18px;background:rgba(255,255,255,.035);margin-bottom:10px}
+    .toggle-row strong{display:block;font-size:14px}
+    .toggle-row small{display:block;color:#dfffd2;margin-top:4px;font-size:12px;line-height:1.35}
+    .toggle-row input{width:22px;height:22px;accent-color:#9dff67}
+
+    .action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .save-btn,.danger-btn{border:none;outline:none;border-radius:16px;min-height:50px;font-weight:950;letter-spacing:.08em}
+    .save-btn{color:#081008;background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);box-shadow:0 0 22px rgba(128,255,80,.32)}
+    .danger-btn{color:#ffd6d6;background:rgba(255,55,55,.08);border:1px solid rgba(255,120,120,.24)}
+    .ghost-btn{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:13px;color:#dfffd2;background:rgba(255,255,255,.045);border:1px solid rgba(151,255,97,.2);font-weight:950;letter-spacing:.08em}
+    .status{margin-top:12px;color:#9dff67;font-size:12px;letter-spacing:.12em;font-weight:850;min-height:18px}
+
+    .bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:40;width:min(980px,100%);display:grid;grid-template-columns:repeat(5,1fr);gap:1px;padding:10px 8px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.98),rgba(0,0,0,.82));border-top:1px solid rgba(130,255,84,.16);backdrop-filter:blur(18px)}
+    .nav-item{color:#dfffd2;text-decoration:none;text-align:center;font-size:11px;letter-spacing:.08em;font-weight:850;padding:8px 4px;border-radius:14px}
+    .nav-item span{display:block;font-size:19px;margin-bottom:3px}
+    .nav-item.active{color:#9dff67;background:rgba(128,255,80,.1);box-shadow:inset 0 0 18px rgba(128,255,80,.08)}
+
+    @media(max-width:640px){
+      .brand strong{font-size:27px}
+      .hero h1{font-size:30px}
+      .form-grid,.action-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="circle-btn" href="/profile.html">‹</a>
+      <div class="brand">
+        <strong>RICH BIZNESS</strong>
+        <small>LLC</small>
+      </div>
+      <a class="circle-btn" href="/edit.html">✎</a>
+    </header>
+
+    <section class="hero">
+      <div class="kicker">ACCOUNT SETTINGS</div>
+      <h1>Control The Whole App</h1>
+      <p>Manage privacy, notifications, presence, uploads, creator defaults, and how your Rich Bizness identity behaves across the full platform.</p>
+    </section>
+
+    <section class="panel">
+      <h2>ACCOUNT MODE</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>ACCOUNT VISIBILITY</label>
+          <select id="accountVisibilityInput">
+            <option value="public">Public</option>
+            <option value="followers">Followers Only</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>ONLINE STATUS</label>
+          <select id="onlineStatusInput">
+            <option value="online">Online</option>
+            <option value="away">Away</option>
+            <option value="busy">Busy</option>
+            <option value="invisible">Invisible</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>DEFAULT UPLOAD SECTION</label>
+          <select id="defaultUploadSectionInput">
+            <option value="general">General</option>
+            <option value="feed">Feed</option>
+            <option value="music">Music</option>
+            <option value="podcast">Podcast</option>
+            <option value="sports">Sports</option>
+            <option value="gaming">Gaming</option>
+            <option value="gallery">Gallery</option>
+            <option value="store-product">Store Product</option>
+            <option value="live-thumbnail">Live Thumbnail</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>START PAGE</label>
+          <select id="startPageInput">
+            <option value="/profile.html">Profile</option>
+            <option value="/feed.html">Feed</option>
+            <option value="/upload.html">Upload</option>
+            <option value="/meta.html">Meta</option>
+            <option value="/live.html">Live</option>
+            <option value="/store.html">Store</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>NOTIFICATIONS</h2>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Likes + Comments</strong>
+          <small>Notify me when people react to my posts, uploads, products, or clips.</small>
+        </div>
+        <input id="notifyEngagementInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Messages</strong>
+          <small>Notify me when creators, fans, buyers, or friends message me.</small>
+        </div>
+        <input id="notifyMessagesInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Live + VIP</strong>
+          <small>Notify me for live stream access, VIP purchases, tips, and live activity.</small>
+        </div>
+        <input id="notifyLiveInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Store + Orders</strong>
+          <small>Notify me about sales, orders, product likes, and customer actions.</small>
+        </div>
+        <input id="notifyStoreInput" type="checkbox" checked />
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>PRIVACY + SAFETY</h2>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Show Online Presence</strong>
+          <small>Let people see when I am online, away, or active in the platform.</small>
+        </div>
+        <input id="showPresenceInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Allow Profile Discovery</strong>
+          <small>Let my profile appear in search, creator lists, and public sections.</small>
+        </div>
+        <input id="allowDiscoveryInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Allow Direct Messages</strong>
+          <small>Let other users message me from profile, artist, store, and live pages.</small>
+        </div>
+        <input id="allowMessagesInput" type="checkbox" checked />
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <strong>Auto-Sync Avatar</strong>
+          <small>Keep profile, meta avatar, feed, live, gaming, and music identity synced.</small>
+        </div>
+        <input id="autoSyncAvatarInput" type="checkbox" checked />
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>APP FEEL</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>APP THEME</label>
+          <select id="appThemeInput">
+            <option value="rich_green">Rich Green</option>
+            <option value="gold_vip">Gold VIP</option>
+            <option value="smoke_city">Smoke City</option>
+            <option value="neon_meta">Neon Meta</option>
+            <option value="money_road">Money Road</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>MOTION LEVEL</label>
+          <select id="motionLevelInput">
+            <option value="full">Full Motion</option>
+            <option value="balanced">Balanced</option>
+            <option value="reduced">Reduced Motion</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="save-btn" id="saveSettingsBtn" type="button">SAVE SETTINGS</button>
+        <button class="danger-btn" id="resetSettingsBtn" type="button">RESET FORM</button>
+      </div>
+
+      <div class="status" id="settingsStatus">BOOTING SETTINGS...</div>
+    </section>
+
+    <section class="panel">
+      <h2>ACCOUNT ACTIONS</h2>
+      <a class="ghost-btn" href="/auth.html">MANAGE SIGN IN</a>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/index.html"><span>⌂</span>HOME</a>
+    <a class="nav-item" href="/feed.html"><span>◆</span>FEED</a>
+    <a class="nav-item" href="/upload.html"><span>⬆️</span>UPLOAD</a>
+    <a class="nav-item" href="/profile.html"><span>◈</span>ME</a>
+    <a class="nav-item active" href="/setting.html"><span>⚙</span>SET</a>
+  </nav>
+
+  <script type="module" src="/core/pages/setting.js"></script>
+</body>
+</html>
