@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE PROFILE
    /core/pages/profile.js
-   Identity Engine + Real 3D Meta Avatar Viewer
+   Avatar Creator + Moving Avatar + Meta Sync
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -34,10 +34,16 @@ const els = {
 
   auraRing: $("auraRing"),
   metaModelViewer: $("metaModelViewer"),
-  metaAvatarPreview: $("metaAvatarPreview"),
+  generatedAvatarPreview: $("generatedAvatarPreview"),
   avatarType: $("avatarType"),
   avatarMotion: $("avatarMotion"),
   avatarEmote: $("avatarEmote"),
+
+  creatorBodyInput: $("creatorBodyInput"),
+  creatorHairInput: $("creatorHairInput"),
+  creatorOutfitInput: $("creatorOutfitInput"),
+  creatorMotionInput: $("creatorMotionInput"),
+  generateAvatarBtn: $("generateAvatarBtn"),
 
   avatarFileInput: $("avatarFileInput"),
   bannerFileInput: $("bannerFileInput"),
@@ -51,7 +57,6 @@ const els = {
   displayNameInput: $("displayNameInput"),
   bioInput: $("bioInput"),
   auraInput: $("auraInput"),
-  motionInput: $("motionInput"),
   emoteInput: $("emoteInput"),
   themeInput: $("themeInput"),
   avatarUrlInput: $("avatarUrlInput"),
@@ -69,8 +74,15 @@ let currentMetaAvatar = null;
 let realtimeChannel = null;
 let presenceTimer = null;
 
+const DEFAULT_AVATAR_CONFIG = {
+  body: "athletic",
+  hair: "waves",
+  outfit: "money",
+  motion: "idle_breathe"
+};
+
 const DEFAULT_META = {
-  avatar_type: "3d",
+  avatar_type: "created",
   aura: "green",
   rank: "new creator",
   level: 1,
@@ -80,11 +92,13 @@ const DEFAULT_META = {
   emote: "neutral",
   theme: "rich_green",
   presence_state: "online",
-  outfit: {},
+  outfit: DEFAULT_AVATAR_CONFIG,
   equipped_items: [],
   equipped_effects: [],
   position: {},
-  metadata: {}
+  metadata: {
+    avatar_config: DEFAULT_AVATAR_CONFIG
+  }
 };
 
 function setStatus(message) {
@@ -138,9 +152,41 @@ function getMetaValue(key) {
   return currentMetaAvatar?.[key] ?? DEFAULT_META[key];
 }
 
+function getAvatarConfig() {
+  return {
+    ...DEFAULT_AVATAR_CONFIG,
+    ...(currentMetaAvatar?.metadata?.avatar_config || {}),
+    ...(currentMetaAvatar?.outfit || {})
+  };
+}
+
+function getCreatorConfigFromInputs() {
+  return {
+    body: els.creatorBodyInput?.value || "athletic",
+    hair: els.creatorHairInput?.value || "waves",
+    outfit: els.creatorOutfitInput?.value || "money",
+    motion: els.creatorMotionInput?.value || "idle_breathe"
+  };
+}
+
+function avatarPromptFromConfig(config = getAvatarConfig()) {
+  return [
+    "Rich Bizness mobile avatar",
+    `${config.body} body`,
+    `${config.hair} hair`,
+    `${config.outfit} outfit`,
+    `${config.motion} motion`,
+    `${els.auraInput?.value || "green"} aura`,
+    `${els.themeInput?.value || "rich_green"} theme`,
+    "Snapchat Bitmoji meets GTA 2K MyPlayer style",
+    "premium futuristic streetwear metaverse character"
+  ].join(", ");
+}
+
 function buildMetaPayload(extra = {}) {
   const richPoints = Number(currentProfile?.rich_points || 0);
-  const level = Number(currentMetaAvatar?.level || Math.max(1, Math.floor(richPoints / 100) + 1));
+  const config = extra.outfit || getAvatarConfig();
+  const extraMetadata = extra.metadata || {};
 
   return {
     user_id: currentUser.id,
@@ -148,19 +194,19 @@ function buildMetaPayload(extra = {}) {
     avatar_url: cleanUrl(els.avatarUrlInput?.value) || currentProfile?.avatar_url || null,
     model_url: cleanUrl(els.modelUrlInput?.value) || currentMetaAvatar?.model_url || null,
 
-    avatar_type: "3d",
+    avatar_type: extra.avatar_type || currentMetaAvatar?.avatar_type || "created",
     aura: els.auraInput?.value || currentMetaAvatar?.aura || "green",
     rank: currentProfile?.rank_title || currentMetaAvatar?.rank || "new creator",
-    level,
+    level: Number(currentMetaAvatar?.level || Math.max(1, Math.floor(richPoints / 100) + 1)),
     xp: richPoints,
 
-    idle_animation: els.motionInput?.value || currentMetaAvatar?.idle_animation || "idle_breathe",
-    motion_state: els.motionInput?.value || currentMetaAvatar?.motion_state || "idle_breathe",
+    idle_animation: config.motion || currentMetaAvatar?.idle_animation || "idle_breathe",
+    motion_state: config.motion || currentMetaAvatar?.motion_state || "idle_breathe",
     emote: els.emoteInput?.value || currentMetaAvatar?.emote || "neutral",
     theme: els.themeInput?.value || currentMetaAvatar?.theme || "rich_green",
     presence_state: "online",
 
-    outfit: currentMetaAvatar?.outfit || {},
+    outfit: config,
     equipped_items: currentMetaAvatar?.equipped_items || [],
     equipped_effects: currentMetaAvatar?.equipped_effects || [],
     position: currentMetaAvatar?.position || {},
@@ -169,12 +215,23 @@ function buildMetaPayload(extra = {}) {
       ...(currentMetaAvatar?.metadata || {}),
       source: "profile.html",
       app: "Rich Bizness Mobile",
+      avatar_config: config,
+      avatar_prompt: avatarPromptFromConfig(config),
       synced_at: new Date().toISOString(),
-      ...extra.metadata
+      ...extraMetadata
     },
 
     updated_at: new Date().toISOString(),
-    ...extra
+    ...extra,
+    metadata: {
+      ...(currentMetaAvatar?.metadata || {}),
+      source: "profile.html",
+      app: "Rich Bizness Mobile",
+      avatar_config: config,
+      avatar_prompt: avatarPromptFromConfig(config),
+      synced_at: new Date().toISOString(),
+      ...extraMetadata
+    }
   };
 }
 
@@ -209,11 +266,9 @@ function renderProfile() {
     els.profileAvatar.textContent = getInitial(name);
   }
 
-  if (bannerUrl) {
-    els.profileBanner.innerHTML = `<img src="${escapeHtml(bannerUrl)}" alt="Profile banner" />`;
-  } else {
-    els.profileBanner.innerHTML = "";
-  }
+  els.profileBanner.innerHTML = bannerUrl
+    ? `<img src="${escapeHtml(bannerUrl)}" alt="Profile banner" />`
+    : "";
 
   els.usernameInput.value = username;
   els.displayNameInput.value = safeText(currentProfile.display_name, name);
@@ -223,25 +278,43 @@ function renderProfile() {
   els.modelUrlInput.value = safeText(currentMetaAvatar?.model_url, "");
 
   els.auraInput.value = safeText(currentMetaAvatar?.aura, "green");
-  els.motionInput.value = safeText(currentMetaAvatar?.motion_state || currentMetaAvatar?.idle_animation, "idle_breathe");
   els.emoteInput.value = safeText(currentMetaAvatar?.emote, "neutral");
   els.themeInput.value = safeText(currentMetaAvatar?.theme, "rich_green");
 
+  syncCreatorInputsFromMeta();
   renderMetaAvatar();
 }
 
+function syncCreatorInputsFromMeta() {
+  const config = getAvatarConfig();
+
+  if (els.creatorBodyInput) els.creatorBodyInput.value = config.body || "athletic";
+  if (els.creatorHairInput) els.creatorHairInput.value = config.hair || "waves";
+  if (els.creatorOutfitInput) els.creatorOutfitInput.value = config.outfit || "money";
+  if (els.creatorMotionInput) els.creatorMotionInput.value = config.motion || currentMetaAvatar?.motion_state || "idle_breathe";
+}
+
+function renderCreatedAvatar(config = getAvatarConfig()) {
+  if (!els.generatedAvatarPreview) return;
+
+  els.generatedAvatarPreview.dataset.body = config.body || "athletic";
+  els.generatedAvatarPreview.dataset.hair = config.hair || "waves";
+  els.generatedAvatarPreview.dataset.outfit = config.outfit || "money";
+  els.generatedAvatarPreview.dataset.motion = config.motion || "idle_breathe";
+  els.generatedAvatarPreview.style.display = "grid";
+}
+
 function renderMetaAvatar() {
-  const name = getName();
-  const avatarUrl = currentMetaAvatar?.avatar_url || currentProfile?.avatar_url || null;
   const modelUrl = cleanUrl(currentMetaAvatar?.model_url) || cleanUrl(els.modelUrlInput?.value);
   const aura = getMetaValue("aura");
   const motion = getMetaValue("motion_state") || getMetaValue("idle_animation");
   const emote = getMetaValue("emote");
+  const config = getAvatarConfig();
 
   if (modelUrl && els.metaModelViewer) {
     els.metaModelViewer.src = modelUrl;
     els.metaModelViewer.style.display = "block";
-    els.metaAvatarPreview.style.display = "none";
+    if (els.generatedAvatarPreview) els.generatedAvatarPreview.style.display = "none";
     els.avatarType.textContent = "3D MODEL";
   } else {
     if (els.metaModelViewer) {
@@ -249,18 +322,11 @@ function renderMetaAvatar() {
       els.metaModelViewer.style.display = "none";
     }
 
-    els.metaAvatarPreview.style.display = "grid";
-
-    if (avatarUrl) {
-      els.metaAvatarPreview.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="Digital avatar preview" />`;
-    } else {
-      els.metaAvatarPreview.textContent = getInitial(name);
-    }
-
-    els.avatarType.textContent = "3D READY";
+    renderCreatedAvatar(config);
+    els.avatarType.textContent = "CREATED";
   }
 
-  els.avatarMotion.textContent = String(motion || "idle").replaceAll("_", " ").toUpperCase();
+  els.avatarMotion.textContent = String(config.motion || motion || "idle").replaceAll("_", " ").toUpperCase();
   els.avatarEmote.textContent = String(emote || "neutral").replaceAll("_", " ").toUpperCase();
 
   if (els.auraRing) {
@@ -375,6 +441,8 @@ async function ensureMetaAvatar() {
     metadata: {
       source: "profile.html",
       created_from: "ensureMetaAvatar",
+      avatar_config: DEFAULT_AVATAR_CONFIG,
+      avatar_prompt: avatarPromptFromConfig(DEFAULT_AVATAR_CONFIG),
       created_at: new Date().toISOString()
     }
   };
@@ -444,6 +512,31 @@ async function updateMetaAvatar(fields, showStatus = false) {
   return data;
 }
 
+async function generateAvatar() {
+  if (!currentUser) return;
+
+  const config = getCreatorConfigFromInputs();
+
+  renderCreatedAvatar(config);
+  setStatus("GENERATING MOVING AVATAR...");
+
+  await updateMetaAvatar({
+    avatar_type: "created",
+    model_url: null,
+    outfit: config,
+    idle_animation: config.motion,
+    motion_state: config.motion,
+    metadata: {
+      avatar_config: config,
+      avatar_prompt: avatarPromptFromConfig(config),
+      generator: "rich_bizness_css_avatar_v1",
+      generated_at: new Date().toISOString()
+    }
+  }, true);
+
+  setStatus("MOVING AVATAR GENERATED + SAVED");
+}
+
 async function uploadFileToBucket(file, bucket, folder = "") {
   if (!file || !currentUser) return null;
 
@@ -477,7 +570,7 @@ async function uploadProfileFile(file, bucket, fieldName) {
     return;
   }
 
-  setStatus(`UPLOADING ${fieldName === "avatar_url" ? "AVATAR" : "BANNER"}...`);
+  setStatus(`UPLOADING ${fieldName === "avatar_url" ? "AVATAR IMAGE" : "BANNER"}...`);
 
   const publicUrl = await uploadFileToBucket(file, bucket, "profile");
   if (!publicUrl) {
@@ -493,11 +586,11 @@ async function uploadProfileFile(file, bucket, fieldName) {
   if (updated && fieldName === "avatar_url") {
     await updateMetaAvatar({
       avatar_url: publicUrl,
-      metadata: { avatar_source: "profile_upload" }
+      metadata: { avatar_image_source: "profile_upload" }
     });
   }
 
-  setStatus(`${fieldName === "avatar_url" ? "AVATAR" : "BANNER"} UPLOADED REALTIME`);
+  setStatus(`${fieldName === "avatar_url" ? "AVATAR IMAGE" : "BANNER"} UPLOADED REALTIME`);
 }
 
 async function uploadModelFile(file) {
@@ -522,7 +615,7 @@ async function uploadModelFile(file) {
   els.modelUrlInput.value = publicUrl;
 
   await updateMetaAvatar({
-    avatar_type: "3d",
+    avatar_type: "3d_model",
     model_url: publicUrl,
     metadata: { model_source: "profile_model_upload" }
   }, true);
@@ -557,39 +650,53 @@ async function saveProfile() {
   });
 
   if (profileData) {
+    const config = getCreatorConfigFromInputs();
+
     await updateMetaAvatar({
       display_name: displayName || username,
       avatar_url: avatarUrl || null,
       model_url: modelUrl || null,
-      avatar_type: "3d",
+      avatar_type: modelUrl ? "3d_model" : "created",
       aura: els.auraInput.value,
-      idle_animation: els.motionInput.value,
-      motion_state: els.motionInput.value,
+      idle_animation: config.motion,
+      motion_state: config.motion,
       emote: els.emoteInput.value,
       theme: els.themeInput.value,
+      outfit: config,
       presence_state: "online",
-      metadata: { saved_from: "profile_save" }
+      metadata: {
+        saved_from: "profile_save",
+        avatar_config: config,
+        avatar_prompt: avatarPromptFromConfig(config)
+      }
     }, true);
 
-    setStatus("IDENTITY SAVED + DIGITAL AVATAR LIVE");
+    setStatus("IDENTITY SAVED + MOVING AVATAR LIVE");
   }
 
   els.saveProfileBtn.disabled = false;
 }
 
 async function syncMetaAvatar(showStatus = true) {
+  const config = getCreatorConfigFromInputs();
+
   await updateMetaAvatar({
     display_name: getName(),
     avatar_url: currentProfile?.avatar_url || cleanUrl(els.avatarUrlInput?.value) || null,
     model_url: cleanUrl(els.modelUrlInput?.value) || currentMetaAvatar?.model_url || null,
-    avatar_type: "3d",
+    avatar_type: cleanUrl(els.modelUrlInput?.value) ? "3d_model" : "created",
     aura: els.auraInput?.value || "green",
-    idle_animation: els.motionInput?.value || "idle_breathe",
-    motion_state: els.motionInput?.value || "idle_breathe",
+    idle_animation: config.motion,
+    motion_state: config.motion,
     emote: els.emoteInput?.value || "neutral",
     theme: els.themeInput?.value || "rich_green",
+    outfit: config,
     presence_state: "online",
-    metadata: { manual_sync: showStatus }
+    metadata: {
+      manual_sync: showStatus,
+      avatar_config: config,
+      avatar_prompt: avatarPromptFromConfig(config)
+    }
   }, showStatus);
 }
 
@@ -655,6 +762,25 @@ async function logout() {
   window.location.href = "/auth.html";
 }
 
+els.generateAvatarBtn?.addEventListener("click", generateAvatar);
+
+[
+  "creatorBodyInput",
+  "creatorHairInput",
+  "creatorOutfitInput",
+  "creatorMotionInput",
+  "auraInput",
+  "emoteInput",
+  "themeInput"
+].forEach((key) => {
+  els[key]?.addEventListener("change", () => {
+    const config = getCreatorConfigFromInputs();
+    renderCreatedAvatar(config);
+    renderMetaAvatar();
+    setStatus("AVATAR PREVIEW UPDATED");
+  });
+});
+
 els.uploadAvatarBtn?.addEventListener("click", () => els.avatarFileInput?.click());
 els.uploadBannerBtn?.addEventListener("click", () => els.bannerFileInput?.click());
 els.uploadModelBtn?.addEventListener("click", () => els.modelFileInput?.click());
@@ -675,14 +801,6 @@ els.modelFileInput?.addEventListener("change", async () => {
   const file = els.modelFileInput.files?.[0];
   await uploadModelFile(file);
   els.modelFileInput.value = "";
-});
-
-["auraInput", "motionInput", "emoteInput", "themeInput"].forEach((key) => {
-  els[key]?.addEventListener("change", async () => {
-    renderMetaAvatar();
-    await syncMetaAvatar(false);
-    setStatus("AVATAR STYLE UPDATED");
-  });
 });
 
 els.syncMetaBtn?.addEventListener("click", () => syncMetaAvatar(true));
@@ -710,7 +828,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 async function bootProfile() {
-  setStatus("BOOTING IDENTITY ENGINE...");
+  setStatus("BOOTING AVATAR CREATOR...");
 
   const ok = await loadUser();
   if (!ok) return;
@@ -725,7 +843,7 @@ async function bootProfile() {
   startRealtime();
   startPresenceHeartbeat();
 
-  setStatus("PROFILE IDENTITY ENGINE READY");
+  setStatus("PROFILE + MOVING AVATAR CREATOR READY");
 }
 
 bootProfile();
