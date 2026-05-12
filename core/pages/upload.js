@@ -1,19 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* =========================
-   RICH BIZNESS MOBILE UPLOAD
-   /core/pages/upload.js
-========================= */
-
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
 const $ = (id) => document.getElementById(id);
@@ -23,16 +14,13 @@ const els = {
   statSection: $("statSection"),
   statType: $("statType"),
   statStatus: $("statStatus"),
-
   dropZone: $("dropZone"),
   fileInput: $("fileInput"),
   previewCard: $("previewCard"),
   previewSlot: $("previewSlot"),
   fileMeta: $("fileMeta"),
-
   progressWrap: $("progressWrap"),
   progressBar: $("progressBar"),
-
   sectionInput: $("sectionInput"),
   titleInput: $("titleInput"),
   categoryInput: $("categoryInput"),
@@ -40,13 +28,11 @@ const els = {
   descriptionInput: $("descriptionInput"),
   uploadBtn: $("uploadBtn"),
   uploadStatus: $("uploadStatus"),
-
   uploadCount: $("uploadCount"),
   uploadsList: $("uploadsList")
 };
 
 let currentUser = null;
-let currentProfile = null;
 let selectedFile = null;
 let uploads = [];
 let realtimeChannel = null;
@@ -56,25 +42,21 @@ const ROUTES = {
   "profile-avatar": { bucket: "avatars", section: "profile", category: "avatar" },
   "profile-banner": { bucket: "profile-banners", section: "profile", category: "banner" },
   feed: { bucket: "general-uploads", section: "feed", category: "feed" },
-
   music: { bucket: "music-audio", section: "music", category: "music" },
   podcast: { bucket: "podcast-audio", section: "podcast", category: "podcast" },
-
   sports: { bucket: "sports-media", section: "sports", category: "sports" },
-  gaming: { bucket: "gaming-media", section: "gaming", category: "gaming" },
+  gaming: { bucket: "game-clips", section: "gaming", category: "gaming" },
   gallery: { bucket: "gallery-media", section: "gallery", category: "gallery" },
-
   "store-product": { bucket: "store-products", section: "store", category: "product" },
   "store-digital": { bucket: "store-digital", section: "store", category: "digital" },
   "store-seller": { bucket: "store-seller-media", section: "store", category: "seller" },
-
   "live-thumbnail": { bucket: "live-thumbnails", section: "live", category: "thumbnail" },
   "live-recording": { bucket: "live-recordings", section: "live", category: "recording" }
 };
 
 function setStatus(message, mode = "idle") {
-  els.uploadStatus.textContent = message || "";
-  els.statStatus.textContent = mode.toUpperCase();
+  if (els.uploadStatus) els.uploadStatus.textContent = message || "";
+  if (els.statStatus) els.statStatus.textContent = mode.toUpperCase();
 }
 
 function escapeHtml(value = "") {
@@ -88,11 +70,9 @@ function escapeHtml(value = "") {
 
 function formatBytes(bytes = 0) {
   const size = Number(bytes || 0);
-
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
   if (size < 1024 * 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
-
   return `${(size / 1024 / 1024 / 1024).toFixed(1)} GB`;
 }
 
@@ -100,7 +80,6 @@ function safeFileName(name = "upload") {
   const parts = String(name).split(".");
   const ext = parts.length > 1 ? parts.pop().toLowerCase() : "file";
   const base = parts.join(".") || "upload";
-
   return `${base}`
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -110,23 +89,21 @@ function safeFileName(name = "upload") {
 
 function getMediaType(file = selectedFile) {
   const type = file?.type || "";
-
   if (type.startsWith("image/")) return "image";
   if (type.startsWith("video/")) return "video";
   if (type.startsWith("audio/")) return "audio";
   if (type.includes("pdf")) return "document";
   if (type.includes("zip")) return "archive";
-
   return "file";
 }
 
 function getRoute() {
-  return ROUTES[els.sectionInput.value] || ROUTES.general;
+  return ROUTES[els.sectionInput?.value] || ROUTES.general;
 }
 
 function getTitle() {
   return (
-    els.titleInput.value.trim() ||
+    els.titleInput?.value.trim() ||
     selectedFile?.name?.replace(/\.[^/.]+$/, "") ||
     "Rich Bizness Upload"
   );
@@ -135,57 +112,38 @@ function getTitle() {
 function updateStats() {
   const route = getRoute();
   const mediaType = selectedFile ? getMediaType(selectedFile) : "ready";
-
-  els.statUploads.textContent = uploads.length.toLocaleString();
-  els.statSection.textContent = route.section.toUpperCase();
-  els.statType.textContent = mediaType.toUpperCase();
-  els.uploadCount.textContent = uploads.length.toLocaleString();
+  if (els.statUploads) els.statUploads.textContent = uploads.length.toLocaleString();
+  if (els.statSection) els.statSection.textContent = route.section.toUpperCase();
+  if (els.statType) els.statType.textContent = mediaType.toUpperCase();
+  if (els.uploadCount) els.uploadCount.textContent = uploads.length.toLocaleString();
 }
 
 function setProgress(value) {
   const percent = Math.max(0, Math.min(100, Number(value || 0)));
-
-  els.progressWrap.style.display = "block";
-  els.progressBar.style.width = `${percent}%`;
+  if (els.progressWrap) els.progressWrap.style.display = "block";
+  if (els.progressBar) els.progressBar.style.width = `${percent}%`;
 }
 
-/* =========================
-   AUTH
-========================= */
 async function loadUser() {
   const { data } = await supabase.auth.getUser();
   currentUser = data?.user || null;
 
   if (!currentUser) {
     setStatus("SIGN IN REQUIRED TO UPLOAD", "locked");
-
-    setTimeout(() => {
-      window.location.href = "/auth.html";
-    }, 800);
-
+    setTimeout(() => (window.location.href = "/auth.html"), 800);
     return false;
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, username, display_name, avatar_url")
-    .eq("id", currentUser.id)
-    .maybeSingle();
-
-  currentProfile = profile || null;
   return true;
 }
 
-/* =========================
-   FILE PICK + PREVIEW
-========================= */
 function setSelectedFile(file) {
   selectedFile = file || null;
 
   if (!selectedFile) {
-    els.previewCard.style.display = "none";
-    els.previewSlot.innerHTML = "";
-    els.fileMeta.textContent = "";
+    if (els.previewCard) els.previewCard.style.display = "none";
+    if (els.previewSlot) els.previewSlot.innerHTML = "";
+    if (els.fileMeta) els.fileMeta.textContent = "";
     updateStats();
     return;
   }
@@ -218,34 +176,67 @@ function setSelectedFile(file) {
   setStatus("FILE READY", "ready");
 }
 
-function setupDragDrop() {
-  els.fileInput.addEventListener("change", () => {
+function setupFilePicker() {
+  els.dropZone?.addEventListener("click", () => {
+    els.fileInput?.click();
+  });
+
+  els.fileInput?.addEventListener("change", () => {
     setSelectedFile(els.fileInput.files?.[0] || null);
   });
 
   ["dragenter", "dragover"].forEach((eventName) => {
-    els.dropZone.addEventListener(eventName, (event) => {
+    els.dropZone?.addEventListener(eventName, (event) => {
       event.preventDefault();
       els.dropZone.classList.add("active");
     });
   });
 
   ["dragleave", "drop"].forEach((eventName) => {
-    els.dropZone.addEventListener(eventName, (event) => {
+    els.dropZone?.addEventListener(eventName, (event) => {
       event.preventDefault();
       els.dropZone.classList.remove("active");
     });
   });
 
-  els.dropZone.addEventListener("drop", (event) => {
+  els.dropZone?.addEventListener("drop", (event) => {
     const file = event.dataTransfer?.files?.[0];
     setSelectedFile(file || null);
   });
 }
 
-/* =========================
-   STORAGE UPLOAD
-========================= */
+async function safeInsert(table, payload) {
+  const { error } = await supabase.from(table).insert(payload);
+  if (error) console.warn(`${table} auto-route skipped:`, error.message);
+}
+
+async function runAutoRoute(upload) {
+  const routeKey = upload?.metadata?.route_key;
+  if (!routeKey) return;
+
+  if (routeKey === "profile-avatar") {
+    await supabase.from("profiles").update({ avatar_url: upload.public_url }).eq("id", currentUser.id);
+    return;
+  }
+
+  if (routeKey === "profile-banner") {
+    await supabase.from("profiles").update({ banner_url: upload.public_url }).eq("id", currentUser.id);
+    return;
+  }
+
+  if (routeKey === "feed" || routeKey === "gallery") {
+    await safeInsert("feed_posts", {
+      user_id: currentUser.id,
+      body: upload.description || upload.title,
+      media_url: upload.public_url,
+      media_type: upload.media_type,
+      section: routeKey === "gallery" ? "gallery" : "feed",
+      visibility: upload.visibility || "public",
+      metadata: { upload_id: upload.id }
+    });
+  }
+}
+
 async function uploadFile() {
   if (!currentUser) {
     window.location.href = "/auth.html";
@@ -282,22 +273,16 @@ async function uploadFile() {
         contentType: selectedFile.type || undefined
       });
 
-    if (uploadError) {
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
     setProgress(65);
-    setStatus("BUILDING PUBLIC URL...", "processing");
 
     const { data: publicData } = supabase.storage
       .from(route.bucket)
       .getPublicUrl(path);
 
     const publicUrl = publicData?.publicUrl;
-
-    if (!publicUrl) {
-      throw new Error("Public URL missing");
-    }
+    if (!publicUrl) throw new Error("Public URL missing");
 
     setProgress(78);
     setStatus("SAVING UPLOAD RECORD...", "saving");
@@ -329,9 +314,7 @@ async function uploadFile() {
       .select("*")
       .single();
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     setProgress(92);
     await runAutoRoute(data);
@@ -342,17 +325,15 @@ async function uploadFile() {
 
     setProgress(100);
     setStatus("UPLOAD LIVE ACROSS RICH BIZNESS", "complete");
-
     resetFormSoft();
   } catch (error) {
     console.error("Upload error:", error);
     setStatus(`UPLOAD ERROR: ${error.message}`, "error");
   } finally {
     els.uploadBtn.disabled = false;
-
     setTimeout(() => {
-      els.progressWrap.style.display = "none";
-      els.progressBar.style.width = "0%";
+      if (els.progressWrap) els.progressWrap.style.display = "none";
+      if (els.progressBar) els.progressBar.style.width = "0%";
     }, 1100);
   }
 }
@@ -368,179 +349,18 @@ function resetFormSoft() {
   els.descriptionInput.value = "";
 }
 
-/* =========================
-   AUTO ROUTING INTO SECTIONS
-========================= */
-async function runAutoRoute(upload) {
-  const routeKey = upload?.metadata?.route_key;
-
-  if (!routeKey) return;
-
-  try {
-    if (routeKey === "profile-avatar") {
-      await supabase
-        .from("profiles")
-        .update({ avatar_url: upload.public_url })
-        .eq("id", currentUser.id);
-    }
-
-    if (routeKey === "profile-banner") {
-      await supabase
-        .from("profiles")
-        .update({ banner_url: upload.public_url })
-        .eq("id", currentUser.id);
-    }
-
-    if (routeKey === "feed") {
-      await supabase.from("feed_posts").insert({
-        user_id: currentUser.id,
-        body: upload.description || upload.title,
-        media_url: upload.public_url,
-        media_type: upload.media_type,
-        post_type: upload.media_type || "upload",
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "music" && upload.media_type === "audio") {
-      await supabase.from("music_tracks").insert({
-        creator_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        audio_url: upload.public_url,
-        genre: upload.category,
-        is_published: true,
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "podcast" && upload.media_type === "audio") {
-      await supabase.from("podcast_episodes").insert({
-        creator_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        audio_url: upload.public_url,
-        is_published: true,
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "sports") {
-      await supabase.from("sports_posts").insert({
-        user_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        media_url: upload.public_url,
-        media_type: upload.media_type,
-        sport: upload.category,
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "gaming") {
-      await supabase.from("game_clips").insert({
-        user_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        clip_url: upload.public_url,
-        media_type: upload.media_type,
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "gallery") {
-      await supabase.from("feed_posts").insert({
-        user_id: currentUser.id,
-        body: upload.description || upload.title,
-        media_url: upload.public_url,
-        media_type: upload.media_type,
-        post_type: "gallery",
-        metadata: {
-          upload_id: upload.id
-        }
-      });
-    }
-
-    if (routeKey === "store-product") {
-      await supabase.from("products").insert({
-        seller_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        category: upload.category || "marketplace",
-        price_cents: 1000,
-        currency: "usd",
-        image_url: upload.public_url,
-        cover_url: upload.public_url,
-        product_type: "physical",
-        fulfillment_type: "shipping",
-        quantity: 1,
-        status: "active",
-        metadata: {
-          upload_id: upload.id,
-          source: "upload_auto_route"
-        }
-      });
-    }
-
-    if (routeKey === "store-digital") {
-      await supabase.from("products").insert({
-        seller_id: currentUser.id,
-        title: upload.title,
-        description: upload.description,
-        category: upload.category || "digital",
-        price_cents: 1000,
-        currency: "usd",
-        media_url: upload.public_url,
-        product_type: "digital",
-        fulfillment_type: "digital",
-        quantity: 999,
-        is_digital: true,
-        status: "active",
-        metadata: {
-          upload_id: upload.id,
-          source: "upload_auto_route"
-        }
-      });
-    }
-
-    if (routeKey === "live-thumbnail") {
-      await supabase
-        .from("live_streams")
-        .update({
-          thumbnail_url: upload.public_url,
-          cover_url: upload.public_url
-        })
-        .eq("user_id", currentUser.id)
-        .in("status", ["draft", "offline", "live"]);
-    }
-  } catch (error) {
-    console.warn("Auto route skipped:", error.message);
-  }
-}
-
-/* =========================
-   LOAD / RENDER UPLOADS
-========================= */
 async function loadUploads() {
+  const guest = "00000000-0000-0000-0000-000000000000";
+
   const { data, error } = await supabase
     .from("uploads")
     .select("*")
-    .or("visibility.eq.public,user_id.eq." + (currentUser?.id || "00000000-0000-0000-0000-000000000000"))
+    .or(`visibility.eq.public,user_id.eq.${currentUser?.id || guest}`)
     .order("created_at", { ascending: false })
     .limit(80);
 
   if (error) {
-    console.warn("Uploads load error:", error);
+    console.warn("Uploads load error:", error.message);
     els.uploadsList.innerHTML = `<div class="empty">Uploads could not load. Check uploads RLS.</div>`;
     return;
   }
@@ -574,7 +394,6 @@ function renderUploads() {
     return `
       <article class="upload-card">
         ${thumb}
-
         <div class="upload-info">
           <h3>${escapeHtml(upload.title || "Rich Bizness Upload")}</h3>
           <div class="upload-meta">
@@ -583,7 +402,6 @@ function renderUploads() {
             ${escapeHtml(upload.media_type || "file")}
           </div>
           <p>${escapeHtml(upload.description || upload.file_path || "Realtime media upload.")}</p>
-
           <div class="upload-actions">
             <button class="small-btn" data-open="${escapeHtml(upload.public_url)}">OPEN</button>
             <button class="small-btn" data-copy="${escapeHtml(upload.public_url)}">COPY URL</button>
@@ -594,13 +412,8 @@ function renderUploads() {
   }).join("");
 }
 
-/* =========================
-   REALTIME
-========================= */
 function startRealtime() {
-  if (realtimeChannel) {
-    supabase.removeChannel(realtimeChannel);
-  }
+  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
 
   realtimeChannel = supabase
     .channel("rich-bizness-uploads")
@@ -609,34 +422,23 @@ function startRealtime() {
       setStatus("UPLOADS UPDATED LIVE", "realtime");
     })
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setStatus("UPLOAD REALTIME CONNECTED", "ready");
-      }
+      if (status === "SUBSCRIBED") setStatus("UPLOAD REALTIME CONNECTED", "ready");
     });
 }
 
-/* =========================
-   EVENTS
-========================= */
-els.sectionInput.addEventListener("change", () => {
+els.sectionInput?.addEventListener("change", () => {
   const route = getRoute();
-
-  if (!els.categoryInput.value.trim()) {
-    els.categoryInput.value = route.category;
-  }
-
+  if (!els.categoryInput.value.trim()) els.categoryInput.value = route.category;
   updateStats();
 });
 
-els.uploadBtn.addEventListener("click", uploadFile);
+els.uploadBtn?.addEventListener("click", uploadFile);
 
 document.addEventListener("click", async (event) => {
   const open = event.target.closest("[data-open]");
   const copy = event.target.closest("[data-copy]");
 
-  if (open) {
-    window.open(open.dataset.open, "_blank");
-  }
+  if (open) window.open(open.dataset.open, "_blank");
 
   if (copy) {
     try {
@@ -648,18 +450,14 @@ document.addEventListener("click", async (event) => {
   }
 });
 
-/* =========================
-   BOOT
-========================= */
 async function bootUpload() {
   setStatus("BOOTING UPLOAD ENGINE...", "boot");
 
   const ok = await loadUser();
   if (!ok) return;
 
-  setupDragDrop();
+  setupFilePicker();
   await loadUploads();
-
   startRealtime();
   updateStats();
 
