@@ -4,87 +4,126 @@
    Elite CPU Engine
 ========================= */
 
-import { COLORS, PIECES, PIECE_VALUES } from "./pieces.js";
+import {
+  COLORS,
+  PIECES,
+  MATERIAL_VALUE
+} from "./pieces.js";
+
 import {
   getAllLegalMoves,
   makeMove,
   getGameStatus,
-  isKingInCheck,
-  oppositeColor
+  oppositeColor,
+  isInCheck,
+  algebraic
 } from "./engine.js";
 
-const POSITION_BONUS = {
+const CPU_LEVELS = {
+  rookie: {
+    label: "CPU Rookie",
+    depth: 1,
+    mistakeRate: 0.45
+  },
+  hustler: {
+    label: "CPU Hustler",
+    depth: 2,
+    mistakeRate: 0.22
+  },
+  boss: {
+    label: "CPU Boss",
+    depth: 3,
+    mistakeRate: 0.08
+  },
+  elite: {
+    label: "CPU Grandmaster",
+    depth: 3,
+    mistakeRate: 0.01
+  }
+};
+
+const PIECE_SQUARE_TABLES = {
   pawn: [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [5, 5, 5, 5, 5, 5, 5, 5],
-    [1, 1, 2, 3, 3, 2, 1, 1],
-    [0, 0, 1, 3, 3, 1, 0, 0],
-    [0, 0, 0, 2, 2, 0, 0, 0],
-    [1, -1, -2, 0, 0, -2, -1, 1],
-    [1, 2, 2, -2, -2, 2, 2, 1],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5, 5, 10, 25, 25, 10, 5, 5],
+    [0, 0, 0, 20, 20, 0, 0, 0],
+    [5, -5, -10, 0, 0, -10, -5, 5],
+    [5, 10, 10, -20, -20, 10, 10, 5],
     [0, 0, 0, 0, 0, 0, 0, 0]
   ],
+
   knight: [
-    [-5, -4, -3, -3, -3, -3, -4, -5],
-    [-4, -2, 0, 1, 1, 0, -2, -4],
-    [-3, 1, 2, 3, 3, 2, 1, -3],
-    [-3, 0, 3, 4, 4, 3, 0, -3],
-    [-3, 1, 3, 4, 4, 3, 1, -3],
-    [-3, 0, 2, 3, 3, 2, 0, -3],
-    [-4, -2, 0, 0, 0, 0, -2, -4],
-    [-5, -4, -3, -3, -3, -3, -4, -5]
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20, 0, 5, 5, 0, -20, -40],
+    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-30, 0, 15, 20, 20, 15, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 10, 15, 15, 10, 0, -30],
+    [-40, -20, 0, 0, 0, 0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
   ],
+
   bishop: [
-    [-2, -1, -1, -1, -1, -1, -1, -2],
-    [-1, 1, 0, 0, 0, 0, 1, -1],
-    [-1, 2, 2, 2, 2, 2, 2, -1],
-    [-1, 0, 2, 2, 2, 2, 0, -1],
-    [-1, 1, 1, 2, 2, 1, 1, -1],
-    [-1, 0, 1, 2, 2, 1, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-2, -1, -1, -1, -1, -1, -1, -2]
+    [-20, -10, -10, -10, -10, -10, -10, -20],
+    [-10, 5, 0, 0, 0, 0, 5, -10],
+    [-10, 10, 10, 10, 10, 10, 10, -10],
+    [-10, 0, 10, 10, 10, 10, 0, -10],
+    [-10, 5, 5, 10, 10, 5, 5, -10],
+    [-10, 0, 5, 10, 10, 5, 0, -10],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-20, -10, -10, -10, -10, -10, -10, -20]
   ],
+
   rook: [
-    [0, 0, 1, 2, 2, 1, 0, 0],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [1, 2, 2, 2, 2, 2, 2, 1],
-    [0, 0, 0, 2, 2, 0, 0, 0]
+    [0, 0, 0, 5, 5, 0, 0, 0],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [5, 10, 10, 10, 10, 10, 10, 5],
+    [0, 0, 0, 10, 10, 5, 0, 0]
   ],
+
   queen: [
-    [-2, -1, -1, 0, 0, -1, -1, -2],
-    [-1, 0, 1, 0, 0, 0, 0, -1],
-    [-1, 1, 1, 1, 1, 1, 0, -1],
-    [0, 0, 1, 1, 1, 1, 0, -1],
-    [-1, 0, 1, 1, 1, 1, 0, -1],
-    [-1, 0, 1, 1, 1, 1, 0, -1],
-    [-1, 0, 0, 0, 0, 0, 0, -1],
-    [-2, -1, -1, 0, 0, -1, -1, -2]
+    [-20, -10, -10, -5, -5, -10, -10, -20],
+    [-10, 0, 5, 0, 0, 0, 0, -10],
+    [-10, 5, 5, 5, 5, 5, 0, -10],
+    [0, 0, 5, 5, 5, 5, 0, -5],
+    [-5, 0, 5, 5, 5, 5, 0, -5],
+    [-10, 0, 5, 5, 5, 5, 0, -10],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-20, -10, -10, -5, -5, -10, -10, -20]
   ],
+
   king: [
-    [-3, -4, -4, -5, -5, -4, -4, -3],
-    [-3, -4, -4, -5, -5, -4, -4, -3],
-    [-3, -4, -4, -5, -5, -4, -4, -3],
-    [-3, -4, -4, -5, -5, -4, -4, -3],
-    [-2, -3, -3, -4, -4, -3, -3, -2],
-    [-1, -2, -2, -2, -2, -2, -2, -1],
-    [2, 2, 0, 0, 0, 0, 2, 2],
-    [2, 3, 1, 0, 0, 1, 3, 2]
+    [20, 30, 10, 0, 0, 10, 30, 20],
+    [20, 20, 0, 0, 0, 0, 20, 20],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [-20, -30, -30, -40, -40, -30, -30, -20],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30]
   ]
 };
 
-function positionBonus(piece, row, col) {
-  const table = POSITION_BONUS[piece.type];
-  if (!table) return 0;
-
-  const lookupRow = piece.color === COLORS.WHITE ? row : 7 - row;
-  return table[lookupRow]?.[col] || 0;
+function getCpuMoveLabel(level = "elite") {
+  return CPU_LEVELS[level]?.label || CPU_LEVELS.elite.label;
 }
 
-export function evaluateBoard(board, aiColor = COLORS.BLACK) {
+function getPieceSquareValue(piece, row, col) {
+  const table = PIECE_SQUARE_TABLES[piece.type];
+  if (!table) return 0;
+
+  const tableRow = piece.color === COLORS.WHITE ? row : 7 - row;
+  return table[tableRow]?.[col] || 0;
+}
+
+function evaluateBoard(board, cpuColor = COLORS.BLACK) {
+  const opponent = oppositeColor(cpuColor);
   let score = 0;
 
   for (let row = 0; row < 8; row++) {
@@ -92,193 +131,194 @@ export function evaluateBoard(board, aiColor = COLORS.BLACK) {
       const piece = board[row][col];
       if (!piece) continue;
 
-      const base = (PIECE_VALUES[piece.type] || 0) * 100;
-      const positional = positionBonus(piece, row, col) * 4;
-      const value = base + positional;
+      const material = MATERIAL_VALUE[piece.type] || 0;
+      const position = getPieceSquareValue(piece, row, col);
+      const value = material + position;
 
-      score += piece.color === aiColor ? value : -value;
+      score += piece.color === cpuColor ? value : -value;
     }
   }
 
-  const aiMoves = getAllLegalMoves(board, aiColor).length;
-  const enemyMoves = getAllLegalMoves(board, oppositeColor(aiColor)).length;
+  const cpuMoves = getAllLegalMoves(board, cpuColor).length;
+  const enemyMoves = getAllLegalMoves(board, opponent).length;
 
-  score += (aiMoves - enemyMoves) * 3;
+  score += (cpuMoves - enemyMoves) * 4;
 
-  if (isKingInCheck(board, oppositeColor(aiColor))) score += 35;
-  if (isKingInCheck(board, aiColor)) score -= 35;
-
-  const status = getGameStatus(board, aiColor);
-  if (status.status === "checkmate") score -= 999999;
-
-  const enemyStatus = getGameStatus(board, oppositeColor(aiColor));
-  if (enemyStatus.status === "checkmate") score += 999999;
+  if (isInCheck(board, opponent)) score += 35;
+  if (isInCheck(board, cpuColor)) score -= 45;
 
   return score;
 }
 
-function moveScore(board, move, aiColor) {
+function scoreMove(board, move, cpuColor) {
   let score = 0;
 
   if (move.captured) {
-    score += (PIECE_VALUES[move.captured.type] || 0) * 120;
-    score -= (PIECE_VALUES[move.piece.type] || 0) * 8;
+    const capturedValue = MATERIAL_VALUE[move.captured.type] || 0;
+    const attackerValue = MATERIAL_VALUE[move.piece.type] || 0;
+    score += capturedValue * 10 - attackerValue;
   }
 
   if (move.promotion) score += 850;
   if (move.castle) score += 70;
 
   const result = makeMove(board, move);
-  if (isKingInCheck(result.board, oppositeColor(aiColor))) score += 55;
+  const nextStatus = getGameStatus(result.board, oppositeColor(move.piece.color));
+
+  if (nextStatus.status === "checkmate") score += 100000;
+  if (nextStatus.status === "check") score += 80;
+
+  score += evaluateBoard(result.board, cpuColor);
 
   return score;
 }
 
-function orderedMoves(board, color, aiColor) {
-  return getAllLegalMoves(board, color)
-    .map((move) => ({
-      move,
-      score: moveScore(board, move, aiColor)
-    }))
-    .sort((a, b) => b.score - a.score)
-    .map((item) => item.move);
-}
-
-function minimax(board, depth, alpha, beta, maximizing, turn, aiColor) {
+function minimax(board, depth, turn, cpuColor, alpha = -Infinity, beta = Infinity) {
   const status = getGameStatus(board, turn);
 
-  if (depth === 0 || status.status === "checkmate" || status.status === "stalemate") {
-    return {
-      score: evaluateBoard(board, aiColor),
-      move: null
-    };
+  if (depth <= 0 || status.gameOver) {
+    if (status.status === "checkmate") {
+      return status.winner === cpuColor ? 100000 : -100000;
+    }
+
+    if (status.status === "stalemate") return 0;
+
+    return evaluateBoard(board, cpuColor);
   }
 
-  const moves = orderedMoves(board, turn, aiColor);
+  const moves = getAllLegalMoves(board, turn);
 
-  if (!moves.length) {
-    return {
-      score: evaluateBoard(board, aiColor),
-      move: null
-    };
-  }
+  if (!moves.length) return evaluateBoard(board, cpuColor);
 
-  let bestMove = moves[0];
+  const maximizing = turn === cpuColor;
 
   if (maximizing) {
-    let bestScore = -Infinity;
+    let best = -Infinity;
 
     for (const move of moves) {
       const result = makeMove(board, move);
-      const next = minimax(
+      const value = minimax(
         result.board,
         depth - 1,
-        alpha,
-        beta,
-        false,
         oppositeColor(turn),
-        aiColor
+        cpuColor,
+        alpha,
+        beta
       );
 
-      if (next.score > bestScore) {
-        bestScore = next.score;
-        bestMove = move;
-      }
+      best = Math.max(best, value);
+      alpha = Math.max(alpha, value);
 
-      alpha = Math.max(alpha, bestScore);
       if (beta <= alpha) break;
     }
 
-    return { score: bestScore, move: bestMove };
+    return best;
   }
 
-  let bestScore = Infinity;
+  let best = Infinity;
 
   for (const move of moves) {
     const result = makeMove(board, move);
-    const next = minimax(
+    const value = minimax(
       result.board,
       depth - 1,
-      alpha,
-      beta,
-      true,
       oppositeColor(turn),
-      aiColor
+      cpuColor,
+      alpha,
+      beta
     );
 
-    if (next.score < bestScore) {
-      bestScore = next.score;
-      bestMove = move;
-    }
+    best = Math.min(best, value);
+    beta = Math.min(beta, value);
 
-    beta = Math.min(beta, bestScore);
     if (beta <= alpha) break;
   }
 
-  return { score: bestScore, move: bestMove };
+  return best;
 }
 
-export function getCpuMove(board, color = COLORS.BLACK, level = "elite") {
-  const depthMap = {
-    easy: 1,
-    normal: 2,
-    hard: 3,
-    elite: 3
-  };
+function sortMoves(board, moves, cpuColor) {
+  return [...moves].sort((a, b) => {
+    return scoreMove(board, b, cpuColor) - scoreMove(board, a, cpuColor);
+  });
+}
 
-  const depth = depthMap[level] || 3;
-  const moves = getAllLegalMoves(board, color);
+function pickMistakeMove(board, moves, cpuColor) {
+  const scored = moves
+    .map((move) => ({
+      move,
+      score: scoreMove(board, move, cpuColor)
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  const pool = scored.slice(0, Math.min(scored.length, 5));
+  return pool[Math.floor(Math.random() * pool.length)]?.move || scored[0]?.move || null;
+}
+
+function getCpuMove(board, cpuColor = COLORS.BLACK, level = "elite") {
+  const config = CPU_LEVELS[level] || CPU_LEVELS.elite;
+  const moves = getAllLegalMoves(board, cpuColor);
 
   if (!moves.length) return null;
 
-  if (level === "easy") {
-    const captures = moves.filter((move) => move.captured);
-    const pool = captures.length ? captures : moves;
-    return pool[Math.floor(Math.random() * pool.length)];
+  if (Math.random() < config.mistakeRate) {
+    return pickMistakeMove(board, moves, cpuColor);
   }
 
-  const result = minimax(
-    board,
-    depth,
-    -Infinity,
-    Infinity,
-    true,
-    color,
-    color
-  );
+  const ordered = sortMoves(board, moves, cpuColor);
 
-  return result.move || moves[0];
+  let bestMove = ordered[0];
+  let bestScore = -Infinity;
+
+  for (const move of ordered) {
+    const result = makeMove(board, move);
+
+    const value = minimax(
+      result.board,
+      Math.max(0, config.depth - 1),
+      oppositeColor(cpuColor),
+      cpuColor
+    );
+
+    const moveBonus = scoreMove(board, move, cpuColor) * 0.05;
+    const total = value + moveBonus + Math.random() * 0.001;
+
+    if (total > bestScore) {
+      bestScore = total;
+      bestMove = move;
+    }
+  }
+
+  return bestMove;
 }
 
-export function getCpuMoveLabel(level = "elite") {
-  const labels = {
-    easy: "CPU EASY",
-    normal: "CPU NORMAL",
-    hard: "CPU HARD",
-    elite: "ELITE CPU"
-  };
-
-  return labels[level] || "ELITE CPU";
-}
-
-export function explainCpuMove(move) {
-  if (!move) return "CPU has no legal move.";
+function explainCpuMove(move) {
+  if (!move) return "CPU HAS NO MOVE";
 
   const piece = move.piece?.label || "Piece";
-  const from = `${"abcdefgh"[move.from.col]}${8 - move.from.row}`;
-  const to = `${"abcdefgh"[move.to.col]}${8 - move.to.row}`;
+  const from = algebraic(move.from.row, move.from.col).toUpperCase();
+  const to = algebraic(move.to.row, move.to.col).toUpperCase();
 
   if (move.captured) {
-    return `${piece} captures on ${to}.`;
+    return `CPU ${piece.toUpperCase()} CAPTURES ON ${to}`;
   }
 
   if (move.castle) {
-    return `King castles ${move.castle} side.`;
+    return `CPU CASTLES ${move.castle.toUpperCase()} SIDE`;
   }
 
   if (move.promotion) {
-    return `${piece} promotes on ${to}.`;
+    return `CPU ${piece.toUpperCase()} PROMOTES ON ${to}`;
   }
 
-  return `${piece} moves ${from} to ${to}.`;
+  return `CPU ${piece.toUpperCase()} MOVES ${from} → ${to}`;
 }
+
+export {
+  CPU_LEVELS,
+  getCpuMove,
+  getCpuMoveLabel,
+  explainCpuMove,
+  evaluateBoard,
+  scoreMove
+};
