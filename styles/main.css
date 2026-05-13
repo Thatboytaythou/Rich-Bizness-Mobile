@@ -1,12 +1,8 @@
 /* =========================================================
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
-   HD4D MASTERPIECE MAIN.CSS
-   10 CORE MOBILE APP LAYOUT
-========================================================= */
-
-/* =========================================================
-   RESET
+   CONNECTED 10 CORE APP DIAL
+   /styles/main.css
 ========================================================= */
 
 *{
@@ -17,19 +13,16 @@
 }
 
 :root{
-
   --rb-green:#8dff5b;
   --rb-green-soft:#6bff8d;
-  --rb-green-deep:#17391a;
-
   --rb-gold:#ffd76a;
   --rb-black:#020302;
 
   --safe-top:env(safe-area-inset-top);
   --safe-bottom:env(safe-area-inset-bottom);
 
-  --topbar-h:124px;
   --stats-h:108px;
+  --rb-dial-rotation:0rad;
 }
 
 html,
@@ -37,135 +30,90 @@ body{
   width:100%;
   height:100%;
   overflow:hidden;
-
   background:#000;
   color:#fff;
-
-  font-family:
-    Inter,
-    SF Pro Display,
-    -apple-system,
-    sans-serif;
-
+  font-family:Inter,"SF Pro Display",-apple-system,BlinkMacSystemFont,Arial,sans-serif;
   touch-action:manipulation;
-
   overscroll-behavior:none;
-
   -webkit-font-smoothing:antialiased;
 }
 
 /* =========================================================
-   ENGINE
-========================================================= */
-
-#engine{
-  position:fixed;
-  inset:0;
-
-  width:100vw;
-  height:100vh;
-
-  z-index:1;
-
-  display:block;
-
-  filter:
-    saturate(1.08)
-    contrast(1.05)
-    brightness(.98);
-}
-
-/* =========================================================
-   GLOBAL FX
+   CINEMATIC BACKGROUND + ENGINE
 ========================================================= */
 
 body::before{
   content:"";
-
   position:fixed;
   inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.16),rgba(0,0,0,.48) 48%,rgba(0,0,0,.88)),
+    radial-gradient(circle at 50% 48%,rgba(141,255,91,.16),transparent 31%),
+    url("/images/background-v2.png");
+  background-size:cover;
+  background-position:center;
+  filter:saturate(1.12) contrast(1.08) brightness(.64);
+}
 
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
   z-index:2;
   pointer-events:none;
-
   background:
+    radial-gradient(circle at 50% 54%,transparent 26%,rgba(0,0,0,.34) 60%,rgba(0,0,0,.9) 100%),
+    linear-gradient(to bottom,rgba(0,0,0,.1),transparent 36%,rgba(0,0,0,.72));
+}
 
-    radial-gradient(
-      circle at 50% 48%,
-      rgba(140,255,120,.14),
-      transparent 22%
-    ),
-
-    radial-gradient(
-      circle at top,
-      rgba(120,255,100,.08),
-      transparent 40%
-    ),
-
-    linear-gradient(
-      to bottom,
-      rgba(0,0,0,.12),
-      rgba(0,0,0,.34),
-      rgba(0,0,0,.82)
-    );
+#engine{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  z-index:1;
+  display:block;
+  opacity:.68;
+  mix-blend-mode:screen;
+  filter:saturate(1.08) contrast(1.05) brightness(.92);
 }
 
 .screen-vignette{
   position:fixed;
   inset:0;
-
   z-index:3;
   pointer-events:none;
-
   background:
-    radial-gradient(
-      circle at center,
-      transparent 36%,
-      rgba(0,0,0,.24) 60%,
-      rgba(0,0,0,.82) 100%
-    );
+    radial-gradient(circle at center,transparent 35%,rgba(0,0,0,.28) 62%,rgba(0,0,0,.86) 100%);
 }
 
 .screen-noise{
   position:fixed;
   inset:0;
-
   z-index:4;
   pointer-events:none;
-
-  opacity:.04;
-
+  opacity:.045;
+  mix-blend-mode:soft-light;
   background-image:
-    repeating-radial-gradient(
-      circle at center,
-      rgba(255,255,255,.06) 0,
-      transparent 2px,
-      transparent 4px
-    );
+    repeating-radial-gradient(circle at center,rgba(255,255,255,.06) 0,transparent 2px,transparent 4px);
 }
 
 /* =========================================================
-   TOPBAR
+   TOP HUD
 ========================================================= */
 
 .topbar{
   position:fixed;
   top:0;
   left:0;
-
   width:100%;
-
-  z-index:40;
-
+  z-index:60;
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-
-  padding:
-    calc(var(--safe-top) + 14px)
-    16px
-    0;
-
+  padding:calc(var(--safe-top) + 14px) 16px 0;
   pointer-events:none;
 }
 
@@ -174,23 +122,16 @@ body::before{
   display:flex;
   flex-direction:column;
   gap:12px;
-
   pointer-events:auto;
 }
 
 .top-center{
   position:absolute;
   left:50%;
-  top:calc(var(--safe-top) + 12px);
-
+  top:calc(var(--safe-top) + 10px);
   transform:translateX(-50%);
-
   pointer-events:none;
 }
-
-/* =========================================================
-   WELCOME
-========================================================= */
 
 .welcome-block{
   display:flex;
@@ -200,75 +141,51 @@ body::before{
 
 .welcome-text{
   font-size:.72rem;
-  font-weight:900;
+  font-weight:950;
   letter-spacing:.28em;
-
   color:var(--rb-green);
-
-  text-shadow:
-    0 0 14px rgba(141,255,91,.5);
+  text-shadow:0 0 14px rgba(141,255,91,.75);
 }
 
 .welcome-name{
   font-size:1rem;
-  font-weight:900;
-
+  font-weight:950;
   color:#fff;
+  text-shadow:0 0 18px rgba(0,0,0,.85);
 }
-
-/* =========================================================
-   PROFILE
-========================================================= */
 
 .rank-panel{
   border:none;
   outline:none;
-
   display:flex;
   align-items:center;
   gap:10px;
-
   min-width:160px;
-
   border-radius:22px;
-
   padding:10px 14px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(14,22,14,.96),
-      rgba(3,5,3,.98)
-    );
-
-  border:1px solid rgba(255,216,106,.4);
-
-  backdrop-filter:blur(18px);
-
   color:#fff;
+  background:
+    radial-gradient(circle at left,rgba(141,255,91,.18),transparent 58%),
+    linear-gradient(180deg,rgba(14,22,14,.9),rgba(3,5,3,.94));
+  border:1px solid rgba(255,216,106,.45);
+  box-shadow:
+    inset 0 0 20px rgba(141,255,91,.08),
+    0 0 24px rgba(0,0,0,.75);
+  backdrop-filter:blur(18px);
 }
 
 .rank-icon{
   width:44px;
   height:44px;
-
   border-radius:50%;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(141,255,91,.24),
-      rgba(5,10,5,.95)
-    );
-
-  border:1px solid rgba(141,255,91,.42);
-
   color:var(--rb-green);
-
+  font-weight:950;
+  background:radial-gradient(circle,rgba(141,255,91,.28),rgba(5,10,5,.95));
+  border:1px solid rgba(141,255,91,.42);
+  box-shadow:0 0 18px rgba(141,255,91,.28);
   overflow:hidden;
 }
 
@@ -285,116 +202,77 @@ body::before{
 
 .rank-copy small{
   font-size:.62rem;
-  font-weight:900;
+  font-weight:950;
   letter-spacing:.22em;
-
-  color:#cfffbd;
+  color:#d9ffca;
 }
 
 .rank-copy strong{
   font-size:1.45rem;
   line-height:1;
-
-  font-weight:900;
-
+  font-weight:950;
   color:var(--rb-green);
+  text-shadow:0 0 16px rgba(141,255,91,.65);
 }
-
-/* =========================================================
-   BRAND
-========================================================= */
 
 .brand-lockup{
   display:flex;
   flex-direction:column;
   align-items:center;
-
   line-height:.82;
+  user-select:none;
 }
 
 .brand-rich,
 .brand-biz{
-  font-family:
-    Georgia,
-    serif;
-
-  font-weight:900;
-
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:950;
   letter-spacing:.03em;
-
   color:#e0ca79;
-
   text-shadow:
-    0 0 18px rgba(141,255,91,.35),
-    0 4px 12px rgba(0,0,0,.7);
+    0 0 18px rgba(141,255,91,.45),
+    0 4px 12px rgba(0,0,0,.85);
 }
 
-.brand-rich{
-  font-size:2rem;
-}
-
-.brand-biz{
-  font-size:2.4rem;
-}
+.brand-rich{font-size:2rem}
+.brand-biz{font-size:2.4rem}
 
 .brand-llc{
   margin-top:5px;
-
   font-size:.74rem;
-  font-weight:900;
+  font-weight:950;
   letter-spacing:.28em;
-
   color:#ffe08a;
+  text-shadow:0 0 12px rgba(0,0,0,.8);
 }
-
-/* =========================================================
-   ICONS
-========================================================= */
 
 .icon{
   width:60px;
   height:60px;
-
   border-radius:50%;
-
-  border:1px solid rgba(255,216,106,.42);
-
+  border:1px solid rgba(255,216,106,.46);
   background:
-    radial-gradient(
-      circle at 30% 30%,
-      rgba(255,255,255,.08),
-      rgba(6,8,6,.96)
-    );
-
+    radial-gradient(circle at 30% 30%,rgba(255,255,255,.08),rgba(6,8,6,.96));
   color:#ffe08a;
-
   font-size:1.35rem;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   position:relative;
-
   backdrop-filter:blur(16px);
+  box-shadow:0 0 22px rgba(0,0,0,.7);
 }
 
 .notification.has-unread::after{
   content:"";
-
   position:absolute;
   top:8px;
   right:8px;
-
   width:12px;
   height:12px;
-
   border-radius:50%;
-
   background:var(--rb-green);
-
-  box-shadow:
-    0 0 12px rgba(141,255,91,.9);
+  box-shadow:0 0 12px rgba(141,255,91,.9);
 }
 
 /* =========================================================
@@ -405,361 +283,331 @@ body::before{
   position:fixed;
   top:102px;
   right:16px;
-
-  width:220px;
-
-  z-index:120;
-
+  width:230px;
+  max-height:calc(100vh - 128px);
+  overflow:auto;
+  z-index:140;
   display:flex;
   flex-direction:column;
   gap:8px;
-
   padding:14px;
-
   border-radius:22px;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(10,14,10,.96),
-      rgba(2,4,2,.98)
-    );
-
-  border:1px solid rgba(141,255,91,.12);
-
-  transform:
-    translateY(-12px)
-    scale(.96);
-
+  background:linear-gradient(180deg,rgba(10,14,10,.96),rgba(2,4,2,.98));
+  border:1px solid rgba(141,255,91,.18);
+  box-shadow:0 0 45px rgba(0,0,0,.9),0 0 20px rgba(141,255,91,.14);
+  backdrop-filter:blur(22px);
+  transform:translateY(-12px) scale(.96);
   opacity:0;
   pointer-events:none;
-
   transition:.28s;
 }
 
 .quick-menu.open{
   opacity:1;
   pointer-events:auto;
-
-  transform:
-    translateY(0)
-    scale(1);
+  transform:translateY(0) scale(1);
 }
 
 .quick-menu a{
   text-decoration:none;
-
   padding:13px 14px;
-
   border-radius:16px;
-
   color:#fff;
-
-  font-weight:700;
-
-  background:rgba(255,255,255,.03);
+  font-weight:800;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.04);
 }
 
 /* =========================================================
-   DIAL UI
+   CONNECTED 10 CORE OMNI DIAL MACHINE
 ========================================================= */
 
 .dial-ui{
   position:fixed;
-  inset:0;
-
+  left:50%;
+  top:55%;
+  width:min(92vw,520px);
+  height:min(92vw,520px);
+  transform:translate(-50%,-50%);
   z-index:20;
   pointer-events:none;
 }
 
+.dial-ui::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at center,transparent 31%,rgba(141,255,91,.13) 32%,transparent 34%),
+    radial-gradient(circle at center,transparent 47%,rgba(141,255,91,.38) 48%,rgba(141,255,91,.12) 50%,transparent 52%),
+    radial-gradient(circle at center,transparent 61%,rgba(255,216,106,.22) 62%,rgba(141,255,91,.28) 64%,transparent 66%),
+    conic-gradient(
+      from var(--rb-dial-rotation),
+      rgba(141,255,91,.08),
+      rgba(255,216,106,.18),
+      rgba(141,255,91,.08),
+      rgba(141,255,91,.24),
+      rgba(255,216,106,.12),
+      rgba(141,255,91,.08)
+    );
+  box-shadow:
+    inset 0 0 38px rgba(141,255,91,.13),
+    0 0 48px rgba(141,255,91,.2),
+    0 0 120px rgba(141,255,91,.08);
+  opacity:.95;
+  animation:machineBreath 4s ease-in-out infinite;
+}
+
+.dial-ui::after{
+  content:"";
+  position:absolute;
+  inset:12%;
+  border-radius:50%;
+  border:1px solid rgba(141,255,91,.22);
+  box-shadow:
+    inset 0 0 26px rgba(141,255,91,.16),
+    0 0 26px rgba(141,255,91,.18);
+  background:
+    repeating-conic-gradient(
+      from var(--rb-dial-rotation),
+      rgba(141,255,91,.18) 0deg,
+      rgba(141,255,91,.18) 1.5deg,
+      transparent 1.5deg,
+      transparent 36deg
+    );
+  opacity:.78;
+}
+
 .dial-card{
   position:absolute;
-
-  width:88px;
-  height:88px;
-
+  width:92px;
+  height:92px;
   border:none;
   outline:none;
-
   border-radius:26px;
-
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:4px;
-
   pointer-events:auto;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(16,22,16,.94),
-      rgba(3,5,3,.98)
-    );
-
-  border:1px solid rgba(141,255,91,.14);
-
-  backdrop-filter:blur(16px);
-
   color:#fff;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(141,255,91,.16),transparent 50%),
+    linear-gradient(180deg,rgba(18,26,18,.96),rgba(3,5,3,.98));
+  border:1px solid rgba(141,255,91,.32);
+  box-shadow:
+    inset 0 0 18px rgba(141,255,91,.06),
+    0 0 14px rgba(0,0,0,.85),
+    0 0 18px rgba(141,255,91,.16);
+  backdrop-filter:blur(16px);
+  transform:translate(-50%,-50%);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,filter .22s ease;
+}
 
-  transition:
-    transform .22s,
-    box-shadow .22s;
+.dial-card::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#9dff63;
+  transform:translate(-50%,-50%) translateY(61px);
+  box-shadow:0 0 10px rgba(141,255,91,.9),0 0 26px rgba(141,255,91,.55);
+  opacity:.85;
+}
+
+.dial-card::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:2px;
+  height:58px;
+  transform-origin:50% 0%;
+  background:linear-gradient(to bottom,rgba(141,255,91,.72),rgba(141,255,91,0));
+  opacity:.55;
 }
 
 .dial-card.is-active{
-  transform:
-    translate(-50%,-50%)
-    scale(1.08);
-
-  border-color:rgba(141,255,91,.65);
-
+  transform:translate(-50%,-50%) scale(1.08);
+  border-color:rgba(170,255,112,.92);
+  filter:brightness(1.18);
   box-shadow:
-    0 0 24px rgba(141,255,91,.34),
-    0 0 60px rgba(141,255,91,.12);
+    inset 0 0 24px rgba(141,255,91,.12),
+    0 0 26px rgba(141,255,91,.55),
+    0 0 76px rgba(141,255,91,.18);
 }
 
 .dial-icon{
-  font-size:1.3rem;
-
+  font-size:1.28rem;
   color:var(--rb-green);
+  text-shadow:0 0 14px rgba(141,255,91,.65);
 }
 
 .dial-title{
   font-size:.82rem;
-  font-weight:900;
-  letter-spacing:.08em;
+  font-weight:950;
+  letter-spacing:.11em;
 }
 
 .dial-sub{
   font-size:.52rem;
-  letter-spacing:.16em;
-  font-weight:800;
-
+  letter-spacing:.17em;
+  font-weight:900;
   color:var(--rb-green-soft);
 }
 
-/* =========================================================
-   10 CORE POSITIONS
-========================================================= */
+/* 10 fixed machine sockets */
+.card-feed{left:50%;top:7%}
+.card-watch{left:79%;top:18%}
+.card-live{left:95%;top:45%}
+.card-music{left:82%;top:73%}
+.card-gaming{left:61%;top:91%}
+.card-meta{left:50%;top:98%}
+.card-sports{left:39%;top:91%}
+.card-gallery{left:18%;top:73%}
+.card-upload{left:5%;top:45%}
+.card-store{left:21%;top:18%}
 
-.card-feed{
-  left:50%;
-  top:28%;
-  transform:translate(-50%,-50%);
-}
-
-.card-watch{
-  left:73%;
-  top:34%;
-  transform:translate(-50%,-50%);
-}
-
-.card-live{
-  left:86%;
-  top:48%;
-  transform:translate(-50%,-50%);
-}
-
-.card-music{
-  left:78%;
-  top:63%;
-  transform:translate(-50%,-50%);
-}
-
-.card-gaming{
-  left:61%;
-  top:72%;
-  transform:translate(-50%,-50%);
-}
-
-.card-sports{
-  left:39%;
-  top:72%;
-  transform:translate(-50%,-50%);
-}
-
-.card-gallery{
-  left:22%;
-  top:63%;
-  transform:translate(-50%,-50%);
-}
-
-.card-upload{
-  left:14%;
-  top:48%;
-  transform:translate(-50%,-50%);
-}
-
-.card-store{
-  left:27%;
-  top:34%;
-  transform:translate(-50%,-50%);
-}
-
-.card-meta{
-  left:50%;
-  top:79%;
-  transform:translate(-50%,-50%);
-}
+/* connector direction per card */
+.card-feed::after{transform:translate(-50%,0) rotate(180deg)}
+.card-watch::after{transform:translate(-50%,0) rotate(218deg)}
+.card-live::after{transform:translate(-50%,0) rotate(270deg)}
+.card-music::after{transform:translate(-50%,0) rotate(320deg)}
+.card-gaming::after{transform:translate(-50%,0) rotate(342deg)}
+.card-meta::after{transform:translate(-50%,0) rotate(0deg)}
+.card-sports::after{transform:translate(-50%,0) rotate(18deg)}
+.card-gallery::after{transform:translate(-50%,0) rotate(40deg)}
+.card-upload::after{transform:translate(-50%,0) rotate(90deg)}
+.card-store::after{transform:translate(-50%,0) rotate(142deg)}
 
 /* =========================================================
-   CENTER CORE
+   CENTER CORE LOCKED INTO DIAL
 ========================================================= */
 
 .center-ui{
   position:fixed;
-  inset:0;
-
-  z-index:18;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
+  left:50%;
+  top:55%;
+  transform:translate(-50%,-50%);
+  z-index:22;
   pointer-events:none;
 }
 
 .portal-core{
   width:190px;
   height:190px;
-
   border-radius:50%;
-
   position:relative;
-
   background:
-    radial-gradient(
-      circle,
-      rgba(141,255,91,.92),
-      rgba(56,118,42,.52) 36%,
-      rgba(0,0,0,.92) 68%
-    );
-
+    radial-gradient(circle,rgba(141,255,91,.18),transparent 58%),
+    radial-gradient(circle,rgba(0,0,0,.42),rgba(0,0,0,.96) 70%);
+  border:1px solid rgba(141,255,91,.34);
   box-shadow:
     0 0 34px rgba(141,255,91,.34),
-    0 0 100px rgba(141,255,91,.12);
-
+    0 0 100px rgba(141,255,91,.12),
+    inset 0 0 30px rgba(141,255,91,.12);
   animation:portalPulse 4s ease-in-out infinite;
 }
 
 .portal-core::before{
   content:"";
-
   position:absolute;
   inset:-18px;
-
   border-radius:50%;
-
-  border:2px solid rgba(141,255,91,.12);
-
+  border:2px solid rgba(141,255,91,.22);
+  box-shadow:0 0 22px rgba(141,255,91,.22);
   animation:spinSlow 16s linear infinite;
+}
+
+.portal-core::after{
+  content:"";
+  position:absolute;
+  inset:20px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(141,255,91,.14),transparent 68%);
+  box-shadow:inset 0 0 28px rgba(141,255,91,.18);
 }
 
 .portal-inner{
   position:absolute;
-  inset:18px;
-
+  inset:24px;
+  z-index:2;
   border-radius:50%;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(10,14,10,.65),
-      rgba(0,0,0,.96)
-    );
+  background:radial-gradient(circle,rgba(11,18,11,.75),rgba(0,0,0,.97));
+  border:1px solid rgba(141,255,91,.18);
 }
 
 .portal-title{
   display:flex;
   flex-direction:column;
   align-items:center;
-
   line-height:.82;
 }
 
 .portal-title span{
-  font-family:
-    Georgia,
-    serif;
-
-  font-size:1.8rem;
-  font-weight:900;
-
+  font-family:Georgia,serif;
+  font-size:1.75rem;
+  font-weight:950;
   color:#dbc771;
+  text-shadow:0 0 18px rgba(141,255,91,.35);
 }
 
 .portal-title small{
   margin-top:7px;
-
   font-size:.68rem;
   letter-spacing:.28em;
-  font-weight:900;
-
+  font-weight:950;
   color:var(--rb-green);
 }
 
 /* =========================================================
-   ENTER BUTTON
+   ACTIVATE
 ========================================================= */
 
 .enter{
   position:fixed;
   left:50%;
-  bottom:calc(var(--stats-h) + 16px);
-
+  bottom:calc(var(--stats-h) + 18px);
   transform:translateX(-50%);
-
   width:88vw;
   max-width:540px;
   height:92px;
-
   z-index:45;
-
   border:none;
   outline:none;
-
   border-radius:28px;
-
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(65,82,36,.82),
-      rgba(10,14,8,.98)
-    );
-
-  border:1px solid rgba(255,216,106,.38);
-
+  background:linear-gradient(180deg,rgba(65,82,36,.86),rgba(10,14,8,.98));
+  border:1px solid rgba(255,216,106,.5);
+  box-shadow:
+    inset 0 0 24px rgba(141,255,91,.12),
+    0 0 44px rgba(141,255,91,.16);
   overflow:hidden;
 }
 
 .enter-main{
-  font-family:
-    Georgia,
-    serif;
-
+  font-family:Georgia,serif;
   font-size:2rem;
-  font-weight:900;
-
+  font-weight:950;
   color:#dff48f;
+  text-shadow:0 0 18px rgba(141,255,91,.45);
 }
 
 .enter-sub{
   font-size:.72rem;
   letter-spacing:.28em;
-  font-weight:900;
-
+  font-weight:950;
   color:#ffe38c;
 }
 
@@ -771,26 +619,14 @@ body::before{
   position:fixed;
   left:0;
   bottom:0;
-
   width:100%;
   height:var(--stats-h);
-
   z-index:50;
-
   display:grid;
   grid-template-columns:repeat(4,1fr);
-
   padding-bottom:var(--safe-bottom);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.08),
-      rgba(0,0,0,.92)
-    );
-
+  background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.92));
   backdrop-filter:blur(18px);
-
   border-top:1px solid rgba(141,255,91,.12);
 }
 
@@ -800,30 +636,53 @@ body::before{
   align-items:center;
   justify-content:center;
   gap:5px;
+  position:relative;
+}
+
+.stat-card:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:22%;
+  width:1px;
+  height:56%;
+  background:linear-gradient(transparent,rgba(141,255,91,.18),transparent);
 }
 
 .stat-icon{
   font-size:1rem;
-
   color:var(--rb-green);
+  text-shadow:0 0 12px rgba(141,255,91,.55);
 }
 
 .stat-card small{
   font-size:.55rem;
   letter-spacing:.18em;
-  font-weight:900;
-
+  font-weight:950;
   color:var(--rb-green-soft);
 }
 
 .stat-card strong{
   font-size:.92rem;
-  font-weight:900;
+  font-weight:950;
+  color:#fff;
 }
 
 /* =========================================================
-   ANIMATION
+   STATES + ANIMATION
 ========================================================= */
+
+.is-live{
+  animation:livePulse 1.8s infinite;
+}
+
+.syncing{
+  opacity:.72;
+  filter:brightness(1.15);
+}
+
+.online{color:#8dff5b}
+.offline{color:#ff6f6f}
 
 @keyframes portalPulse{
   0%{transform:scale(1)}
@@ -834,4 +693,57 @@ body::before{
 @keyframes spinSlow{
   from{transform:rotate(0deg)}
   to{transform:rotate(360deg)}
+}
+
+@keyframes machineBreath{
+  0%,100%{filter:brightness(.95);opacity:.88}
+  50%{filter:brightness(1.14);opacity:1}
+}
+
+@keyframes livePulse{
+  0%{box-shadow:0 0 0 rgba(141,255,91,.2)}
+  50%{box-shadow:0 0 34px rgba(141,255,91,.42)}
+  100%{box-shadow:0 0 0 rgba(141,255,91,.2)}
+}
+
+/* =========================================================
+   SHORT PHONE PATCH
+========================================================= */
+
+@media (max-height:760px){
+  :root{--stats-h:96px}
+
+  .dial-ui,
+  .center-ui{
+    top:55%;
+  }
+
+  .dial-ui{
+    width:min(88vw,470px);
+    height:min(88vw,470px);
+  }
+
+  .dial-card{
+    width:82px;
+    height:82px;
+    border-radius:23px;
+  }
+
+  .portal-core{
+    width:168px;
+    height:168px;
+  }
+
+  .portal-title span{
+    font-size:1.48rem;
+  }
+
+  .enter{
+    height:82px;
+    bottom:calc(var(--stats-h) + 12px);
+  }
+
+  .enter-main{
+    font-size:1.75rem;
+  }
 }
