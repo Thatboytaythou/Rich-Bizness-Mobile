@@ -1,728 +1,119 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 /* =========================
-   RICH BIZNESS RICH CHESS
+   RICH BIZNESS — RICH CHESS
    /games/rich-chess/game.js
-   Elite Local Engine + Supabase Match/Tournament Sync
+   Final Game Controller
 ========================= */
 
-const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2";
+import {
+  COLORS,
+  getStartingBoard,
+  getPieceSymbol,
+  getPieceClass,
+  getCapturedSummary,
+  boardToFenLite
+} from "./pieces.js";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
+import {
+  getLegalMoves,
+  makeMove,
+  getGameStatus,
+  oppositeColor,
+  algebraic
+} from "./engine.js";
+
+import { getCpuMove, getCpuMoveLabel, explainCpuMove } from "./ai.js";
+
+import {
+  supabase,
+  createChessRoom,
+  joinChessRoom,
+  loadChessRoom,
+  saveMoveToRoom,
+  resignRoom,
+  subscribeToRoom,
+  getRoomCodeFromUrl,
+  getRoomLink,
+  getCurrentUserAndProfile,
+  getPlayerColor,
+  canPlayerMove,
+  roomToBoard
+} from "./multiplayer.js";
+
+import {
+  ensureTournamentLobby,
+  joinChessTournament,
+  renderTournamentOptions
+} from "./tournaments.js";
 
 const $ = (id) => document.getElementById(id);
 
 const els = {
   board: $("chessBoard"),
-  status: $("gameStatus"),
 
   statMode: $("statMode"),
   statTurn: $("statTurn"),
   statMoves: $("statMoves"),
-  statState: $("statState"),
+  statStatus: $("statStatus"),
 
   whiteName: $("whiteName"),
   blackName: $("blackName"),
-  whiteMeta: $("whiteMeta"),
-  blackMeta: $("blackMeta"),
+  whiteClock: $("whiteClock"),
+  blackClock: $("blackClock"),
+  whiteAvatar: $("whiteAvatar"),
+  blackAvatar: $("blackAvatar"),
 
   newGameBtn: $("newGameBtn"),
-  flipBoardBtn: $("flipBoardBtn"),
-  undoBtn: $("undoBtn"),
+  createRoomBtn: $("createRoomBtn"),
+  joinRoomBtn: $("joinRoomBtn"),
   resignBtn: $("resignBtn"),
 
-  matchModeInput: $("matchModeInput"),
-  matchNameInput: $("matchNameInput"),
-  createMatchBtn: $("createMatchBtn"),
-  joinMatchBtn: $("joinMatchBtn"),
-  matchCodeInput: $("matchCodeInput"),
+  roomCodeInput: $("roomCodeInput"),
+  matchTypeInput: $("matchTypeInput"),
+  copyRoomBtn: $("copyRoomBtn"),
 
-  tournamentNameInput: $("tournamentNameInput"),
-  tournamentEntryInput: $("tournamentEntryInput"),
-  createTournamentBtn: $("createTournamentBtn"),
+  tournamentSelect: $("tournamentSelect"),
   joinTournamentBtn: $("joinTournamentBtn"),
 
   moveList: $("moveList"),
-  capturedWhite: $("capturedWhite"),
-  capturedBlack: $("capturedBlack"),
-  multiplayerStatus: $("multiplayerStatus"),
-  tournamentStatus: $("tournamentStatus")
+  whiteCaptured: $("whiteCaptured"),
+  blackCaptured: $("blackCaptured"),
+
+  status: $("chessStatus")
 };
+
+let board = getStartingBoard();
+let turn = COLORS.WHITE;
+let selected = null;
+let legalMoves = [];
+let moveHistory = [];
+let capturedWhite = [];
+let capturedBlack = [];
+
+let mode = "solo";
+let cpuEnabled = true;
+let cpuLevel = "elite";
+let gameOver = false;
 
 let currentUser = null;
 let currentProfile = null;
-let currentMatch = null;
-let currentPlayer = null;
-let realtimeChannel = null;
-
-let selectedSquare = null;
-let legalTargets = [];
-let boardFlipped = false;
-let gameOver = false;
-
-const PIECES = {
-  wK: "♔", wQ: "♕", wR: "♖", wB: "♗", wN: "♘", wP: "♙",
-  bK: "♚", bQ: "♛", bR: "♜", bB: "♝", bN: "♞", bP: "♟"
-};
-
-const START_BOARD = [
-  ["bR","bN","bB","bQ","bK","bB","bN","bR"],
-  ["bP","bP","bP","bP","bP","bP","bP","bP"],
-  [null,null,null,null,null,null,null,null],
-  [null,null,null,null,null,null,null,null],
-  [null,null,null,null,null,null,null,null],
-  [null,null,null,null,null,null,null,null],
-  ["wP","wP","wP","wP","wP","wP","wP","wP"],
-  ["wR","wN","wB","wQ","wK","wB","wN","wR"]
-];
-
-const state = {
-  board: cloneBoard(START_BOARD),
-  turn: "w",
-  moveNumber: 1,
-  halfmove: 0,
-  castling: { wK: true, wQ: true, bK: true, bQ: true },
-  enPassant: null,
-  history: [],
-  captured: { w: [], b: [] },
-  check: false,
-  winner: null,
-  result: "active"
-};
+let currentRoom = null;
+let playerColor = null;
+let tournaments = [];
 
 function setStatus(message) {
   if (els.status) els.status.textContent = message || "";
 }
 
-function setMultiplayer(message) {
-  if (els.multiplayerStatus) els.multiplayerStatus.textContent = message || "";
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function setTournament(message) {
-  if (els.tournamentStatus) els.tournamentStatus.textContent = message || "";
-}
-
-function cloneBoard(board) {
-  return board.map((row) => [...row]);
-}
-
-function inBounds(r, c) {
-  return r >= 0 && r < 8 && c >= 0 && c < 8;
-}
-
-function colorOf(piece) {
-  return piece ? piece[0] : null;
-}
-
-function typeOf(piece) {
-  return piece ? piece[1] : null;
-}
-
-function enemy(color) {
-  return color === "w" ? "b" : "w";
-}
-
-function squareName(r, c) {
-  return `${"abcdefgh"[c]}${8 - r}`;
-}
-
-function fromSquareName(square) {
-  const file = square[0];
-  const rank = Number(square[1]);
-  return { r: 8 - rank, c: "abcdefgh".indexOf(file) };
-}
-
-function getPiece(r, c) {
-  return inBounds(r, c) ? state.board[r][c] : null;
-}
-
-function sameSquare(a, b) {
-  return a && b && a.r === b.r && a.c === b.c;
-}
-
-function isMyTurn() {
-  if (!currentMatch || !currentPlayer) return true;
-  return currentPlayer.color === state.turn;
-}
-
-function serializeState() {
-  return {
-    board: state.board,
-    turn: state.turn,
-    moveNumber: state.moveNumber,
-    halfmove: state.halfmove,
-    castling: state.castling,
-    enPassant: state.enPassant,
-    history: state.history,
-    captured: state.captured,
-    check: state.check,
-    winner: state.winner,
-    result: state.result,
-    updated_at: new Date().toISOString()
-  };
-}
-
-function hydrateState(payload = {}) {
-  if (!payload.board) return;
-
-  state.board = payload.board;
-  state.turn = payload.turn || "w";
-  state.moveNumber = payload.moveNumber || 1;
-  state.halfmove = payload.halfmove || 0;
-  state.castling = payload.castling || { wK: true, wQ: true, bK: true, bQ: true };
-  state.enPassant = payload.enPassant || null;
-  state.history = payload.history || [];
-  state.captured = payload.captured || { w: [], b: [] };
-  state.check = Boolean(payload.check);
-  state.winner = payload.winner || null;
-  state.result = payload.result || "active";
-  gameOver = state.result !== "active";
-
-  selectedSquare = null;
-  legalTargets = [];
-  render();
-}
-
-function resetGame() {
-  state.board = cloneBoard(START_BOARD);
-  state.turn = "w";
-  state.moveNumber = 1;
-  state.halfmove = 0;
-  state.castling = { wK: true, wQ: true, bK: true, bQ: true };
-  state.enPassant = null;
-  state.history = [];
-  state.captured = { w: [], b: [] };
-  state.check = false;
-  state.winner = null;
-  state.result = "active";
-  selectedSquare = null;
-  legalTargets = [];
-  gameOver = false;
-  render();
-  syncMatchState();
-}
-
-/* =========================
-   MOVE ENGINE
-========================= */
-
-function findKing(color, board = state.board) {
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      if (board[r][c] === `${color}K`) return { r, c };
-    }
-  }
-  return null;
-}
-
-function isSquareAttacked(r, c, byColor, board = state.board) {
-  for (let rr = 0; rr < 8; rr++) {
-    for (let cc = 0; cc < 8; cc++) {
-      const piece = board[rr][cc];
-      if (!piece || colorOf(piece) !== byColor) continue;
-
-      const moves = pseudoMovesFor(rr, cc, board, true);
-      if (moves.some((m) => m.to.r === r && m.to.c === c)) return true;
-    }
-  }
-  return false;
-}
-
-function isInCheck(color, board = state.board) {
-  const king = findKing(color, board);
-  if (!king) return true;
-  return isSquareAttacked(king.r, king.c, enemy(color), board);
-}
-
-function pushSlideMoves(moves, r, c, color, dirs, board) {
-  for (const [dr, dc] of dirs) {
-    let rr = r + dr;
-    let cc = c + dc;
-
-    while (inBounds(rr, cc)) {
-      const target = board[rr][cc];
-
-      if (!target) {
-        moves.push({ from: { r, c }, to: { r: rr, c: cc } });
-      } else {
-        if (colorOf(target) !== color) {
-          moves.push({ from: { r, c }, to: { r: rr, c: cc }, capture: target });
-        }
-        break;
-      }
-
-      rr += dr;
-      cc += dc;
-    }
-  }
-}
-
-function pseudoMovesFor(r, c, board = state.board, attackOnly = false) {
-  const piece = board[r][c];
-  if (!piece) return [];
-
-  const color = colorOf(piece);
-  const type = typeOf(piece);
-  const moves = [];
-
-  if (type === "P") {
-    const dir = color === "w" ? -1 : 1;
-    const startRow = color === "w" ? 6 : 1;
-    const promoteRow = color === "w" ? 0 : 7;
-
-    for (const dc of [-1, 1]) {
-      const rr = r + dir;
-      const cc = c + dc;
-      if (!inBounds(rr, cc)) continue;
-
-      const target = board[rr][cc];
-
-      if (attackOnly) {
-        moves.push({ from: { r, c }, to: { r: rr, c: cc } });
-      } else if (target && colorOf(target) !== color) {
-        moves.push({
-          from: { r, c },
-          to: { r: rr, c: cc },
-          capture: target,
-          promotion: rr === promoteRow ? "Q" : null
-        });
-      }
-
-      if (
-        !attackOnly &&
-        state.enPassant &&
-        state.enPassant.r === rr &&
-        state.enPassant.c === cc
-      ) {
-        moves.push({
-          from: { r, c },
-          to: { r: rr, c: cc },
-          enPassant: true,
-          capture: `${enemy(color)}P`
-        });
-      }
-    }
-
-    if (!attackOnly) {
-      const one = r + dir;
-      const two = r + dir * 2;
-
-      if (inBounds(one, c) && !board[one][c]) {
-        moves.push({
-          from: { r, c },
-          to: { r: one, c },
-          promotion: one === promoteRow ? "Q" : null
-        });
-
-        if (r === startRow && inBounds(two, c) && !board[two][c]) {
-          moves.push({ from: { r, c }, to: { r: two, c }, doublePawn: true });
-        }
-      }
-    }
-  }
-
-  if (type === "N") {
-    const jumps = [
-      [-2,-1],[-2,1],[-1,-2],[-1,2],
-      [1,-2],[1,2],[2,-1],[2,1]
-    ];
-
-    for (const [dr, dc] of jumps) {
-      const rr = r + dr;
-      const cc = c + dc;
-      if (!inBounds(rr, cc)) continue;
-
-      const target = board[rr][cc];
-      if (!target || colorOf(target) !== color) {
-        moves.push({
-          from: { r, c },
-          to: { r: rr, c: cc },
-          capture: target || null
-        });
-      }
-    }
-  }
-
-  if (type === "B") {
-    pushSlideMoves(moves, r, c, color, [[1,1],[1,-1],[-1,1],[-1,-1]], board);
-  }
-
-  if (type === "R") {
-    pushSlideMoves(moves, r, c, color, [[1,0],[-1,0],[0,1],[0,-1]], board);
-  }
-
-  if (type === "Q") {
-    pushSlideMoves(moves, r, c, color, [[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]], board);
-  }
-
-  if (type === "K") {
-    for (const dr of [-1, 0, 1]) {
-      for (const dc of [-1, 0, 1]) {
-        if (dr === 0 && dc === 0) continue;
-
-        const rr = r + dr;
-        const cc = c + dc;
-        if (!inBounds(rr, cc)) continue;
-
-        const target = board[rr][cc];
-        if (!target || colorOf(target) !== color) {
-          moves.push({
-            from: { r, c },
-            to: { r: rr, c: cc },
-            capture: target || null
-          });
-        }
-      }
-    }
-
-    if (!attackOnly && !isInCheck(color, board)) {
-      const row = color === "w" ? 7 : 0;
-
-      if (
-        state.castling[`${color}K`] &&
-        !board[row][5] &&
-        !board[row][6] &&
-        !isSquareAttacked(row, 5, enemy(color), board) &&
-        !isSquareAttacked(row, 6, enemy(color), board)
-      ) {
-        moves.push({ from: { r, c }, to: { r: row, c: 6 }, castle: "king" });
-      }
-
-      if (
-        state.castling[`${color}Q`] &&
-        !board[row][1] &&
-        !board[row][2] &&
-        !board[row][3] &&
-        !isSquareAttacked(row, 3, enemy(color), board) &&
-        !isSquareAttacked(row, 2, enemy(color), board)
-      ) {
-        moves.push({ from: { r, c }, to: { r: row, c: 2 }, castle: "queen" });
-      }
-    }
-  }
-
-  return moves;
-}
-
-function makeMoveOnBoard(board, move) {
-  const next = cloneBoard(board);
-  const piece = next[move.from.r][move.from.c];
-
-  next[move.from.r][move.from.c] = null;
-
-  if (move.enPassant) {
-    const capRow = colorOf(piece) === "w" ? move.to.r + 1 : move.to.r - 1;
-    next[capRow][move.to.c] = null;
-  }
-
-  if (move.castle === "king") {
-    const row = move.to.r;
-    next[row][5] = next[row][7];
-    next[row][7] = null;
-  }
-
-  if (move.castle === "queen") {
-    const row = move.to.r;
-    next[row][3] = next[row][0];
-    next[row][0] = null;
-  }
-
-  const promotionPiece = move.promotion ? `${colorOf(piece)}${move.promotion}` : piece;
-  next[move.to.r][move.to.c] = promotionPiece;
-
-  return next;
-}
-
-function legalMovesFor(r, c) {
-  const piece = getPiece(r, c);
-  if (!piece) return [];
-
-  const color = colorOf(piece);
-  if (color !== state.turn) return [];
-
-  const pseudo = pseudoMovesFor(r, c);
-
-  return pseudo.filter((move) => {
-    const next = makeMoveOnBoard(state.board, move);
-    return !isInCheck(color, next);
-  });
-}
-
-function allLegalMoves(color = state.turn) {
-  const out = [];
-
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      const piece = getPiece(r, c);
-      if (piece && colorOf(piece) === color) {
-        out.push(...legalMovesFor(r, c));
-      }
-    }
-  }
-
-  return out;
-}
-
-function applyMove(move) {
-  if (gameOver) return false;
-
-  const piece = getPiece(move.from.r, move.from.c);
-  const captured = move.enPassant
-    ? `${enemy(colorOf(piece))}P`
-    : getPiece(move.to.r, move.to.c);
-
-  const before = serializeState();
-
-  state.board = makeMoveOnBoard(state.board, move);
-
-  if (captured) {
-    state.captured[colorOf(piece)].push(captured);
-  }
-
-  updateCastlingRights(piece, move);
-
-  if (move.doublePawn) {
-    state.enPassant = {
-      r: (move.from.r + move.to.r) / 2,
-      c: move.from.c
-    };
-  } else {
-    state.enPassant = null;
-  }
-
-  const san = buildMoveNotation(piece, move, captured);
-  state.history.push({
-    moveNumber: state.moveNumber,
-    color: state.turn,
-    piece,
-    from: squareName(move.from.r, move.from.c),
-    to: squareName(move.to.r, move.to.c),
-    capture: captured || null,
-    notation: san,
-    created_at: new Date().toISOString(),
-    before
-  });
-
-  state.turn = enemy(state.turn);
-
-  if (state.turn === "w") state.moveNumber += 1;
-
-  state.check = isInCheck(state.turn);
-  const legal = allLegalMoves(state.turn);
-
-  if (!legal.length && state.check) {
-    state.result = "checkmate";
-    state.winner = enemy(state.turn);
-    gameOver = true;
-    setStatus(`${state.winner === "w" ? "WHITE" : "BLACK"} WINS BY CHECKMATE`);
-  } else if (!legal.length) {
-    state.result = "stalemate";
-    state.winner = null;
-    gameOver = true;
-    setStatus("STALEMATE");
-  } else if (state.check) {
-    setStatus(`${state.turn === "w" ? "WHITE" : "BLACK"} IN CHECK`);
-  } else {
-    setStatus(`${state.turn === "w" ? "WHITE" : "BLACK"} TO MOVE`);
-  }
-
-  selectedSquare = null;
-  legalTargets = [];
-  render();
-  syncMatchState();
-  return true;
-}
-
-function updateCastlingRights(piece, move) {
-  const color = colorOf(piece);
-  const type = typeOf(piece);
-
-  if (type === "K") {
-    state.castling[`${color}K`] = false;
-    state.castling[`${color}Q`] = false;
-  }
-
-  if (type === "R") {
-    if (move.from.r === 7 && move.from.c === 0) state.castling.wQ = false;
-    if (move.from.r === 7 && move.from.c === 7) state.castling.wK = false;
-    if (move.from.r === 0 && move.from.c === 0) state.castling.bQ = false;
-    if (move.from.r === 0 && move.from.c === 7) state.castling.bK = false;
-  }
-
-  if (move.to.r === 7 && move.to.c === 0) state.castling.wQ = false;
-  if (move.to.r === 7 && move.to.c === 7) state.castling.wK = false;
-  if (move.to.r === 0 && move.to.c === 0) state.castling.bQ = false;
-  if (move.to.r === 0 && move.to.c === 7) state.castling.bK = false;
-}
-
-function buildMoveNotation(piece, move, captured) {
-  const type = typeOf(piece);
-  const to = squareName(move.to.r, move.to.c);
-
-  if (move.castle === "king") return "O-O";
-  if (move.castle === "queen") return "O-O-O";
-
-  const pieceLetter = type === "P" ? "" : type;
-  const captureMark = captured ? "x" : "";
-  const fromFile = type === "P" && captured ? squareName(move.from.r, move.from.c)[0] : "";
-  const promo = move.promotion ? `=${move.promotion}` : "";
-
-  return `${pieceLetter}${fromFile}${captureMark}${to}${promo}`;
-}
-
-/* =========================
-   RENDER
-========================= */
-
-function render() {
-  renderBoard();
-  renderHud();
-  renderMoves();
-  renderCaptured();
-}
-
-function renderBoard() {
-  if (!els.board) return;
-
-  els.board.innerHTML = "";
-
-  const rows = boardFlipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
-  const cols = boardFlipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
-
-  for (const r of rows) {
-    for (const c of cols) {
-      const piece = getPiece(r, c);
-      const square = document.createElement("button");
-
-      square.className = `square ${(r + c) % 2 === 0 ? "light" : "dark"}`;
-      square.dataset.r = r;
-      square.dataset.c = c;
-      square.type = "button";
-      square.setAttribute("aria-label", squareName(r, c));
-
-      if (selectedSquare?.r === r && selectedSquare?.c === c) {
-        square.classList.add("selected");
-      }
-
-      const target = legalTargets.find((m) => m.to.r === r && m.to.c === c);
-      if (target) {
-        square.classList.add(target.capture || getPiece(r, c) ? "capture" : "legal");
-      }
-
-      if (piece) {
-        square.innerHTML = `<span class="piece">${PIECES[piece]}</span>`;
-      }
-
-      square.addEventListener("click", () => handleSquareClick(r, c));
-      els.board.appendChild(square);
-    }
-  }
-}
-
-function renderHud() {
-  const mode = currentMatch ? "ONLINE" : "LOCAL";
-  const turn = state.turn === "w" ? "WHITE" : "BLACK";
-  const stateText = gameOver ? state.result.toUpperCase() : state.check ? "CHECK" : "ACTIVE";
-
-  if (els.statMode) els.statMode.textContent = mode;
-  if (els.statTurn) els.statTurn.textContent = turn;
-  if (els.statMoves) els.statMoves.textContent = state.history.length.toLocaleString();
-  if (els.statState) els.statState.textContent = stateText;
-
-  if (els.whiteName) els.whiteName.textContent = currentMatch?.white_name || "White Player";
-  if (els.blackName) els.blackName.textContent = currentMatch?.black_name || "Black Player";
-
-  if (els.whiteMeta) els.whiteMeta.textContent = currentMatch ? "MULTIPLAYER SEAT" : "LOCAL SIDE";
-  if (els.blackMeta) els.blackMeta.textContent = currentMatch ? "MULTIPLAYER SEAT" : "LOCAL SIDE";
-}
-
-function renderMoves() {
-  if (!els.moveList) return;
-
-  if (!state.history.length) {
-    els.moveList.innerHTML = `<div class="empty">No moves yet. Make the first elite move.</div>`;
-    return;
-  }
-
-  els.moveList.innerHTML = state.history.map((m) => `
-    <div class="move-item">
-      <span>${m.moveNumber}. ${m.color === "w" ? "White" : "Black"}</span>
-      <strong>${m.notation}</strong>
-    </div>
-  `).join("");
-}
-
-function renderCaptured() {
-  if (els.capturedWhite) {
-    els.capturedWhite.textContent = state.captured.w.map((p) => PIECES[p]).join(" ");
-  }
-
-  if (els.capturedBlack) {
-    els.capturedBlack.textContent = state.captured.b.map((p) => PIECES[p]).join(" ");
-  }
-}
-
-function handleSquareClick(r, c) {
-  if (gameOver) return;
-  if (!isMyTurn()) {
-    setStatus("WAIT FOR YOUR TURN");
-    return;
-  }
-
-  const piece = getPiece(r, c);
-
-  if (selectedSquare) {
-    const move = legalTargets.find((m) => m.to.r === r && m.to.c === c);
-
-    if (move) {
-      applyMove(move);
-      return;
-    }
-  }
-
-  if (piece && colorOf(piece) === state.turn) {
-    selectedSquare = { r, c };
-    legalTargets = legalMovesFor(r, c);
-    renderBoard();
-    setStatus(`${PIECES[piece]} SELECTED • ${legalTargets.length} MOVES`);
-    return;
-  }
-
-  selectedSquare = null;
-  legalTargets = [];
-  renderBoard();
-}
-
-/* =========================
-   AUTH + PROFILE
-========================= */
-
-async function loadUser() {
-  const { data } = await supabase.auth.getUser();
-  currentUser = data?.user || null;
-
-  if (!currentUser) {
-    setMultiplayer("SIGN IN TO PLAY MULTIPLAYER");
-    return;
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, username, display_name, avatar_url")
-    .eq("id", currentUser.id)
-    .maybeSingle();
-
-  currentProfile = profile || {};
-}
-
-function playerName() {
+function getName() {
   return (
     currentProfile?.display_name ||
     currentProfile?.username ||
@@ -731,320 +122,457 @@ function playerName() {
   );
 }
 
-/* =========================
-   MULTIPLAYER
-========================= */
-
-function matchCodeFromId(id = "") {
-  return String(id).slice(0, 8).toUpperCase();
+function getInitial(name = "R") {
+  return String(name || "R").trim().slice(0, 1).toUpperCase();
 }
 
-async function createMatch() {
-  if (!currentUser) {
-    window.location.href = "/auth.html";
-    return;
-  }
+function squareColor(row, col) {
+  return (row + col) % 2 === 0 ? "light" : "dark";
+}
 
-  const mode = els.matchModeInput?.value || "ranked";
-  const title = els.matchNameInput?.value?.trim() || "Rich Chess Match";
+function sameSquare(a, b) {
+  return a && b && a.row === b.row && a.col === b.col;
+}
 
-  const payload = {
-    game_slug: "rich-chess",
-    title,
-    status: "waiting",
-    mode,
-    white_user_id: currentUser.id,
-    white_name: playerName(),
-    black_user_id: null,
-    black_name: null,
-    current_turn: "w",
-    board_state: serializeState(),
-    winner_id: null,
-    result: null,
-    metadata: {
-      source: "rich-chess",
-      app: "Rich Bizness Mobile"
+function isLegalTarget(row, col) {
+  return legalMoves.find((move) => move.to.row === row && move.to.col === col) || null;
+}
+
+function moveNotation(move) {
+  const piece = move.piece?.label || "Piece";
+  const from = algebraic(move.from.row, move.from.col);
+  const to = algebraic(move.to.row, move.to.col);
+  const cap = move.captured ? "x" : "→";
+  const promo = move.promotion ? "=Q" : "";
+  return `${piece} ${from} ${cap} ${to}${promo}`;
+}
+
+function hydrateRoomState(room) {
+  currentRoom = room;
+  const roomBoard = roomToBoard(room);
+
+  if (roomBoard) board = roomBoard;
+  turn = room.current_turn || room.board_state?.turn || COLORS.WHITE;
+  moveHistory = Array.isArray(room.moves) ? room.moves : [];
+
+  mode = "multiplayer";
+  cpuEnabled = false;
+  playerColor = getPlayerColor(room, currentUser?.id);
+
+  els.roomCodeInput.value = room.room_code || "";
+
+  const meta = room.metadata || {};
+  els.whiteName.textContent = meta.white_player_name || "White Player";
+  els.blackName.textContent = meta.black_player_name || (room.black_player_id ? "Black Player" : "Waiting...");
+
+  gameOver = ["checkmate", "stalemate", "resigned", "completed"].includes(room.status);
+
+  selected = null;
+  legalMoves = [];
+
+  renderAll();
+}
+
+function renderBoard() {
+  els.board.innerHTML = "";
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col];
+      const move = isLegalTarget(row, col);
+
+      const square = document.createElement("button");
+      square.className = [
+        "square",
+        squareColor(row, col),
+        sameSquare(selected, { row, col }) ? "selected" : "",
+        move ? (move.capture ? "capture" : "legal") : ""
+      ].filter(Boolean).join(" ");
+
+      square.type = "button";
+      square.dataset.row = String(row);
+      square.dataset.col = String(col);
+      square.setAttribute("aria-label", `${algebraic(row, col)} ${piece?.label || "empty"}`);
+
+      if (piece) {
+        const span = document.createElement("span");
+        span.className = getPieceClass(piece);
+        span.textContent = getPieceSymbol(piece);
+        square.appendChild(span);
+      }
+
+      els.board.appendChild(square);
     }
-  };
-
-  const { data, error } = await supabase
-    .from("chess_matches")
-    .insert(payload)
-    .select("*")
-    .single();
-
-  if (error) {
-    setMultiplayer(`CREATE MATCH ERROR: ${error.message}`);
-    return;
   }
-
-  currentMatch = data;
-  currentPlayer = { color: "w", role: "white" };
-  setMultiplayer(`MATCH CREATED • CODE ${matchCodeFromId(data.id)}`);
-  startRealtime();
-  render();
 }
 
-async function joinMatch() {
-  if (!currentUser) {
-    window.location.href = "/auth.html";
+function renderHud() {
+  const status = getGameStatus(board, turn);
+
+  els.statMode.textContent = mode === "multiplayer"
+    ? "MULTI"
+    : getCpuMoveLabel(cpuLevel).replace("CPU ", "");
+
+  els.statTurn.textContent = turn.toUpperCase();
+  els.statMoves.textContent = String(moveHistory.length);
+  els.statStatus.textContent = gameOver ? status.label : status.label;
+
+  if (mode === "solo") {
+    els.whiteName.textContent = getName();
+    els.blackName.textContent = getCpuMoveLabel(cpuLevel);
+    els.whiteAvatar.textContent = getInitial(getName());
+    els.blackAvatar.textContent = "C";
+  }
+
+  if (mode === "multiplayer") {
+    els.statMode.textContent = playerColor ? `MULTI ${playerColor.toUpperCase()}` : "SPECTATE";
+  }
+}
+
+function renderMoves() {
+  if (!moveHistory.length) {
+    els.moveList.innerHTML = `<div class="empty">No moves yet.</div>`;
     return;
   }
 
-  const rawCode = els.matchCodeInput?.value?.trim();
-  if (!rawCode) {
-    setMultiplayer("ENTER MATCH CODE");
+  els.moveList.innerHTML = moveHistory.map((move, index) => `
+    <div class="move-item">
+      <span>${index + 1}. ${escapeHtml(move.notation || move.label || "Move")}</span>
+      <strong>${escapeHtml((move.color || "").toUpperCase())}</strong>
+    </div>
+  `).join("");
+}
+
+function renderCaptured() {
+  els.whiteCaptured.textContent = getCapturedSummary(capturedWhite);
+  els.blackCaptured.textContent = getCapturedSummary(capturedBlack);
+}
+
+function renderAll() {
+  renderBoard();
+  renderHud();
+  renderMoves();
+  renderCaptured();
+}
+
+function canTouchBoard() {
+  if (gameOver) return false;
+
+  if (mode === "solo") {
+    return turn === COLORS.WHITE;
+  }
+
+  if (!currentRoom || !currentUser) return false;
+
+  return canPlayerMove(currentRoom, currentUser.id);
+}
+
+function selectSquare(row, col) {
+  const piece = board[row][col];
+
+  if (!canTouchBoard()) {
+    setStatus(mode === "multiplayer" ? "WAITING ON YOUR TURN" : "CPU THINKING");
     return;
   }
 
-  const { data: matches, error } = await supabase
-    .from("chess_matches")
-    .select("*")
-    .ilike("id", `${rawCode}%`)
-    .limit(1);
+  if (selected) {
+    const move = isLegalTarget(row, col);
 
-  if (error || !matches?.length) {
-    setMultiplayer("MATCH NOT FOUND");
-    return;
-  }
-
-  const match = matches[0];
-
-  if (match.white_user_id === currentUser.id) {
-    currentPlayer = { color: "w", role: "white" };
-  } else if (match.black_user_id === currentUser.id) {
-    currentPlayer = { color: "b", role: "black" };
-  } else if (!match.black_user_id) {
-    const { data, error: updateError } = await supabase
-      .from("chess_matches")
-      .update({
-        black_user_id: currentUser.id,
-        black_name: playerName(),
-        status: "active",
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", match.id)
-      .select("*")
-      .single();
-
-    if (updateError) {
-      setMultiplayer(`JOIN ERROR: ${updateError.message}`);
+    if (move) {
+      playMove(move);
       return;
     }
+  }
 
-    currentMatch = data;
-    currentPlayer = { color: "b", role: "black" };
-    hydrateState(data.board_state);
-    setMultiplayer("JOINED MATCH AS BLACK");
-    startRealtime();
-    return;
-  } else {
-    setMultiplayer("MATCH FULL — SPECTATOR MODE COMING NEXT");
+  if (!piece || piece.color !== turn) {
+    selected = null;
+    legalMoves = [];
+    renderBoard();
     return;
   }
 
-  currentMatch = match;
-  hydrateState(match.board_state);
-  setMultiplayer(`JOINED MATCH AS ${currentPlayer.color === "w" ? "WHITE" : "BLACK"}`);
-  startRealtime();
-}
-
-async function syncMatchState() {
-  if (!currentMatch?.id || !currentUser) return;
-
-  const update = {
-    board_state: serializeState(),
-    current_turn: state.turn,
-    status: state.result === "active" ? "active" : "completed",
-    result: state.result,
-    winner_id:
-      state.winner === "w" ? currentMatch.white_user_id :
-      state.winner === "b" ? currentMatch.black_user_id :
-      null,
-    updated_at: new Date().toISOString()
-  };
-
-  const { data, error } = await supabase
-    .from("chess_matches")
-    .update(update)
-    .eq("id", currentMatch.id)
-    .select("*")
-    .single();
-
-  if (!error && data) currentMatch = data;
-}
-
-function startRealtime() {
-  if (!currentMatch?.id) return;
-
-  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
-
-  realtimeChannel = supabase
-    .channel(`rich-chess-${currentMatch.id}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "chess_matches",
-        filter: `id=eq.${currentMatch.id}`
-      },
-      (payload) => {
-        if (!payload.new) return;
-        currentMatch = payload.new;
-        hydrateState(payload.new.board_state);
-        setMultiplayer("MATCH UPDATED LIVE");
-      }
-    )
-    .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setMultiplayer(`MULTIPLAYER LIVE • CODE ${matchCodeFromId(currentMatch.id)}`);
-      }
-    });
-}
-
-/* =========================
-   TOURNAMENTS
-========================= */
-
-async function createTournament() {
-  if (!currentUser) {
-    window.location.href = "/auth.html";
-    return;
-  }
-
-  const title = els.tournamentNameInput?.value?.trim() || "Rich Chess Tournament";
-  const entry = Number(els.tournamentEntryInput?.value || 0);
-
-  const { data, error } = await supabase
-    .from("chess_tournaments")
-    .insert({
-      title,
-      game_slug: "rich-chess",
-      created_by: currentUser.id,
-      status: "open",
-      entry_fee_cents: entry,
-      prize_pool_cents: 0,
-      max_players: 16,
-      metadata: {
-        source: "rich-chess",
-        app: "Rich Bizness Mobile"
-      }
-    })
-    .select("*")
-    .single();
-
-  if (error) {
-    setTournament(`TOURNAMENT ERROR: ${error.message}`);
-    return;
-  }
-
-  await joinTournament(data.id);
-  setTournament(`TOURNAMENT CREATED • ${title}`);
-}
-
-async function joinTournament(tournamentId = null) {
-  if (!currentUser) {
-    window.location.href = "/auth.html";
-    return;
-  }
-
-  let id = tournamentId;
-
-  if (!id) {
-    const { data } = await supabase
-      .from("chess_tournaments")
-      .select("*")
-      .eq("status", "open")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    id = data?.id;
-  }
-
-  if (!id) {
-    setTournament("NO OPEN TOURNAMENT FOUND");
-    return;
-  }
-
-  const { error } = await supabase
-    .from("chess_tournament_players")
-    .upsert({
-      tournament_id: id,
-      user_id: currentUser.id,
-      username: currentProfile?.username || playerName(),
-      display_name: playerName(),
-      status: "joined",
-      score: 0,
-      metadata: {
-        source: "rich-chess"
-      }
-    }, { onConflict: "tournament_id,user_id" });
-
-  if (error) {
-    setTournament(`JOIN TOURNAMENT ERROR: ${error.message}`);
-    return;
-  }
-
-  setTournament("JOINED TOURNAMENT");
-}
-
-/* =========================
-   CONTROLS
-========================= */
-
-function undoMove() {
-  if (currentMatch) {
-    setStatus("UNDO DISABLED IN MULTIPLAYER");
-    return;
-  }
-
-  const last = state.history.pop();
-  if (!last?.before) return;
-
-  hydrateState(last.before);
-  setStatus("MOVE UNDONE");
-}
-
-async function resignGame() {
-  if (gameOver) return;
-
-  const loser = state.turn;
-  state.result = "resigned";
-  state.winner = enemy(loser);
-  gameOver = true;
-
-  setStatus(`${loser === "w" ? "WHITE" : "BLACK"} RESIGNED`);
-  render();
-  await syncMatchState();
-}
-
-function flipBoard() {
-  boardFlipped = !boardFlipped;
+  selected = { row, col };
+  legalMoves = getLegalMoves(board, selected);
+  setStatus(`${piece.label.toUpperCase()} SELECTED — ${legalMoves.length} MOVES`);
   renderBoard();
 }
 
-/* =========================
-   BOOT
-========================= */
+async function playMove(move, saveRemote = true) {
+  const beforeTurn = turn;
+  const result = makeMove(board, move);
 
-els.newGameBtn?.addEventListener("click", resetGame);
-els.flipBoardBtn?.addEventListener("click", flipBoard);
-els.undoBtn?.addEventListener("click", undoMove);
-els.resignBtn?.addEventListener("click", resignGame);
+  board = result.board;
 
-els.createMatchBtn?.addEventListener("click", createMatch);
-els.joinMatchBtn?.addEventListener("click", joinMatch);
+  if (result.captured) {
+    if (result.captured.color === COLORS.WHITE) capturedWhite.push(result.captured);
+    if (result.captured.color === COLORS.BLACK) capturedBlack.push(result.captured);
+  }
 
-els.createTournamentBtn?.addEventListener("click", createTournament);
-els.joinTournamentBtn?.addEventListener("click", () => joinTournament());
+  const record = {
+    color: beforeTurn,
+    notation: moveNotation(move),
+    label: moveNotation(move),
+    from: move.from,
+    to: move.to,
+    captured: move.captured ? {
+      type: move.captured.type,
+      color: move.captured.color,
+      symbol: move.captured.symbol
+    } : null,
+    promotion: move.promotion || null,
+    created_at: new Date().toISOString()
+  };
 
-async function bootChess() {
-  setStatus("BOOTING RICH CHESS ENGINE...");
-  await loadUser();
-  render();
-  setStatus("RICH CHESS ENGINE READY");
+  moveHistory.push(record);
+
+  turn = oppositeColor(turn);
+  selected = null;
+  legalMoves = [];
+
+  const status = getGameStatus(board, turn);
+
+  if (status.status === "checkmate" || status.status === "stalemate") {
+    gameOver = true;
+    setStatus(status.label);
+  } else if (status.status === "check") {
+    setStatus(`${turn.toUpperCase()} IN CHECK`);
+  } else {
+    setStatus(`${turn.toUpperCase()} TO MOVE`);
+  }
+
+  renderAll();
+
+  if (mode === "multiplayer" && currentRoom?.id && saveRemote) {
+    try {
+      const winnerId =
+        status.winner && currentRoom
+          ? status.winner === COLORS.WHITE
+            ? currentRoom.white_player_id
+            : currentRoom.black_player_id
+          : null;
+
+      const updated = await saveMoveToRoom({
+        roomId: currentRoom.id,
+        board,
+        turn,
+        move: record,
+        status: gameOver ? status.status : "active",
+        winnerId
+      });
+
+      currentRoom = updated;
+    } catch (error) {
+      setStatus(`ROOM SAVE ERROR: ${error.message}`);
+    }
+  }
+
+  if (mode === "solo" && cpuEnabled && !gameOver && turn === COLORS.BLACK) {
+    window.setTimeout(cpuMove, 450);
+  }
 }
 
-bootChess();
+async function cpuMove() {
+  if (gameOver || turn !== COLORS.BLACK) return;
+
+  setStatus("ELITE CPU THINKING...");
+
+  const move = getCpuMove(board, COLORS.BLACK, cpuLevel);
+
+  if (!move) {
+    const status = getGameStatus(board, turn);
+    gameOver = true;
+    setStatus(status.label);
+    renderAll();
+    return;
+  }
+
+  setStatus(explainCpuMove(move));
+  await playMove(move, false);
+}
+
+function newGame() {
+  board = getStartingBoard();
+  turn = COLORS.WHITE;
+  selected = null;
+  legalMoves = [];
+  moveHistory = [];
+  capturedWhite = [];
+  capturedBlack = [];
+  gameOver = false;
+  mode = "solo";
+  cpuEnabled = true;
+  currentRoom = null;
+  playerColor = null;
+
+  els.roomCodeInput.value = "";
+
+  renderAll();
+  setStatus("NEW ELITE SOLO GAME READY");
+}
+
+async function createRoom() {
+  try {
+    const matchType = els.matchTypeInput.value || "casual";
+    const tournamentId = els.tournamentSelect.value || null;
+
+    setStatus("CREATING MULTIPLAYER ROOM...");
+
+    const room = await createChessRoom({
+      board,
+      turn,
+      matchType,
+      tournamentId
+    });
+
+    hydrateRoomState(room);
+
+    subscribeToRoom(room.id, hydrateRoomState);
+
+    const link = getRoomLink(room.room_code);
+    await navigator.clipboard?.writeText(link).catch(() => null);
+
+    setStatus(`ROOM CREATED: ${room.room_code}`);
+  } catch (error) {
+    setStatus(`ROOM ERROR: ${error.message}`);
+  }
+}
+
+async function joinRoom() {
+  const roomCode = els.roomCodeInput.value.trim() || getRoomCodeFromUrl();
+
+  if (!roomCode) {
+    setStatus("ROOM CODE REQUIRED");
+    return;
+  }
+
+  try {
+    setStatus("JOINING ROOM...");
+
+    const room = await joinChessRoom(roomCode);
+    hydrateRoomState(room);
+
+    subscribeToRoom(room.id, hydrateRoomState);
+
+    setStatus(`JOINED ROOM: ${room.room_code}`);
+  } catch (error) {
+    setStatus(`JOIN ERROR: ${error.message}`);
+  }
+}
+
+async function copyRoom() {
+  const roomCode = els.roomCodeInput.value.trim() || currentRoom?.room_code;
+
+  if (!roomCode) {
+    setStatus("NO ROOM TO COPY");
+    return;
+  }
+
+  const link = getRoomLink(roomCode);
+
+  try {
+    await navigator.clipboard.writeText(link);
+    setStatus("ROOM LINK COPIED");
+  } catch {
+    prompt("Copy room link:", link);
+  }
+}
+
+async function resign() {
+  if (mode === "multiplayer" && currentRoom?.id) {
+    try {
+      const room = await resignRoom(currentRoom.id);
+      hydrateRoomState(room);
+      gameOver = true;
+      setStatus("YOU RESIGNED");
+    } catch (error) {
+      setStatus(`RESIGN ERROR: ${error.message}`);
+    }
+    return;
+  }
+
+  gameOver = true;
+  setStatus("GAME RESIGNED");
+  renderAll();
+}
+
+async function loadTournaments() {
+  tournaments = await ensureTournamentLobby();
+  renderTournamentOptions(els.tournamentSelect, tournaments);
+}
+
+async function joinTournament() {
+  const tournamentId = els.tournamentSelect.value;
+
+  try {
+    const entry = await joinChessTournament(tournamentId);
+    setStatus(`TOURNAMENT JOINED — SEED ${entry.seed || "READY"}`);
+  } catch (error) {
+    setStatus(`TOURNAMENT ERROR: ${error.message}`);
+  }
+}
+
+async function bootFromRoomIfPresent() {
+  const roomCode = getRoomCodeFromUrl();
+
+  if (!roomCode) return false;
+
+  try {
+    setStatus("LOADING ROOM FROM LINK...");
+
+    const room = await loadChessRoom(roomCode);
+
+    if (!room) {
+      setStatus("ROOM LINK NOT FOUND");
+      return false;
+    }
+
+    hydrateRoomState(room);
+
+    if (currentUser) {
+      playerColor = getPlayerColor(room, currentUser.id);
+    }
+
+    subscribeToRoom(room.id, hydrateRoomState);
+    setStatus(`ROOM LOADED: ${room.room_code}`);
+    return true;
+  } catch (error) {
+    setStatus(`ROOM LOAD ERROR: ${error.message}`);
+    return false;
+  }
+}
+
+els.board.addEventListener("click", (event) => {
+  const square = event.target.closest(".square");
+  if (!square) return;
+
+  selectSquare(Number(square.dataset.row), Number(square.dataset.col));
+});
+
+els.newGameBtn?.addEventListener("click", newGame);
+els.createRoomBtn?.addEventListener("click", createRoom);
+els.joinRoomBtn?.addEventListener("click", joinRoom);
+els.copyRoomBtn?.addEventListener("click", copyRoom);
+els.resignBtn?.addEventListener("click", resign);
+els.joinTournamentBtn?.addEventListener("click", joinTournament);
+
+async function bootGame() {
+  setStatus("BOOTING RICH CHESS ENGINE...");
+
+  const auth = await getCurrentUserAndProfile();
+  currentUser = auth.user;
+  currentProfile = auth.profile;
+
+  await loadTournaments();
+
+  renderAll();
+
+  const loadedRoom = await bootFromRoomIfPresent();
+
+  if (!loadedRoom) {
+    setStatus("RICH CHESS READY — ELITE CPU ACTIVE");
+  }
+
+  console.log("Rich Chess FEN:", boardToFenLite(board, turn));
+}
+
+bootGame();
