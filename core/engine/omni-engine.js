@@ -1,31 +1,29 @@
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
-/* =========================
+/* =========================================================
    RICH BIZNESS OMNI ENGINE
-   CINEMATIC UNIVERSAL MASTERPIECE
-   ULTRA REALISTIC HD 4D CORE
-   REALTIME IMMERSIVE APP ENGINE
-   MULTI-DEVICE CINEMA SYSTEM
+   CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
+   HD4D MASTERPIECE ATMOSPHERE CORE
    /core/engine/omni-engine.js
-========================= */
+========================================================= */
 
 const canvas = document.getElementById("engine");
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020402);
-scene.fog = new THREE.FogExp2(0x031003, 0.035);
+scene.fog = new THREE.FogExp2(0x041204, 0.035);
 
 const camera = new THREE.PerspectiveCamera(
-  36,
+  38,
   window.innerWidth / window.innerHeight,
   0.1,
-  280
+  260
 );
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: true,
+  alpha: false,
   powerPreference: "high-performance"
 });
 
@@ -33,7 +31,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.68;
+renderer.toneMappingExposure = 1.45;
 
 const clock = new THREE.Clock();
 
@@ -41,107 +39,80 @@ function isPhone(){
   return window.innerWidth < 700;
 }
 
-function isShortPhone(){
-  return window.innerWidth < 700 && window.innerHeight < 760;
-}
-
 function isTablet(){
   return window.innerWidth >= 700 && window.innerWidth < 1100;
 }
 
-/* =========================
-   CINEMA LIGHTING
-========================= */
+/* =========================================================
+   LIGHTS
+========================================================= */
 
-scene.add(new THREE.AmbientLight(0xd8ffd0, 0.78));
+scene.add(new THREE.AmbientLight(0xd9ffd2, 0.75));
 
-const keyLight = new THREE.PointLight(0xa8ff63, 34, 120);
-keyLight.position.set(0, 6.8, 8.8);
-scene.add(keyLight);
+const topGlow = new THREE.PointLight(0x9dff63, 22, 95);
+topGlow.position.set(0, 6.5, 7.5);
+scene.add(topGlow);
 
-const crownLight = new THREE.PointLight(0xffdf88, 13, 90);
-crownLight.position.set(0, 8.4, 4.9);
-scene.add(crownLight);
-
-const leftLight = new THREE.PointLight(0x2cffbd, 11, 80);
-leftLight.position.set(-7.6, 2.1, 7.8);
-scene.add(leftLight);
-
-const rightLight = new THREE.PointLight(0xffd47a, 10, 80);
-rightLight.position.set(7.6, 2.1, 7.8);
-scene.add(rightLight);
-
-const portalLight = new THREE.PointLight(0x8dff50, 28, 76);
-portalLight.position.set(0, -0.18, 5.2);
+const portalLight = new THREE.PointLight(0x8dff5b, 26, 78);
+portalLight.position.set(0, -0.35, 5.6);
 scene.add(portalLight);
 
-const bottomGlow = new THREE.PointLight(0x79ff43, 17, 62);
-bottomGlow.position.set(0, -4.9, 5.7);
+const leftWorldLight = new THREE.PointLight(0x39ffc1, 7, 72);
+leftWorldLight.position.set(-7.5, 1.8, 6);
+scene.add(leftWorldLight);
+
+const rightGoldLight = new THREE.PointLight(0xffd76a, 7, 72);
+rightGoldLight.position.set(7.5, 1.8, 6);
+scene.add(rightGoldLight);
+
+const bottomGlow = new THREE.PointLight(0x7fff45, 12, 58);
+bottomGlow.position.set(0, -5.2, 6);
 scene.add(bottomGlow);
 
-/* =========================
+/* =========================================================
    MATERIALS
-========================= */
+========================================================= */
 
-const blackMetal = new THREE.MeshStandardMaterial({
-  color: 0x050705,
+const deepMetal = new THREE.MeshStandardMaterial({
+  color: 0x070a07,
   metalness: 1,
-  roughness: 0.18,
-  emissive: 0x071607,
-  emissiveIntensity: 0.38
-});
-
-const gunMetal = new THREE.MeshStandardMaterial({
-  color: 0x252b23,
-  metalness: 1,
-  roughness: 0.13,
-  emissive: 0x0d1909,
-  emissiveIntensity: 0.28
-});
-
-const heavyEdgeMetal = new THREE.MeshStandardMaterial({
-  color: 0x31372f,
-  metalness: 1,
-  roughness: 0.11,
-  emissive: 0x11200b,
+  roughness: 0.17,
+  emissive: 0x071507,
   emissiveIntensity: 0.34
 });
 
-const darkPanel = new THREE.MeshStandardMaterial({
-  color: 0x071107,
-  metalness: 0.88,
-  roughness: 0.18,
-  emissive: 0x183513,
-  emissiveIntensity: 0.68
+const ringMetal = new THREE.MeshStandardMaterial({
+  color: 0x1b241a,
+  metalness: 1,
+  roughness: 0.13,
+  emissive: 0x10230d,
+  emissiveIntensity: 0.28
 });
 
 const glowMat = new THREE.MeshBasicMaterial({
-  color: 0x9cff63,
+  color: 0x8dff5b,
   transparent: true,
-  opacity: 0.98,
+  opacity: 0.72,
   depthWrite: false
 });
 
 const softGlowMat = new THREE.MeshBasicMaterial({
-  color: 0xc7ff9d,
+  color: 0xd7ff9b,
   transparent: true,
-  opacity: 0.36,
+  opacity: 0.18,
   depthWrite: false
 });
 
-const portalGlassMat = new THREE.MeshStandardMaterial({
-  color: 0x7fff4b,
-  emissive: 0x7fff4b,
-  emissiveIntensity: 4.25,
+const goldGlowMat = new THREE.MeshBasicMaterial({
+  color: 0xffd76a,
   transparent: true,
-  opacity: 0.72,
-  metalness: 0.2,
-  roughness: 0.025
+  opacity: 0.22,
+  depthWrite: false
 });
 
-/* =========================
-   ATMOSPHERE
-========================= */
+/* =========================================================
+   ATMOSPHERE POINT FIELD
+========================================================= */
 
 function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity){
   const geo = new THREE.BufferGeometry();
@@ -162,176 +133,135 @@ function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity)
     new THREE.PointsMaterial({
       color,
       size,
-      transparent:true,
+      transparent: true,
       opacity,
-      depthWrite:false
+      depthWrite: false
     })
   );
 }
 
-const smoke = makePoints(1800, 38, 24, -10, 24, 0x72ff53, 0.055, 0.16);
+const smoke = makePoints(1700, 36, 24, -7, 25, 0x73ff55, 0.052, 0.14);
 scene.add(smoke);
 
-const goldDust = makePoints(650, 20, 15, -4, 15, 0xffdd7e, 0.035, 0.23);
+const greenDust = makePoints(900, 19, 14, -2, 16, 0xafff7d, 0.025, 0.3);
+scene.add(greenDust);
+
+const goldDust = makePoints(520, 22, 14, -3, 18, 0xffd76a, 0.03, 0.18);
 scene.add(goldDust);
 
-const greenSparks = makePoints(950, 17, 12, -2, 11, 0xb6ff82, 0.026, 0.34);
-scene.add(greenSparks);
+/* =========================================================
+   MAIN CINEMA RIG
+========================================================= */
 
-/* =========================
-   DIAL ROOT
-========================= */
+const rig = new THREE.Group();
+scene.add(rig);
 
-const dialRig = new THREE.Group();
-scene.add(dialRig);
+const portalRig = new THREE.Group();
+portalRig.position.z = 0.2;
+rig.add(portalRig);
 
-const dial = new THREE.Group();
-dial.rotation.x = -0.105;
-dialRig.add(dial);
+/* =========================================================
+   SUBTLE MACHINE RINGS BEHIND HTML
+========================================================= */
 
-/* =========================
-   DISC / ARMOR
-========================= */
-
-const backPlate = new THREE.Mesh(
-  new THREE.CylinderGeometry(4.7, 4.7, 0.54, 220),
-  blackMetal
-);
-backPlate.rotation.x = Math.PI / 2;
-backPlate.position.z = -0.42;
-dial.add(backPlate);
-
-function torus(radius, tube, mat, z = 0){
-  const mesh = new THREE.Mesh(
-    new THREE.TorusGeometry(radius, tube, 36, 300),
-    mat
-  );
-  mesh.rotation.x = Math.PI / 2;
-  mesh.position.z = z;
-  dial.add(mesh);
-  return mesh;
-}
-
-const outerArmor = torus(4.64, 0.28, heavyEdgeMetal, 0.09);
-const outerHalo = torus(4.43, 0.035, softGlowMat, 0.2);
-const outerGlow = torus(4.18, 0.048, glowMat, 0.28);
-const midArmor = torus(3.36, 0.15, gunMetal, 0.31);
-const midHalo = torus(2.58, 0.028, softGlowMat, 0.4);
-const innerGlow = torus(1.76, 0.065, glowMat, 0.51);
-const centerArmor = torus(1.31, 0.17, heavyEdgeMetal, 0.61);
-
-/* =========================
-   MACHINE FRAME
-========================= */
-
-const frameGroup = new THREE.Group();
-frameGroup.position.z = 0.02;
-dial.add(frameGroup);
-
-for(let i = 0; i < 8; i++){
-  const a = (Math.PI * 2 / 8) * i + Math.PI / 8;
-
-  const bar = new THREE.Mesh(
-    new THREE.BoxGeometry(1.28, 0.055, 0.075),
-    new THREE.MeshBasicMaterial({
-      color:0x80ff45,
-      transparent:true,
-      opacity:0.5,
-      depthWrite:false
-    })
+function addRing(radius, tube, material, z){
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, tube, 32, 240),
+    material
   );
 
-  bar.position.set(Math.cos(a) * 4.18, Math.sin(a) * 4.18, 0.78);
-  bar.rotation.z = a + Math.PI / 2;
-  frameGroup.add(bar);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.z = z;
+  portalRig.add(ring);
+
+  return ring;
 }
 
-/* =========================
-   PORTAL CORE
-========================= */
-
-const portalGroup = new THREE.Group();
-portalGroup.position.z = 0.75;
-dial.add(portalGroup);
-
-const portalBase = new THREE.Mesh(
-  new THREE.CylinderGeometry(1.18, 1.18, 0.24, 150),
-  new THREE.MeshStandardMaterial({
-    color:0x041004,
-    metalness:0.96,
-    roughness:0.08,
-    emissive:0x53ff38,
-    emissiveIntensity:1.55
-  })
+const machineBack = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.62, 2.62, 0.22, 160),
+  deepMetal
 );
-portalBase.rotation.x = Math.PI / 2;
-portalGroup.add(portalBase);
+machineBack.rotation.x = Math.PI / 2;
+machineBack.position.z = -0.18;
+portalRig.add(machineBack);
+
+const outerRing = addRing(2.78, 0.08, ringMetal, 0.03);
+const outerGlow = addRing(2.42, 0.022, glowMat, 0.13);
+const midRing = addRing(1.85, 0.055, ringMetal, 0.18);
+const midGlow = addRing(1.5, 0.018, softGlowMat, 0.24);
+const innerGlow = addRing(1.05, 0.032, glowMat, 0.32);
+
+/* =========================================================
+   PORTAL ENERGY CORE
+========================================================= */
+
+const coreGroup = new THREE.Group();
+coreGroup.position.z = 0.45;
+portalRig.add(coreGroup);
 
 const portalGlass = new THREE.Mesh(
-  new THREE.SphereGeometry(1.02, 88, 88),
-  portalGlassMat
+  new THREE.SphereGeometry(0.92, 72, 72),
+  new THREE.MeshStandardMaterial({
+    color: 0x7fff4b,
+    emissive: 0x7fff4b,
+    emissiveIntensity: 3.7,
+    transparent: true,
+    opacity: 0.54,
+    metalness: 0.18,
+    roughness: 0.03
+  })
 );
-portalGlass.scale.set(1, 1, 0.28);
-portalGlass.position.z = 0.14;
-portalGroup.add(portalGlass);
+
+portalGlass.scale.set(1, 1, 0.25);
+portalGlass.position.z = 0.12;
+coreGroup.add(portalGlass);
 
 const portalAura = new THREE.Mesh(
-  new THREE.SphereGeometry(1.34, 70, 70),
+  new THREE.SphereGeometry(1.3, 64, 64),
   new THREE.MeshBasicMaterial({
-    color:0x8fff57,
-    transparent:true,
-    opacity:0.16,
-    depthWrite:false
+    color: 0x8dff5b,
+    transparent: true,
+    opacity: 0.12,
+    depthWrite: false
   })
 );
-portalAura.scale.set(1, 1, 0.16);
-portalAura.position.z = 0.08;
-portalGroup.add(portalAura);
 
-const portalRing1 = new THREE.Mesh(
-  new THREE.TorusGeometry(1.17, 0.042, 20, 250),
+portalAura.scale.set(1, 1, 0.18);
+portalAura.position.z = 0.02;
+coreGroup.add(portalAura);
+
+const portalRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.15, 0.014, 12, 180),
   glowMat
 );
-portalRing1.rotation.x = Math.PI / 2;
-portalRing1.position.z = 0.31;
-portalGroup.add(portalRing1);
+portalRing.rotation.x = Math.PI / 2;
+portalRing.position.z = 0.38;
+coreGroup.add(portalRing);
 
-const portalRing2 = new THREE.Mesh(
-  new THREE.TorusGeometry(0.8, 0.02, 16, 200),
-  new THREE.MeshBasicMaterial({
-    color:0xd5ffad,
-    transparent:true,
-    opacity:0.9,
-    depthWrite:false
-  })
+const goldOrbit = new THREE.Mesh(
+  new THREE.TorusGeometry(1.42, 0.008, 10, 180),
+  goldGlowMat
 );
-portalRing2.rotation.x = Math.PI / 2;
-portalRing2.position.z = 0.37;
-portalGroup.add(portalRing2);
+goldOrbit.rotation.x = Math.PI / 2.18;
+goldOrbit.rotation.y = 0.2;
+goldOrbit.position.z = 0.32;
+coreGroup.add(goldOrbit);
 
-const portalRing3 = new THREE.Mesh(
-  new THREE.TorusGeometry(1.46, 0.018, 14, 220),
-  new THREE.MeshBasicMaterial({
-    color:0xffe58a,
-    transparent:true,
-    opacity:0.42,
-    depthWrite:false
-  })
-);
-portalRing3.rotation.x = Math.PI / 2;
-portalRing3.position.z = 0.26;
-portalGroup.add(portalRing3);
+/* =========================================================
+   ENERGY PARTICLES INSIDE PORTAL
+========================================================= */
 
 const energyGeo = new THREE.BufferGeometry();
 const energyPositions = [];
 
-for(let i = 0; i < 1400; i++){
-  const r = Math.random() * 0.96;
+for(let i = 0; i < 1200; i++){
+  const r = Math.random() * 1.02;
   const a = Math.random() * Math.PI * 2;
+
   energyPositions.push(
     Math.cos(a) * r,
     Math.sin(a) * r,
-    0.2 + (Math.random() - 0.5) * 0.38
+    0.12 + (Math.random() - 0.5) * 0.32
   );
 }
 
@@ -340,62 +270,82 @@ energyGeo.setAttribute("position", new THREE.Float32BufferAttribute(energyPositi
 const energy = new THREE.Points(
   energyGeo,
   new THREE.PointsMaterial({
-    color:0xd8ffab,
-    size:0.028,
-    transparent:true,
-    opacity:0.98,
-    depthWrite:false
+    color: 0xd9ffad,
+    size: 0.025,
+    transparent: true,
+    opacity: 0.82,
+    depthWrite: false
   })
 );
-portalGroup.add(energy);
 
-const orbitGroup = new THREE.Group();
-orbitGroup.position.z = 0.45;
-portalGroup.add(orbitGroup);
+coreGroup.add(energy);
 
-for(let i = 0; i < 4; i++){
-  const orbit = new THREE.Mesh(
-    new THREE.TorusGeometry(1.45 + i * 0.12, 0.006, 8, 170),
+/* =========================================================
+   CINEMA HEX LINES / MACHINE DEPTH
+========================================================= */
+
+const hexGroup = new THREE.Group();
+hexGroup.position.z = -0.05;
+portalRig.add(hexGroup);
+
+for(let i = 0; i < 8; i++){
+  const angle = (Math.PI * 2 / 8) * i + Math.PI / 8;
+
+  const bar = new THREE.Mesh(
+    new THREE.BoxGeometry(1.25, 0.035, 0.035),
     new THREE.MeshBasicMaterial({
-      color:i % 2 ? 0xffe58a : 0xb6ff82,
-      transparent:true,
-      opacity:0.38,
-      depthWrite:false
+      color: 0x8dff5b,
+      transparent: true,
+      opacity: 0.19,
+      depthWrite: false
     })
   );
 
-  orbit.rotation.x = Math.PI / 2 + (i - 1.5) * 0.28;
-  orbit.rotation.y = (i - 1.5) * 0.22;
-  orbitGroup.add(orbit);
+  bar.position.set(
+    Math.cos(angle) * 3.32,
+    Math.sin(angle) * 3.32,
+    0.1
+  );
+
+  bar.rotation.z = angle + Math.PI / 2;
+  hexGroup.add(bar);
 }
 
-const lightningGroup = new THREE.Group();
-lightningGroup.position.z = 0.42;
-portalGroup.add(lightningGroup);
+/* =========================================================
+   SIDE ATMOSPHERE / MONEY FLOOR HINT
+========================================================= */
 
-for(let i = 0; i < 24; i++){
-  const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3((Math.random() - 0.5) * 1.48, (Math.random() - 0.5) * 1.48, 0),
-    new THREE.Vector3((Math.random() - 0.5) * 1.72, (Math.random() - 0.5) * 1.72, 0.03),
-    new THREE.Vector3((Math.random() - 0.5) * 1.48, (Math.random() - 0.5) * 1.48, 0)
-  ]);
+const floorGroup = new THREE.Group();
+floorGroup.position.set(0, -4.65, -2.2);
+scene.add(floorGroup);
 
-  const tube = new THREE.Mesh(
-    new THREE.TubeGeometry(curve, 9, 0.008, 6, false),
-    new THREE.MeshBasicMaterial({
-      color:0xc8ff92,
-      transparent:true,
-      opacity:0.42,
-      depthWrite:false
+for(let i = 0; i < 22; i++){
+  const bill = new THREE.Mesh(
+    new THREE.BoxGeometry(1.1, 0.045, 0.48),
+    new THREE.MeshStandardMaterial({
+      color: 0x163911,
+      metalness: 0.25,
+      roughness: 0.58,
+      emissive: 0x14380e,
+      emissiveIntensity: 0.22
     })
   );
 
-  lightningGroup.add(tube);
+  bill.position.set(
+    (Math.random() - 0.5) * 8.6,
+    i * 0.015,
+    (Math.random() - 0.5) * 1.75
+  );
+
+  bill.rotation.y = (Math.random() - 0.5) * 0.8;
+  bill.rotation.z = (Math.random() - 0.5) * 0.25;
+
+  floorGroup.add(bill);
 }
 
-/* =========================
-   SEGMENTS
-========================= */
+/* =========================================================
+   ACTIVE DIAL SYNC
+========================================================= */
 
 const labels = [
   "live",
@@ -409,190 +359,32 @@ const labels = [
 ];
 
 const routes = {
-  gallery:"/gallery.html",
-  live:"/live.html",
-  music:"/music.html",
-  gaming:"/gaming.html",
-  store:"/store.html",
-  meta:"/meta.html",
-  sports:"/sports.html",
-  upload:"/upload.html"
+  gallery: "/gallery.html",
+  live: "/live.html",
+  music: "/music.html",
+  gaming: "/gaming.html",
+  store: "/store.html",
+  meta: "/meta.html",
+  sports: "/sports.html",
+  upload: "/upload.html"
 };
 
-const segments = [];
-const count = labels.length;
-const step = (Math.PI * 2) / count;
-
-for(let i = 0; i < count; i++){
-  const shape = new THREE.Shape();
-
-  const innerR = 1.5;
-  const outerR = 4.02;
-  const gap = step * 0.05;
-
-  const a0 = i * step - step / 2 + gap + Math.PI / 2;
-  const a1 = i * step + step / 2 - gap + Math.PI / 2;
-
-  shape.moveTo(Math.cos(a0) * innerR, Math.sin(a0) * innerR);
-  shape.absarc(0, 0, innerR, a0, a1, false);
-  shape.lineTo(Math.cos(a1) * outerR, Math.sin(a1) * outerR);
-  shape.absarc(0, 0, outerR, a1, a0, true);
-  shape.closePath();
-
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth:0.4,
-    bevelEnabled:true,
-    bevelSegments:6,
-    bevelSize:0.045,
-    bevelThickness:0.055
-  });
-
-  const panel = new THREE.Mesh(geo, darkPanel.clone());
-  panel.rotation.x = Math.PI / 2;
-  panel.position.z = 0.18;
-  panel.userData.name = labels[i];
-
-  dial.add(panel);
-  segments.push(panel);
-
-  const dividerAngle = i * step + step / 2 + Math.PI / 2;
-
-  const divider = new THREE.Mesh(
-    new THREE.BoxGeometry(0.052, 2.66, 0.22),
-    new THREE.MeshStandardMaterial({
-      color:0x22281f,
-      metalness:1,
-      roughness:0.12,
-      emissive:0x76ff43,
-      emissiveIntensity:0.24
-    })
-  );
-
-  divider.position.set(
-    Math.cos(dividerAngle) * 2.82,
-    Math.sin(dividerAngle) * 2.82,
-    0.62
-  );
-
-  divider.rotation.z = dividerAngle;
-  dial.add(divider);
-}
-
-/* =========================
-   BOLTS / LAMPS
-========================= */
-
-const lamps = [];
-
-for(let i = 0; i < 16; i++){
-  const angle = (Math.PI * 2 / 16) * i;
-
-  const bolt = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.115, 0.115, 0.21, 28),
-    new THREE.MeshStandardMaterial({
-      color:0xb6b799,
-      metalness:1,
-      roughness:0.12,
-      emissive:0x0c110b,
-      emissiveIntensity:0.26
-    })
-  );
-
-  bolt.rotation.x = Math.PI / 2;
-  bolt.position.set(Math.cos(angle) * 4.5, Math.sin(angle) * 4.5, 0.49);
-  dial.add(bolt);
-
-  if(i % 2 === 1){
-    const lamp = new THREE.Mesh(
-      new THREE.SphereGeometry(0.142, 28, 28),
-      new THREE.MeshStandardMaterial({
-        color:0xaaff72,
-        emissive:0xaaff72,
-        emissiveIntensity:4.1,
-        roughness:0.04
-      })
-    );
-
-    lamp.position.set(Math.cos(angle) * 4.65, Math.sin(angle) * 4.65, 0.66);
-    dial.add(lamp);
-    lamps.push(lamp);
-  }
-}
-
-for(const side of [-1, 1]){
-  const armor = new THREE.Mesh(
-    new THREE.BoxGeometry(0.62, 1.48, 0.42),
-    heavyEdgeMetal
-  );
-
-  armor.position.set(side * 4.68, 0, 0.25);
-  armor.rotation.z = side * 0.12;
-  dial.add(armor);
-
-  const strip = new THREE.Mesh(
-    new THREE.BoxGeometry(0.09, 1, 0.07),
-    glowMat
-  );
-
-  strip.position.set(side * 4.8, 0, 0.58);
-  strip.rotation.z = side * 0.12;
-  dial.add(strip);
-}
-
-/* =========================
-   MONEY BASE
-========================= */
-
-const moneyGroup = new THREE.Group();
-moneyGroup.position.set(0, -4.02, -2.7);
-scene.add(moneyGroup);
-
-for(let i = 0; i < 34; i++){
-  const bill = new THREE.Mesh(
-    new THREE.BoxGeometry(1.18, 0.08, 0.52),
-    new THREE.MeshStandardMaterial({
-      color:0x173b11,
-      metalness:0.24,
-      roughness:0.58,
-      emissive:0x183f10,
-      emissiveIntensity:0.34
-    })
-  );
-
-  bill.position.set(
-    (Math.random() - 0.5) * 9.2,
-    i * 0.022,
-    (Math.random() - 0.5) * 2.05
-  );
-
-  bill.rotation.y = (Math.random() - 0.5) * 0.8;
-  bill.rotation.z = (Math.random() - 0.5) * 0.25;
-  moneyGroup.add(bill);
-}
-
-/* =========================
-   STATE
-========================= */
-
-let rotation = 0;
-let velocity = 0;
-let dragging = false;
-let lastX = 0;
-let moved = false;
-
-let targetTiltX = -0.105;
-let targetTiltY = 0;
-let smoothTiltX = -0.105;
-let smoothTiltY = 0;
-
+let activeIndex = 0;
 let activeName = "live";
+let targetRotation = 0;
+let currentRotation = 0;
 
 window.RB_ACTIVE_KEY = activeName;
-window.RB_ACTIVE_ROUTE = routes[activeName];
+window.RB_ACTIVE_ROUTE = routes[activeName] || "/live.html";
 window.RB_DIAL_ROTATION = 0;
 
 function setActive(name){
-  activeName = name || "live";
+  const index = labels.indexOf(name);
+  if(index < 0) return;
+
+  activeIndex = index;
+  activeName = name;
+  targetRotation = -index * ((Math.PI * 2) / labels.length);
 
   window.RB_ACTIVE_KEY = activeName;
   window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
@@ -602,82 +394,7 @@ function setActive(name){
   }
 }
 
-function getActiveFromRotation(){
-  const normalized =
-    ((-rotation % (Math.PI * 2)) + Math.PI * 2) %
-    (Math.PI * 2);
-
-  const index = Math.round(normalized / step) % count;
-  return labels[index] || "live";
-}
-
-/* =========================
-   POINTER
-========================= */
-
-window.addEventListener("pointerdown", (event) => {
-  dragging = true;
-  moved = false;
-  lastX = event.clientX;
-});
-
-window.addEventListener("pointermove", (event) => {
-  const nx = event.clientX / window.innerWidth - 0.5;
-  const ny = event.clientY / window.innerHeight - 0.5;
-
-  targetTiltY = nx * 0.12;
-  targetTiltX = -0.105 + ny * 0.04;
-
-  if(!dragging) return;
-
-  const dx = event.clientX - lastX;
-  lastX = event.clientX;
-
-  if(Math.abs(dx) > 2) moved = true;
-  velocity = dx * 0.0032;
-});
-
-window.addEventListener("pointerup", () => {
-  dragging = false;
-});
-
-window.addEventListener("pointercancel", () => {
-  dragging = false;
-});
-
-/* =========================
-   CLICK RAYCAST
-========================= */
-
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-
-window.addEventListener("click", (event) => {
-  if(moved) return;
-
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(pointer, camera);
-
-  const hits = raycaster.intersectObjects(segments);
-
-  if(!hits.length) return;
-
-  const name = hits[0].object.userData.name;
-  setActive(name);
-
-  if(window.RB_DIAL_CLICK_TO_OPEN === true){
-    window.location.href = routes[name];
-  }
-});
-
 window.RB_spinTo = function(key){
-  const index = labels.indexOf(key);
-  if(index < 0) return;
-
-  rotation = -index * step;
-  velocity = 0;
   setActive(key);
 };
 
@@ -687,161 +404,130 @@ window.enterWorld = function(){
 
 window.enter = window.enterWorld;
 
-/* =========================
-   APP-STAGE RESIZE
-========================= */
+/* =========================================================
+   POINTER PARALLAX ONLY
+========================================================= */
+
+let targetTiltX = -0.08;
+let targetTiltY = 0;
+let smoothTiltX = -0.08;
+let smoothTiltY = 0;
+
+window.addEventListener("pointermove", (event) => {
+  const nx = event.clientX / window.innerWidth - 0.5;
+  const ny = event.clientY / window.innerHeight - 0.5;
+
+  targetTiltY = nx * 0.08;
+  targetTiltX = -0.08 + ny * 0.025;
+});
+
+/* =========================================================
+   RESIZE / APP MATCHING
+========================================================= */
 
 function resize(){
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const phone = isPhone();
 
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
 
-  if(phone){
-    if(isShortPhone()){
-      dialRig.scale.setScalar(0.54);
-      dialRig.position.set(0, -1.72, 0);
-      camera.position.set(0, 0.52, 10.55);
-      camera.lookAt(0, -0.86, 0);
-    }else{
-      dialRig.scale.setScalar(0.58);
-      dialRig.position.set(0, -1.82, 0);
-      camera.position.set(0, 0.56, 10.7);
-      camera.lookAt(0, -0.92, 0);
-    }
+  if(isPhone()){
+    rig.scale.setScalar(0.78);
+    rig.position.set(0, -0.42, 0);
+    camera.position.set(0, 0.54, 9.8);
+    camera.lookAt(0, -0.24, 0);
   }else if(isTablet()){
-    dialRig.scale.setScalar(0.86);
-    dialRig.position.set(0, -0.86, 0);
-    camera.position.set(0, 0.62, 9.55);
-    camera.lookAt(0, -0.34, 0);
+    rig.scale.setScalar(0.98);
+    rig.position.set(0, -0.2, 0);
+    camera.position.set(0, 0.6, 9.2);
+    camera.lookAt(0, -0.08, 0);
   }else{
-    dialRig.scale.setScalar(1.08);
-    dialRig.position.set(0, -0.36, 0);
-    camera.position.set(0, 0.62, 9.05);
-    camera.lookAt(0, 0.03, 0);
+    rig.scale.setScalar(1.12);
+    rig.position.set(0, -0.1, 0);
+    camera.position.set(0, 0.55, 8.4);
+    camera.lookAt(0, 0, 0);
   }
 }
 
 window.addEventListener("resize", resize);
 resize();
 
-/* =========================
+/* =========================================================
    LOOP
-========================= */
+========================================================= */
 
 function animate(){
   requestAnimationFrame(animate);
 
   const t = clock.getElapsedTime();
 
-  smoothTiltX += (targetTiltX - smoothTiltX) * 0.07;
-  smoothTiltY += (targetTiltY - smoothTiltY) * 0.07;
+  currentRotation += (targetRotation - currentRotation) * 0.08;
 
-  dialRig.rotation.x = smoothTiltX;
-  dialRig.rotation.y = smoothTiltY;
+  window.RB_DIAL_ROTATION = currentRotation;
+  document.documentElement.style.setProperty(
+    "--rb-dial-rotation",
+    `${currentRotation}rad`
+  );
 
-  rotation += velocity;
+  smoothTiltX += (targetTiltX - smoothTiltX) * 0.06;
+  smoothTiltY += (targetTiltY - smoothTiltY) * 0.06;
 
-  if(!dragging){
-    velocity *= 0.91;
+  rig.rotation.x = smoothTiltX;
+  rig.rotation.y = smoothTiltY;
 
-    if(Math.abs(velocity) < 0.0006){
-      velocity = 0;
-      const snapped = Math.round(rotation / step) * step;
-      rotation = THREE.MathUtils.lerp(rotation, snapped, 0.09);
-    }
-  }
+  portalRig.rotation.z = currentRotation * 0.12;
 
-  dial.rotation.z = rotation;
+  outerRing.rotation.z = -currentRotation * 0.12;
+  outerGlow.rotation.z = -currentRotation * 0.26;
+  midRing.rotation.z = currentRotation * 0.18;
+  midGlow.rotation.z = currentRotation * 0.32;
+  innerGlow.rotation.z = -currentRotation * 0.42;
 
-  window.RB_DIAL_ROTATION = rotation;
-  document.documentElement.style.setProperty("--rb-dial-rotation", `${rotation}rad`);
+  hexGroup.rotation.z = -currentRotation * 0.05;
 
-  outerArmor.rotation.z = -rotation * 0.14;
-  outerHalo.rotation.z = -rotation * 0.22;
-  outerGlow.rotation.z = -rotation * 0.35;
-  midArmor.rotation.z = rotation * 0.12;
-  midHalo.rotation.z = rotation * 0.24;
-  innerGlow.rotation.z = rotation * 0.55;
-  centerArmor.rotation.z = -rotation * 0.22;
-  frameGroup.rotation.z = -rotation * 0.08;
+  const pulse = Math.sin(t * 2.4);
+  const fastPulse = Math.sin(t * 5.2);
 
-  const pulse = Math.sin(t * 2.65);
-  const fastPulse = Math.sin(t * 5.3);
+  portalGlass.scale.set(
+    1 + pulse * 0.035,
+    1 + pulse * 0.035,
+    0.25
+  );
 
-  portalGlass.scale.set(1 + pulse * 0.045, 1 + pulse * 0.045, 0.28);
-  portalAura.scale.set(1.04 + pulse * 0.07, 1.04 + pulse * 0.07, 0.16);
+  portalGlass.material.emissiveIntensity = 3.55 + Math.abs(pulse) * 0.75;
 
-  portalGlass.material.emissiveIntensity = 4.1 + Math.sin(t * 3.4) * 0.85;
-  portalAura.material.opacity = 0.12 + Math.abs(pulse) * 0.08;
+  portalAura.scale.set(
+    1.02 + Math.abs(pulse) * 0.08,
+    1.02 + Math.abs(pulse) * 0.08,
+    0.18
+  );
 
-  portalRing1.rotation.z += 0.01;
-  portalRing2.rotation.z -= 0.016;
-  portalRing3.rotation.z += 0.006;
-  orbitGroup.rotation.z += 0.006;
-  orbitGroup.rotation.x = Math.sin(t * 0.7) * 0.12;
+  portalAura.material.opacity = 0.1 + Math.abs(pulse) * 0.08;
 
-  energy.rotation.z -= 0.016;
-  lightningGroup.rotation.z += 0.005;
+  portalRing.rotation.z += 0.01;
+  goldOrbit.rotation.z -= 0.006;
+  goldOrbit.rotation.y = 0.2 + Math.sin(t * 0.7) * 0.08;
 
-  lightningGroup.children.forEach((line, index) => {
-    line.material.opacity =
-      0.12 + Math.abs(Math.sin(t * 2.7 + index * 0.8)) * 0.46;
-  });
+  energy.rotation.z -= 0.013;
+  energy.material.opacity = 0.68 + Math.abs(fastPulse) * 0.18;
 
-  smoke.rotation.y += 0.00065;
-  smoke.rotation.x = Math.sin(t * 0.15) * 0.035;
-  smoke.material.opacity = 0.13 + Math.abs(Math.sin(t * 0.42)) * 0.06;
+  smoke.rotation.y += 0.0006;
+  smoke.rotation.x = Math.sin(t * 0.16) * 0.03;
+  smoke.material.opacity = 0.12 + Math.abs(Math.sin(t * 0.42)) * 0.05;
 
-  goldDust.rotation.y -= 0.00075;
-  goldDust.rotation.x = Math.sin(t * 0.18) * 0.025;
+  greenDust.rotation.z += 0.0009;
+  greenDust.material.opacity = 0.24 + Math.abs(fastPulse) * 0.1;
 
-  greenSparks.rotation.z += 0.0009;
-  greenSparks.material.opacity = 0.25 + Math.abs(fastPulse) * 0.12;
+  goldDust.rotation.y -= 0.0007;
 
-  moneyGroup.rotation.y = Math.sin(t * 0.35) * 0.065;
-  moneyGroup.position.y = -4.02 + Math.sin(t * 0.7) * 0.035;
+  floorGroup.rotation.y = Math.sin(t * 0.35) * 0.055;
+  floorGroup.position.y = -4.65 + Math.sin(t * 0.7) * 0.025;
 
-  lamps.forEach((lamp, index) => {
-    lamp.material.emissiveIntensity =
-      3.4 + Math.abs(Math.sin(t * 2.4 + index)) * 1.5;
-  });
-
-  const newActive = getActiveFromRotation();
-
-  if(newActive !== activeName){
-    setActive(newActive);
-  }
-
-  segments.forEach((segment) => {
-    const isActive = segment.userData.name === activeName;
-
-    segment.material.emissiveIntensity = THREE.MathUtils.lerp(
-      segment.material.emissiveIntensity,
-      isActive ? 1.65 : 0.62,
-      0.12
-    );
-
-    segment.position.z = THREE.MathUtils.lerp(
-      segment.position.z,
-      isActive ? 0.32 : 0.18,
-      0.12
-    );
-
-    segment.scale.z = THREE.MathUtils.lerp(
-      segment.scale.z,
-      isActive ? 1.08 : 1,
-      0.08
-    );
-  });
-
-  keyLight.intensity = 31 + Math.sin(t * 1.7) * 3.2;
-  crownLight.intensity = 10 + Math.sin(t * 1.1) * 2.4;
-  portalLight.intensity = 23 + Math.sin(t * 2.8) * 5;
-  bottomGlow.intensity = 14 + Math.sin(t * 2.2) * 2.8;
+  topGlow.intensity = 20 + Math.sin(t * 1.4) * 2.5;
+  portalLight.intensity = 24 + Math.sin(t * 2.6) * 4;
+  bottomGlow.intensity = 11 + Math.sin(t * 2.1) * 2.2;
 
   renderer.render(scene, camera);
 }
