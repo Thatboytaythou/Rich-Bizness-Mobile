@@ -2,16 +2,64 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 /* =========================================================
    RICH BIZNESS OMNI ENGINE
-   FULL MATCHING CINEMA ENGINE
-   10 CORE REALISTIC APP ATMOSPHERE
+   USER-CONTROLLED 10 CORE CINEMA DIAL
    /core/engine/omni-engine.js
 ========================================================= */
 
 const canvas = document.getElementById("engine");
 
+/* =========================================================
+   ROUTES + 10 CORE ORDER
+========================================================= */
+
+const labels = [
+  "feed",
+  "watch",
+  "live",
+  "music",
+  "gaming",
+  "meta",
+  "sports",
+  "gallery",
+  "upload",
+  "store"
+];
+
+const routes = {
+  feed: "/feed.html",
+  watch: "/watch.html",
+  live: "/live.html",
+  music: "/music.html",
+  gaming: "/gaming.html",
+  meta: "/meta.html",
+  sports: "/sports.html",
+  gallery: "/gallery.html",
+  upload: "/upload.html",
+  store: "/store.html"
+};
+
+const step = (Math.PI * 2) / labels.length;
+
+let activeIndex = labels.indexOf(window.RB_ACTIVE_KEY || "live");
+if (activeIndex < 0) activeIndex = 2;
+
+let activeName = labels[activeIndex];
+let rotation = -activeIndex * step;
+let targetRotation = rotation;
+let velocity = 0;
+
+let dragging = false;
+let moved = false;
+let lastAngle = 0;
+let lastTime = performance.now();
+
+/* =========================================================
+   THREE BACKGROUND ATMOSPHERE ONLY
+========================================================= */
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020402);
-scene.fog = new THREE.FogExp2(0x031003, 0.038);
+scene.fog = new THREE.FogExp2(0x031003, 0.045);
 
 const camera = new THREE.PerspectiveCamera(
   38,
@@ -23,7 +71,7 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: false,
+  alpha: true,
   powerPreference: "high-performance"
 });
 
@@ -31,82 +79,33 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.46;
+renderer.toneMappingExposure = 1.28;
 
 const clock = new THREE.Clock();
-
-function isPhone(){
-  return window.innerWidth < 700;
-}
-
-function isTablet(){
-  return window.innerWidth >= 700 && window.innerWidth < 1100;
-}
-
-/* =========================================================
-   10 CORE ROUTE STATE
-========================================================= */
-
-const labels = [
-  "feed",
-  "watch",
-  "live",
-  "music",
-  "gaming",
-  "sports",
-  "gallery",
-  "upload",
-  "store",
-  "meta"
-];
-
-const routes = {
-  feed: "/feed.html",
-  watch: "/watch.html",
-  live: "/live.html",
-  music: "/music.html",
-  gaming: "/gaming.html",
-  sports: "/sports.html",
-  gallery: "/gallery.html",
-  upload: "/upload.html",
-  store: "/store.html",
-  meta: "/meta.html"
-};
-
-let activeIndex = labels.indexOf(window.RB_ACTIVE_KEY || "live");
-if (activeIndex < 0) activeIndex = 2;
-
-let activeName = labels[activeIndex] || "live";
-let targetRotation = -activeIndex * ((Math.PI * 2) / labels.length);
-let currentRotation = targetRotation;
-
-window.RB_ACTIVE_KEY = activeName;
-window.RB_ACTIVE_ROUTE = routes[activeName] || "/live.html";
-window.RB_DIAL_ROTATION = currentRotation;
 
 /* =========================================================
    LIGHTS
 ========================================================= */
 
-scene.add(new THREE.AmbientLight(0xd8ffd0, 0.76));
+scene.add(new THREE.AmbientLight(0xd8ffd0, 0.62));
 
-const topGlow = new THREE.PointLight(0x9dff63, 22, 95);
-topGlow.position.set(0, 6.5, 7.5);
+const topGlow = new THREE.PointLight(0x9dff63, 16, 95);
+topGlow.position.set(0, 6.4, 7.5);
 scene.add(topGlow);
 
-const portalLight = new THREE.PointLight(0x8dff5b, 26, 78);
-portalLight.position.set(0, -0.35, 5.6);
+const portalLight = new THREE.PointLight(0x8dff5b, 18, 76);
+portalLight.position.set(0, -0.25, 5.8);
 scene.add(portalLight);
 
-const leftWorldLight = new THREE.PointLight(0x39ffc1, 7, 72);
-leftWorldLight.position.set(-7.5, 1.8, 6);
-scene.add(leftWorldLight);
+const leftLight = new THREE.PointLight(0x39ffc1, 5, 72);
+leftLight.position.set(-7.5, 1.8, 6);
+scene.add(leftLight);
 
-const rightGoldLight = new THREE.PointLight(0xffd76a, 7, 72);
-rightGoldLight.position.set(7.5, 1.8, 6);
-scene.add(rightGoldLight);
+const rightLight = new THREE.PointLight(0xffd76a, 5, 72);
+rightLight.position.set(7.5, 1.8, 6);
+scene.add(rightLight);
 
-const bottomGlow = new THREE.PointLight(0x7fff45, 12, 58);
+const bottomGlow = new THREE.PointLight(0x7fff45, 8, 58);
 bottomGlow.position.set(0, -5.2, 6);
 scene.add(bottomGlow);
 
@@ -114,52 +113,44 @@ scene.add(bottomGlow);
    MATERIALS
 ========================================================= */
 
-const deepMetal = new THREE.MeshStandardMaterial({
-  color: 0x070a07,
-  metalness: 1,
-  roughness: 0.17,
-  emissive: 0x071507,
-  emissiveIntensity: 0.34
-});
-
-const ringMetal = new THREE.MeshStandardMaterial({
-  color: 0x1b241a,
-  metalness: 1,
-  roughness: 0.13,
-  emissive: 0x10230d,
-  emissiveIntensity: 0.28
-});
-
 const glowMat = new THREE.MeshBasicMaterial({
   color: 0x8dff5b,
   transparent: true,
-  opacity: 0.72,
+  opacity: 0.34,
   depthWrite: false
 });
 
 const softGlowMat = new THREE.MeshBasicMaterial({
   color: 0xd7ff9b,
   transparent: true,
-  opacity: 0.18,
+  opacity: 0.16,
   depthWrite: false
 });
 
 const goldGlowMat = new THREE.MeshBasicMaterial({
   color: 0xffd76a,
   transparent: true,
-  opacity: 0.22,
+  opacity: 0.2,
   depthWrite: false
 });
 
+const deepMetal = new THREE.MeshStandardMaterial({
+  color: 0x061006,
+  metalness: 0.9,
+  roughness: 0.18,
+  emissive: 0x071507,
+  emissiveIntensity: 0.24
+});
+
 /* =========================================================
-   ATMOSPHERE PARTICLES
+   PARTICLES
 ========================================================= */
 
-function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity){
+function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity) {
   const geo = new THREE.BufferGeometry();
   const positions = [];
 
-  for(let i = 0; i < count; i++){
+  for (let i = 0; i < count; i++) {
     positions.push(
       (Math.random() - 0.5) * spreadX,
       (Math.random() - 0.5) * spreadY,
@@ -181,190 +172,87 @@ function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity)
   );
 }
 
-const smoke = makePoints(1700, 36, 24, -7, 25, 0x73ff55, 0.052, 0.14);
+const smoke = makePoints(1500, 36, 24, -7, 25, 0x73ff55, 0.052, 0.12);
 scene.add(smoke);
 
-const greenDust = makePoints(900, 19, 14, -2, 16, 0xafff7d, 0.025, 0.3);
+const greenDust = makePoints(850, 19, 14, -2, 16, 0xafff7d, 0.026, 0.26);
 scene.add(greenDust);
 
-const goldDust = makePoints(520, 22, 14, -3, 18, 0xffd76a, 0.03, 0.18);
+const goldDust = makePoints(480, 22, 14, -3, 18, 0xffd76a, 0.03, 0.16);
 scene.add(goldDust);
 
 /* =========================================================
-   MAIN RIG
+   VISUAL RIG — MATCHES HTML/CSS DIAL
 ========================================================= */
 
 const rig = new THREE.Group();
 scene.add(rig);
 
-const portalRig = new THREE.Group();
-portalRig.position.z = 0.2;
-rig.add(portalRig);
+const ringRig = new THREE.Group();
+ringRig.position.z = 0.1;
+rig.add(ringRig);
 
-/* =========================================================
-   BACK MACHINE RINGS
-========================================================= */
-
-function addRing(radius, tube, material, z){
+function addRing(radius, tube, mat, z = 0) {
   const ring = new THREE.Mesh(
     new THREE.TorusGeometry(radius, tube, 32, 240),
-    material
+    mat
   );
 
   ring.rotation.x = Math.PI / 2;
   ring.position.z = z;
-  portalRig.add(ring);
+  ringRig.add(ring);
 
   return ring;
 }
 
-const machineBack = new THREE.Mesh(
-  new THREE.CylinderGeometry(2.62, 2.62, 0.22, 160),
+const backDisc = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.75, 2.75, 0.12, 160),
   deepMetal
 );
-machineBack.rotation.x = Math.PI / 2;
-machineBack.position.z = -0.18;
-portalRig.add(machineBack);
+backDisc.rotation.x = Math.PI / 2;
+backDisc.position.z = -0.18;
+ringRig.add(backDisc);
 
-const outerRing = addRing(2.78, 0.08, ringMetal, 0.03);
-const outerGlow = addRing(2.42, 0.022, glowMat, 0.13);
-const midRing = addRing(1.85, 0.055, ringMetal, 0.18);
-const midGlow = addRing(1.5, 0.018, softGlowMat, 0.24);
-const innerGlow = addRing(1.05, 0.032, glowMat, 0.32);
+const outerRing = addRing(2.8, 0.025, glowMat, 0.02);
+const middleRing = addRing(2.08, 0.018, softGlowMat, 0.08);
+const innerRing = addRing(1.35, 0.022, glowMat, 0.16);
+const goldRing = addRing(2.48, 0.008, goldGlowMat, 0.12);
 
 /* =========================================================
-   10 CORE GHOST ORBIT — BEHIND HTML CARDS
+   10 SOCKET LIGHTS
 ========================================================= */
 
-const ghostOrbit = new THREE.Group();
-ghostOrbit.position.z = 0.18;
-portalRig.add(ghostOrbit);
+const socketGroup = new THREE.Group();
+socketGroup.position.z = 0.22;
+ringRig.add(socketGroup);
 
-for(let i = 0; i < labels.length; i++){
-  const angle = (Math.PI * 2 / labels.length) * i - Math.PI / 2;
+const sockets = [];
 
-  const node = new THREE.Mesh(
-    new THREE.SphereGeometry(0.055, 18, 18),
+for (let i = 0; i < labels.length; i++) {
+  const angle = i * step - Math.PI / 2;
+
+  const socket = new THREE.Mesh(
+    new THREE.SphereGeometry(0.06, 24, 24),
     new THREE.MeshBasicMaterial({
-      color: i === activeIndex ? 0xffd76a : 0x8dff5b,
+      color: 0x8dff5b,
       transparent: true,
-      opacity: i === activeIndex ? 0.8 : 0.28,
+      opacity: 0.45,
       depthWrite: false
     })
   );
 
-  node.position.set(
-    Math.cos(angle) * 2.86,
-    Math.sin(angle) * 2.86,
-    0.28
+  socket.position.set(
+    Math.cos(angle) * 2.66,
+    Math.sin(angle) * 2.66,
+    0.22
   );
 
-  node.userData.index = i;
-  ghostOrbit.add(node);
-}
+  socket.userData.index = i;
+  socketGroup.add(socket);
+  sockets.push(socket);
 
-/* =========================================================
-   PORTAL CORE ENERGY
-========================================================= */
-
-const coreGroup = new THREE.Group();
-coreGroup.position.z = 0.45;
-portalRig.add(coreGroup);
-
-const portalGlass = new THREE.Mesh(
-  new THREE.SphereGeometry(0.92, 72, 72),
-  new THREE.MeshStandardMaterial({
-    color: 0x7fff4b,
-    emissive: 0x7fff4b,
-    emissiveIntensity: 3.7,
-    transparent: true,
-    opacity: 0.54,
-    metalness: 0.18,
-    roughness: 0.03
-  })
-);
-
-portalGlass.scale.set(1, 1, 0.25);
-portalGlass.position.z = 0.12;
-coreGroup.add(portalGlass);
-
-const portalAura = new THREE.Mesh(
-  new THREE.SphereGeometry(1.3, 64, 64),
-  new THREE.MeshBasicMaterial({
-    color: 0x8dff5b,
-    transparent: true,
-    opacity: 0.12,
-    depthWrite: false
-  })
-);
-
-portalAura.scale.set(1, 1, 0.18);
-portalAura.position.z = 0.02;
-coreGroup.add(portalAura);
-
-const portalRing = new THREE.Mesh(
-  new THREE.TorusGeometry(1.15, 0.014, 12, 180),
-  glowMat
-);
-portalRing.rotation.x = Math.PI / 2;
-portalRing.position.z = 0.38;
-coreGroup.add(portalRing);
-
-const goldOrbit = new THREE.Mesh(
-  new THREE.TorusGeometry(1.42, 0.008, 10, 180),
-  goldGlowMat
-);
-goldOrbit.rotation.x = Math.PI / 2.18;
-goldOrbit.rotation.y = 0.2;
-goldOrbit.position.z = 0.32;
-coreGroup.add(goldOrbit);
-
-/* =========================================================
-   ENERGY PARTICLES INSIDE CORE
-========================================================= */
-
-const energyGeo = new THREE.BufferGeometry();
-const energyPositions = [];
-
-for(let i = 0; i < 1200; i++){
-  const r = Math.random() * 1.02;
-  const a = Math.random() * Math.PI * 2;
-
-  energyPositions.push(
-    Math.cos(a) * r,
-    Math.sin(a) * r,
-    0.12 + (Math.random() - 0.5) * 0.32
-  );
-}
-
-energyGeo.setAttribute("position", new THREE.Float32BufferAttribute(energyPositions, 3));
-
-const energy = new THREE.Points(
-  energyGeo,
-  new THREE.PointsMaterial({
-    color: 0xd9ffad,
-    size: 0.025,
-    transparent: true,
-    opacity: 0.82,
-    depthWrite: false
-  })
-);
-
-coreGroup.add(energy);
-
-/* =========================================================
-   CINEMA HEX DEPTH LINES
-========================================================= */
-
-const hexGroup = new THREE.Group();
-hexGroup.position.z = -0.05;
-portalRig.add(hexGroup);
-
-for(let i = 0; i < 10; i++){
-  const angle = (Math.PI * 2 / 10) * i - Math.PI / 2;
-
-  const bar = new THREE.Mesh(
-    new THREE.BoxGeometry(1.1, 0.035, 0.035),
+  const line = new THREE.Mesh(
+    new THREE.BoxGeometry(0.018, 0.78, 0.018),
     new THREE.MeshBasicMaterial({
       color: 0x8dff5b,
       transparent: true,
@@ -373,132 +261,262 @@ for(let i = 0; i < 10; i++){
     })
   );
 
-  bar.position.set(
-    Math.cos(angle) * 3.22,
-    Math.sin(angle) * 3.22,
-    0.1
+  line.position.set(
+    Math.cos(angle) * 2.08,
+    Math.sin(angle) * 2.08,
+    0.12
   );
 
-  bar.rotation.z = angle + Math.PI / 2;
-  hexGroup.add(bar);
+  line.rotation.z = angle;
+  socketGroup.add(line);
 }
 
 /* =========================================================
-   MONEY FLOOR / DEPTH HINT
+   CENTER ENERGY
 ========================================================= */
 
-const floorGroup = new THREE.Group();
-floorGroup.position.set(0, -4.65, -2.2);
-scene.add(floorGroup);
+const coreGroup = new THREE.Group();
+coreGroup.position.z = 0.36;
+ringRig.add(coreGroup);
 
-for(let i = 0; i < 22; i++){
-  const bill = new THREE.Mesh(
-    new THREE.BoxGeometry(1.1, 0.045, 0.48),
-    new THREE.MeshStandardMaterial({
-      color: 0x163911,
-      metalness: 0.25,
-      roughness: 0.58,
-      emissive: 0x14380e,
-      emissiveIntensity: 0.22
-    })
+const coreGlow = new THREE.Mesh(
+  new THREE.SphereGeometry(0.92, 72, 72),
+  new THREE.MeshBasicMaterial({
+    color: 0x8dff5b,
+    transparent: true,
+    opacity: 0.1,
+    depthWrite: false
+  })
+);
+
+coreGlow.scale.set(1, 1, 0.18);
+coreGroup.add(coreGlow);
+
+const coreRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.08, 0.014, 12, 180),
+  glowMat
+);
+coreRing.rotation.x = Math.PI / 2;
+coreRing.position.z = 0.24;
+coreGroup.add(coreRing);
+
+const coreEnergyGeo = new THREE.BufferGeometry();
+const energyPositions = [];
+
+for (let i = 0; i < 900; i++) {
+  const r = Math.random() * 1.05;
+  const a = Math.random() * Math.PI * 2;
+
+  energyPositions.push(
+    Math.cos(a) * r,
+    Math.sin(a) * r,
+    0.05 + (Math.random() - 0.5) * 0.28
   );
-
-  bill.position.set(
-    (Math.random() - 0.5) * 8.6,
-    i * 0.015,
-    (Math.random() - 0.5) * 1.75
-  );
-
-  bill.rotation.y = (Math.random() - 0.5) * 0.8;
-  bill.rotation.z = (Math.random() - 0.5) * 0.25;
-
-  floorGroup.add(bill);
 }
 
+coreEnergyGeo.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(energyPositions, 3)
+);
+
+const coreEnergy = new THREE.Points(
+  coreEnergyGeo,
+  new THREE.PointsMaterial({
+    color: 0xd9ffad,
+    size: 0.022,
+    transparent: true,
+    opacity: 0.56,
+    depthWrite: false
+  })
+);
+
+coreGroup.add(coreEnergy);
+
 /* =========================================================
-   ACTIVE SYNC
+   STATE SYNC
 ========================================================= */
 
-function updateGhostNodes(){
-  ghostOrbit.children.forEach((node) => {
-    const isActive = node.userData.index === activeIndex;
-    node.material.opacity = isActive ? 0.82 : 0.28;
-    node.material.color.setHex(isActive ? 0xffd76a : 0x8dff5b);
-    node.scale.setScalar(isActive ? 1.45 : 1);
+function normalizeAngle(value) {
+  return ((value % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+}
+
+function closestIndexFromRotation(value) {
+  const normalized = normalizeAngle(-value);
+  return Math.round(normalized / step) % labels.length;
+}
+
+function setCssRotation(value) {
+  document.documentElement.style.setProperty(
+    "--rb-dial-rotation",
+    `${value}rad`
+  );
+
+  document.documentElement.style.setProperty(
+    "--rb-dial-counter-rotation",
+    `${-value}rad`
+  );
+}
+
+function updateSockets() {
+  sockets.forEach((socket) => {
+    const isActive = socket.userData.index === activeIndex;
+
+    socket.material.opacity = isActive ? 0.95 : 0.38;
+    socket.material.color.setHex(isActive ? 0xffd76a : 0x8dff5b);
+    socket.scale.setScalar(isActive ? 1.55 : 1);
   });
 }
 
-function setActive(name){
+function setActive(name, fromSpin = false) {
   const index = labels.indexOf(name);
-  if(index < 0) return;
+  if (index < 0) return;
 
   activeIndex = index;
   activeName = name;
-  targetRotation = -index * ((Math.PI * 2) / labels.length);
+
+  targetRotation = -activeIndex * step;
 
   window.RB_ACTIVE_KEY = activeName;
   window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
 
-  updateGhostNodes();
+  updateSockets();
 
-  if(typeof window.setActiveDial === "function"){
+  if (typeof window.setActiveDial === "function") {
     window.setActiveDial(activeName, true);
+  }
+
+  if (!fromSpin) {
+    velocity = 0;
   }
 }
 
-window.RB_spinTo = function(key){
-  setActive(key);
+window.RB_spinTo = function (key) {
+  setActive(key, false);
 };
 
-window.enterWorld = function(){
+window.enterWorld = function () {
   window.location.href = window.RB_ACTIVE_ROUTE || "/feed.html";
 };
 
 window.enter = window.enterWorld;
 
 /* =========================================================
-   POINTER PARALLAX ONLY
+   USER ROTATION INPUT
 ========================================================= */
 
-let targetTiltX = -0.08;
-let targetTiltY = 0;
-let smoothTiltX = -0.08;
-let smoothTiltY = 0;
+function dialCenter() {
+  const rect = canvas.getBoundingClientRect();
+
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height * 0.55
+  };
+}
+
+function angleFromEvent(event) {
+  const center = dialCenter();
+  return Math.atan2(
+    event.clientY - center.y,
+    event.clientX - center.x
+  );
+}
+
+function shouldIgnorePointer(event) {
+  return Boolean(
+    event.target.closest("button") ||
+    event.target.closest("a") ||
+    event.target.closest(".quick-menu")
+  );
+}
+
+window.addEventListener("pointerdown", (event) => {
+  if (shouldIgnorePointer(event)) return;
+
+  dragging = true;
+  moved = false;
+  lastAngle = angleFromEvent(event);
+  lastTime = performance.now();
+
+  velocity = 0;
+});
 
 window.addEventListener("pointermove", (event) => {
-  const nx = event.clientX / window.innerWidth - 0.5;
-  const ny = event.clientY / window.innerHeight - 0.5;
+  if (!dragging) return;
 
-  targetTiltY = nx * 0.08;
-  targetTiltX = -0.08 + ny * 0.025;
+  const now = performance.now();
+  const nextAngle = angleFromEvent(event);
+
+  let delta = nextAngle - lastAngle;
+
+  if (delta > Math.PI) delta -= Math.PI * 2;
+  if (delta < -Math.PI) delta += Math.PI * 2;
+
+  if (Math.abs(delta) > 0.002) moved = true;
+
+  rotation += delta;
+  targetRotation = rotation;
+
+  const dt = Math.max(16, now - lastTime);
+  velocity = delta / dt * 16;
+
+  lastAngle = nextAngle;
+  lastTime = now;
+
+  const nextIndex = closestIndexFromRotation(rotation);
+
+  if (nextIndex !== activeIndex) {
+    activeIndex = nextIndex;
+    activeName = labels[activeIndex];
+
+    window.RB_ACTIVE_KEY = activeName;
+    window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
+
+    updateSockets();
+
+    if (typeof window.setActiveDial === "function") {
+      window.setActiveDial(activeName, true);
+    }
+  }
+});
+
+window.addEventListener("pointerup", () => {
+  if (!dragging) return;
+
+  dragging = false;
+
+  const snapIndex = closestIndexFromRotation(rotation);
+  setActive(labels[snapIndex], true);
+});
+
+window.addEventListener("pointercancel", () => {
+  dragging = false;
+
+  const snapIndex = closestIndexFromRotation(rotation);
+  setActive(labels[snapIndex], true);
 });
 
 /* =========================================================
    RESIZE
 ========================================================= */
 
-function resize(){
+function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+
   renderer.setSize(w, h);
 
-  if(isPhone()){
-    rig.scale.setScalar(0.78);
-    rig.position.set(0, -0.42, 0);
-    camera.position.set(0, 0.54, 9.8);
+  if (w < 700) {
+    rig.scale.setScalar(0.84);
+    rig.position.set(0, -0.35, 0);
+    camera.position.set(0, 0.38, 8.9);
     camera.lookAt(0, -0.24, 0);
-  }else if(isTablet()){
-    rig.scale.setScalar(0.98);
-    rig.position.set(0, -0.2, 0);
-    camera.position.set(0, 0.6, 9.2);
-    camera.lookAt(0, -0.08, 0);
-  }else{
-    rig.scale.setScalar(1.12);
+  } else {
+    rig.scale.setScalar(1.1);
     rig.position.set(0, -0.1, 0);
-    camera.position.set(0, 0.55, 8.4);
+    camera.position.set(0, 0.48, 8.2);
     camera.lookAt(0, 0, 0);
   }
 }
@@ -510,79 +528,58 @@ resize();
    LOOP
 ========================================================= */
 
-function animate(){
+function animate() {
   requestAnimationFrame(animate);
 
   const t = clock.getElapsedTime();
 
-  currentRotation += (targetRotation - currentRotation) * 0.08;
+  if (!dragging) {
+    rotation += velocity;
+    velocity *= 0.91;
 
-  window.RB_DIAL_ROTATION = currentRotation;
-  document.documentElement.style.setProperty(
-    "--rb-dial-rotation",
-    `${currentRotation}rad`
-  );
+    const snap = targetRotation;
+    rotation += (snap - rotation) * 0.12;
 
-  smoothTiltX += (targetTiltX - smoothTiltX) * 0.06;
-  smoothTiltY += (targetTiltY - smoothTiltY) * 0.06;
+    if (Math.abs(velocity) < 0.0008) velocity = 0;
+  }
 
-  rig.rotation.x = smoothTiltX;
-  rig.rotation.y = smoothTiltY;
+  setCssRotation(rotation);
 
-  portalRig.rotation.z = currentRotation * 0.12;
-
-  outerRing.rotation.z = -currentRotation * 0.12;
-  outerGlow.rotation.z = -currentRotation * 0.26;
-  midRing.rotation.z = currentRotation * 0.18;
-  midGlow.rotation.z = currentRotation * 0.32;
-  innerGlow.rotation.z = -currentRotation * 0.42;
-  ghostOrbit.rotation.z = currentRotation * 0.1;
-  hexGroup.rotation.z = -currentRotation * 0.05;
+  ringRig.rotation.z = rotation * 0.08;
+  outerRing.rotation.z = -rotation * 0.18;
+  middleRing.rotation.z = rotation * 0.24;
+  innerRing.rotation.z = -rotation * 0.34;
+  goldRing.rotation.z = rotation * 0.16;
+  socketGroup.rotation.z = rotation * 0.02;
 
   const pulse = Math.sin(t * 2.4);
-  const fastPulse = Math.sin(t * 5.2);
+  const fastPulse = Math.sin(t * 5.1);
 
-  portalGlass.scale.set(
-    1 + pulse * 0.035,
-    1 + pulse * 0.035,
-    0.25
-  );
-
-  portalGlass.material.emissiveIntensity = 3.55 + Math.abs(pulse) * 0.75;
-
-  portalAura.scale.set(
-    1.02 + Math.abs(pulse) * 0.08,
-    1.02 + Math.abs(pulse) * 0.08,
+  coreGlow.scale.set(
+    1 + pulse * 0.05,
+    1 + pulse * 0.05,
     0.18
   );
 
-  portalAura.material.opacity = 0.1 + Math.abs(pulse) * 0.08;
+  coreGlow.material.opacity = 0.08 + Math.abs(pulse) * 0.08;
 
-  portalRing.rotation.z += 0.01;
-  goldOrbit.rotation.z -= 0.006;
-  goldOrbit.rotation.y = 0.2 + Math.sin(t * 0.7) * 0.08;
+  coreRing.rotation.z += 0.01;
+  coreEnergy.rotation.z -= 0.012;
+  coreEnergy.material.opacity = 0.48 + Math.abs(fastPulse) * 0.15;
 
-  energy.rotation.z -= 0.013;
-  energy.material.opacity = 0.68 + Math.abs(fastPulse) * 0.18;
+  smoke.rotation.y += 0.0005;
+  smoke.rotation.x = Math.sin(t * 0.16) * 0.025;
 
-  smoke.rotation.y += 0.0006;
-  smoke.rotation.x = Math.sin(t * 0.16) * 0.03;
-  smoke.material.opacity = 0.12 + Math.abs(Math.sin(t * 0.42)) * 0.05;
+  greenDust.rotation.z += 0.0007;
+  goldDust.rotation.y -= 0.0005;
 
-  greenDust.rotation.z += 0.0009;
-  greenDust.material.opacity = 0.24 + Math.abs(fastPulse) * 0.1;
-
-  goldDust.rotation.y -= 0.0007;
-
-  floorGroup.rotation.y = Math.sin(t * 0.35) * 0.055;
-  floorGroup.position.y = -4.65 + Math.sin(t * 0.7) * 0.025;
-
-  topGlow.intensity = 20 + Math.sin(t * 1.4) * 2.5;
-  portalLight.intensity = 24 + Math.sin(t * 2.6) * 4;
-  bottomGlow.intensity = 11 + Math.sin(t * 2.1) * 2.2;
+  topGlow.intensity = 15 + Math.sin(t * 1.4) * 2;
+  portalLight.intensity = 17 + Math.sin(t * 2.6) * 3.5;
+  bottomGlow.intensity = 7 + Math.sin(t * 2.1) * 2;
 
   renderer.render(scene, camera);
 }
 
-setActive(activeName || "live");
+setActive(activeName, true);
+setCssRotation(rotation);
 animate();
