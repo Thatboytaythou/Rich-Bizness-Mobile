@@ -9,82 +9,300 @@
 </head>
 
 <body>
-  <main class="chess-page">
-    <header class="topbar">
-      <a class="circle-btn" href="/gaming.html" aria-label="Back to Gaming">‹</a>
+  <main class="chess-app">
 
-      <div class="brand">
-        <strong>RICH CHESS</strong>
-        <small>RICH BIZNESS LLC</small>
-      </div>
+    <!-- LEFT RAIL -->
+    <aside class="left-rail">
+      <section class="profile-card">
+        <div class="profile-avatar" id="profileAvatar">♚</div>
 
-      <a class="circle-btn" href="/profile.html" aria-label="Profile">◈</a>
-    </header>
+        <div class="profile-info">
+          <strong id="profileName">RICH PLAYER</strong>
+          <small id="profileTag">ELITE MEMBER ●</small>
+        </div>
 
-    <section class="hero">
-      <div>
+        <div class="profile-stats">
+          <div>
+            <small>WINS</small>
+            <strong id="profileWins">0</strong>
+          </div>
+          <div>
+            <small>ELO</small>
+            <strong id="profileElo">2153</strong>
+          </div>
+          <div>
+            <small>RANK</small>
+            <strong id="profileRank">#27</strong>
+          </div>
+        </div>
+      </section>
+
+      <nav class="side-menu">
+        <button class="side-link active" id="menuPlayBtn" type="button">
+          <span>▷</span>
+          PLAY
+        </button>
+
+        <button class="side-link" id="menuMultiplayerBtn" type="button">
+          <span>♟</span>
+          MULTIPLAYER
+        </button>
+
+        <button class="side-link" id="menuTournamentBtn" type="button">
+          <span>♕</span>
+          TOURNAMENTS
+        </button>
+
+        <a class="side-link" href="/watch.html">
+          <span>◉</span>
+          WATCH
+        </a>
+
+        <a class="side-link" href="/gaming.html">
+          <span>⌂</span>
+          ARCADE
+        </a>
+
+        <a class="side-link" href="/profile.html">
+          <span>◈</span>
+          PROFILE
+        </a>
+      </nav>
+
+      <section class="rail-brand">
+        <div class="rail-crown">♛</div>
+        <strong>RICH<br />BIZNESS</strong>
+        <small>LLC</small>
+      </section>
+    </aside>
+
+    <!-- CENTER STAGE -->
+    <section class="center-stage">
+
+      <header class="topbar">
+        <a class="circle-btn" href="/gaming.html" aria-label="Back to Gaming">‹</a>
+
+        <div class="brand">
+          <div class="brand-crown">♛</div>
+          <strong>RICH CHESS</strong>
+          <small>RICH BIZNESS LLC</small>
+        </div>
+
+        <div class="wallet-bar">
+          <span>💎 <b id="gemCount">8,450</b></span>
+          <span>🪙 <b id="coinCount">125,600</b></span>
+          <a href="/messages.html">✉</a>
+          <a href="/notifications.html">🔔</a>
+          <a href="/profile.html">◈</a>
+        </div>
+      </header>
+
+      <section class="mobile-hero">
         <div class="kicker">ELITE MULTIPLAYER CHESS ARENA</div>
         <h1>Strategy. Tournaments. Rich Moves.</h1>
-        <p>
-          Play solo, create ranked rooms, join multiplayer battles, and enter Rich Bizness tournaments.
-        </p>
-      </div>
-    </section>
+        <p>Play solo, create ranked rooms, join multiplayer battles, and enter Rich Bizness tournaments.</p>
+      </section>
 
-    <section class="stats-grid">
-      <div class="stat">
-        <small>MODE</small>
-        <strong id="statMode">SOLO</strong>
-      </div>
+      <section class="match-strip">
+        <div class="fighter-card white-card">
+          <div class="fighter-avatar" id="whiteAvatar">♔</div>
+          <div>
+            <strong id="whiteName">Rich Player</strong>
+            <small id="whiteMeta">2153 ●</small>
+          </div>
+        </div>
 
-      <div class="stat">
-        <small>TURN</small>
-        <strong id="statTurn">WHITE</strong>
-      </div>
-
-      <div class="stat">
-        <small>MOVES</small>
-        <strong id="statMoves">0</strong>
-      </div>
-
-      <div class="stat">
-        <small>STATUS</small>
-        <strong id="statStatus">READY</strong>
-      </div>
-    </section>
-
-    <section class="arena">
-      <div class="player-card top-player">
-        <div class="avatar" id="blackAvatar">B</div>
-        <div>
-          <strong id="blackName">Black Player</strong>
+        <div class="clock-card">
+          <strong id="whiteClock">10:00</strong>
           <small id="blackClock">10:00</small>
         </div>
-      </div>
 
-      <div class="board-wrap">
-        <div class="board-glow"></div>
-        <div class="chess-board" id="chessBoard" aria-label="Rich Chess Board"></div>
-      </div>
-
-      <div class="player-card bottom-player">
-        <div class="avatar" id="whiteAvatar">W</div>
-        <div>
-          <strong id="whiteName">White Player</strong>
-          <small id="whiteClock">10:00</small>
+        <div class="fighter-card black-card">
+          <div>
+            <strong id="blackName">CPU — Grandmaster</strong>
+            <small id="blackMeta">2500</small>
+          </div>
+          <div class="fighter-avatar dark" id="blackAvatar">♚</div>
         </div>
-      </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat">
+          <small>MODE</small>
+          <strong id="statMode">SOLO</strong>
+        </div>
+
+        <div class="stat">
+          <small>TURN</small>
+          <strong id="statTurn">WHITE</strong>
+        </div>
+
+        <div class="stat">
+          <small>MOVES</small>
+          <strong id="statMoves">0</strong>
+        </div>
+
+        <div class="stat">
+          <small>STATUS</small>
+          <strong id="statStatus">READY</strong>
+        </div>
+      </section>
+
+      <section class="board-stage">
+        <div class="board-glow"></div>
+
+        <div class="board-frame">
+          <div class="rank-labels">
+            <span>8</span>
+            <span>7</span>
+            <span>6</span>
+            <span>5</span>
+            <span>4</span>
+            <span>3</span>
+            <span>2</span>
+            <span>1</span>
+          </div>
+
+          <div class="chess-board" id="chessBoard" aria-label="Rich Chess Board"></div>
+
+          <div class="file-labels">
+            <span>A</span>
+            <span>B</span>
+            <span>C</span>
+            <span>D</span>
+            <span>E</span>
+            <span>F</span>
+            <span>G</span>
+            <span>H</span>
+          </div>
+
+          <div class="corner-gem gem-tl">◆</div>
+          <div class="corner-gem gem-tr">◆</div>
+          <div class="corner-gem gem-bl">◆</div>
+          <div class="corner-gem gem-br">◆</div>
+        </div>
+      </section>
+
+      <section class="bottom-dashboard">
+
+        <section class="panel move-panel">
+          <h2>MOVE HISTORY</h2>
+          <div class="move-list" id="moveList">
+            <div class="empty">No moves yet.</div>
+          </div>
+        </section>
+
+        <section class="panel status-panel">
+          <h2>GAME STATUS</h2>
+
+          <div class="turn-callout">
+            <strong id="turnCallout">RICH PLAYER’S TURN ●</strong>
+            <small id="aiExplain">Make your move...</small>
+          </div>
+
+          <div class="mini-grid">
+            <div>
+              <small>MOVES</small>
+              <strong id="miniMoves">0</strong>
+            </div>
+
+            <div>
+              <small>CAPTURES</small>
+              <strong id="miniCaptures">0</strong>
+            </div>
+
+            <div>
+              <small>CHECKS</small>
+              <strong id="miniChecks">0</strong>
+            </div>
+
+            <div>
+              <small>TIME</small>
+              <strong id="miniTime">10:00</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel captured-panel">
+          <h2>CAPTURED PIECES</h2>
+
+          <div class="captured-block">
+            <small>WHITE CAPTURED</small>
+            <div class="piece-row" id="whiteCaptured"></div>
+          </div>
+
+          <div class="captured-block">
+            <small>BLACK CAPTURED</small>
+            <div class="piece-row" id="blackCaptured"></div>
+          </div>
+        </section>
+
+      </section>
     </section>
 
-    <section class="controls">
-      <button class="main-btn" id="newGameBtn" type="button">NEW GAME</button>
-      <button class="ghost-btn" id="createRoomBtn" type="button">CREATE ROOM</button>
-      <button class="ghost-btn" id="joinRoomBtn" type="button">JOIN ROOM</button>
-      <button class="danger-btn" id="resignBtn" type="button">RESIGN</button>
-    </section>
+    <!-- RIGHT RAIL -->
+    <aside class="right-rail">
 
-    <section class="grid">
-      <section class="panel">
+      <section class="panel mode-panel">
+        <h2>GAME MODE</h2>
+
+        <button class="mode-card active" type="button" data-mode-choice="casual">
+          <span>♙</span>
+          <strong>CASUAL</strong>
+          <small>Play for fun</small>
+        </button>
+
+        <button class="mode-card" type="button" data-mode-choice="ranked">
+          <span>♜</span>
+          <strong>RANKED</strong>
+          <small>Compete for ELO</small>
+        </button>
+
+        <button class="mode-card" type="button" data-mode-choice="cpu">
+          <span>♛</span>
+          <strong>CPU CHALLENGE</strong>
+          <small>Play vs AI</small>
+        </button>
+
+        <button class="mode-card" type="button" data-mode-choice="room">
+          <span>♟</span>
+          <strong>CUSTOM ROOM</strong>
+          <small>Create or Join</small>
+        </button>
+      </section>
+
+      <section class="panel difficulty-panel">
+        <h2>CPU DIFFICULTY</h2>
+
+        <button class="difficulty-card" type="button" data-cpu="rookie">
+          ROOKIE
+          <small>400 - 800 ELO</small>
+        </button>
+
+        <button class="difficulty-card" type="button" data-cpu="hustler">
+          HUSTLER
+          <small>800 - 1400 ELO</small>
+        </button>
+
+        <button class="difficulty-card" type="button" data-cpu="boss">
+          BOSS
+          <small>1400 - 2000 ELO</small>
+        </button>
+
+        <button class="difficulty-card active" type="button" data-cpu="elite">
+          GRANDMASTER
+          <small>2000+ ELO</small>
+        </button>
+      </section>
+
+      <section class="controls">
+        <button class="main-btn" id="newGameBtn" type="button">NEW GAME</button>
+        <button class="ghost-btn" id="createRoomBtn" type="button">CREATE ROOM</button>
+        <button class="ghost-btn" id="joinRoomBtn" type="button">JOIN ROOM</button>
+        <button class="danger-btn" id="resignBtn" type="button">RESIGN</button>
+      </section>
+
+      <section class="panel multiplayer-panel" id="multiplayerPanel">
         <h2>MULTIPLAYER ROOM</h2>
 
         <div class="field">
@@ -105,7 +323,7 @@
         <button class="main-btn full" id="copyRoomBtn" type="button">COPY ROOM LINK</button>
       </section>
 
-      <section class="panel">
+      <section class="panel tournament-panel" id="tournamentPanel">
         <h2>TOURNAMENT LOBBY</h2>
 
         <div class="field">
@@ -118,28 +336,15 @@
         <button class="main-btn full" id="joinTournamentBtn" type="button">JOIN TOURNAMENT</button>
       </section>
 
-      <section class="panel">
-        <h2>MOVE HISTORY</h2>
-        <div class="move-list" id="moveList">
-          <div class="empty">No moves yet.</div>
-        </div>
-      </section>
+    </aside>
 
-      <section class="panel">
-        <h2>CAPTURED PIECES</h2>
-        <div class="captured">
-          <div>
-            <small>WHITE CAPTURED</small>
-            <div id="whiteCaptured" class="piece-row"></div>
-          </div>
-
-          <div>
-            <small>BLACK CAPTURED</small>
-            <div id="blackCaptured" class="piece-row"></div>
-          </div>
-        </div>
-      </section>
-    </section>
+    <!-- MOBILE ACTION BAR -->
+    <nav class="mobile-actions">
+      <button class="main-btn" id="mobileNewGameBtn" type="button">NEW</button>
+      <button class="ghost-btn" id="mobileRoomBtn" type="button">ROOM</button>
+      <button class="ghost-btn" id="mobileTournamentBtn" type="button">TOURNEY</button>
+      <a class="ghost-btn" href="/gaming.html">ARCADE</a>
+    </nav>
 
     <div class="status" id="chessStatus">RICH CHESS READY</div>
   </main>
