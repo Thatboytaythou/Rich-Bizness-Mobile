@@ -2,8 +2,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* =========================
    RICH BIZNESS MOBILE INDEX
+   CINEMATIC UNIVERSAL MASTERPIECE
+   ULTRA REALISTIC HD 4D APP HUB
+   REALTIME IMMERSIVE COMMAND CORE
+   MULTI-DEVICE CINEMA SYSTEM
    /core/pages/index.js
-   Realtime command hub brain
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -28,6 +31,7 @@ const els = {
   notificationBtn: $("notificationBtn"),
   portalStatus: $("portalStatus"),
   activateMain: $("activateMain"),
+  activateSub: $("activateSub"),
 
   homeBalance: $("homeBalance"),
   homeRichPoints: $("homeRichPoints"),
@@ -47,12 +51,18 @@ const els = {
 let currentUser = null;
 let currentProfile = null;
 let realtimeChannel = null;
+let statsLoading = false;
+let statsQueued = false;
+
+function safeSet(el, value) {
+  if (el) el.textContent = value;
+}
 
 function money(cents = 0) {
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
 }
 
-function text(value, fallback = "") {
+function cleanText(value, fallback = "") {
   return value === null || value === undefined || value === "" ? fallback : value;
 }
 
@@ -79,63 +89,85 @@ function getInitial(name = "R") {
 }
 
 function setHubStatus(message) {
-  if (els.portalStatus) els.portalStatus.textContent = message || "LLC";
+  safeSet(els.portalStatus, message || "LLC");
 }
 
-function setNotificationGlow(hasUnread) {
+function setNotificationGlow(count = 0) {
   if (!els.notificationBtn) return;
-  els.notificationBtn.classList.toggle("has-unread", Boolean(hasUnread));
+
+  const unread = Number(count || 0);
+
+  els.notificationBtn.classList.toggle("has-unread", unread > 0);
+
+  if (unread > 0) {
+    els.notificationBtn.setAttribute("data-count", unread > 99 ? "99+" : String(unread));
+  } else {
+    els.notificationBtn.removeAttribute("data-count");
+  }
+}
+
+function renderGuest() {
+  safeSet(els.welcomeStatus, "TAP IN 💰");
+  safeSet(els.homeUserName, "Rich Guest");
+  safeSet(els.homeRichLevel, "GUEST");
+  safeSet(els.homeAvatar, "R");
+  safeSet(els.homeBalance, "$0.00");
+  safeSet(els.homeRichPoints, "0");
+  safeSet(els.homeRank, "VISITOR");
+  setHubStatus("GUEST");
 }
 
 function renderProfile() {
-  if (!currentProfile && !currentUser) return;
-
-  const name = getName(currentProfile, currentUser);
-  const level = text(currentProfile?.rich_level, "MAX").toUpperCase();
-  const rank = text(currentProfile?.rank_title, "BIZ LEGEND").toUpperCase();
-
-  els.homeUserName.textContent = name;
-  els.homeRichLevel.textContent = level;
-  els.homeBalance.textContent = money(currentProfile?.balance_cents || 0);
-  els.homeRichPoints.textContent = shortCount(currentProfile?.rich_points || 0);
-  els.homeRank.textContent = rank;
-
-  if (currentProfile?.avatar_url) {
-    els.homeAvatar.innerHTML = `<img src="${currentProfile.avatar_url}" alt="Profile avatar" />`;
-  } else {
-    els.homeAvatar.textContent = getInitial(name);
+  if (!currentProfile && !currentUser) {
+    renderGuest();
+    return;
   }
 
-  if (els.welcomeStatus) {
-    els.welcomeStatus.textContent = currentUser ? "WELCOME BACK" : "WELCOME";
+  const name = getName(currentProfile, currentUser);
+  const level = cleanText(currentProfile?.rich_level, "MAX").toUpperCase();
+  const rank = cleanText(currentProfile?.rank_title, "BIZ LEGEND").toUpperCase();
+
+  safeSet(els.homeUserName, name);
+  safeSet(els.homeRichLevel, level);
+  safeSet(els.homeBalance, money(currentProfile?.balance_cents || 0));
+  safeSet(els.homeRichPoints, shortCount(currentProfile?.rich_points || 0));
+  safeSet(els.homeRank, rank);
+  safeSet(els.welcomeStatus, currentUser ? "WELCOME BACK" : "WELCOME");
+
+  if (els.homeAvatar) {
+    if (currentProfile?.avatar_url) {
+      els.homeAvatar.innerHTML = `<img src="${currentProfile.avatar_url}" alt="Profile avatar" />`;
+    } else {
+      els.homeAvatar.textContent = getInitial(name);
+    }
   }
 }
 
 async function loadUserAndProfile() {
-  const { data } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    console.warn("Index auth load:", error.message);
+  }
+
   currentUser = data?.user || null;
 
   if (!currentUser) {
-    els.welcomeStatus.textContent = "TAP IN 💰";
-    els.homeUserName.textContent = "Rich Guest";
-    els.homeRichLevel.textContent = "GUEST";
-    els.homeAvatar.textContent = "R";
-    els.homeBalance.textContent = "$0.00";
-    els.homeRichPoints.textContent = "0";
-    els.homeRank.textContent = "VISITOR";
-    setHubStatus("GUEST");
+    currentProfile = null;
+    renderGuest();
     return;
   }
 
-  const { data: profile, error } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", currentUser.id)
     .maybeSingle();
 
-  if (error) {
-    console.warn("Index profile load:", error.message);
+  if (profileError) {
+    console.warn("Index profile load:", profileError.message);
     setHubStatus("PROFILE");
+    renderProfile();
     return;
   }
 
@@ -146,7 +178,8 @@ async function loadUserAndProfile() {
     .from("profiles")
     .update({
       online_status: "online",
-      last_seen_at: new Date().toISOString()
+      last_seen_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     })
     .eq("id", currentUser.id);
 }
@@ -157,23 +190,46 @@ async function countRows(table, filterBuilder = null) {
       .from(table)
       .select("id", { count: "exact", head: true });
 
-    if (filterBuilder) query = filterBuilder(query);
+    if (typeof filterBuilder === "function") {
+      query = filterBuilder(query);
+    }
 
     const { count, error } = await query;
 
     if (error) {
-      console.warn(`Count skipped ${table}:`, error.message);
+      console.warn(`Index count skipped ${table}:`, error.message);
       return 0;
     }
 
     return count || 0;
   } catch (err) {
-    console.warn(`Count failed ${table}:`, err.message);
+    console.warn(`Index count failed ${table}:`, err.message);
     return 0;
   }
 }
 
+async function countGalleryDrops() {
+  const sectionGallery = await countRows("uploads", (q) => q.eq("section", "gallery"));
+  if (sectionGallery > 0) return sectionGallery;
+
+  return countRows("uploads", (q) => q.eq("category", "gallery"));
+}
+
+async function countGamingActivity() {
+  const scores = await countRows("game_scores");
+  if (scores > 0) return scores;
+
+  return countRows("games", (q) => q.eq("is_active", true));
+}
+
 async function loadHubStats() {
+  if (statsLoading) {
+    statsQueued = true;
+    return;
+  }
+
+  statsLoading = true;
+  statsQueued = false;
   setHubStatus("SYNC");
 
   const [
@@ -189,7 +245,7 @@ async function loadHubStats() {
     gamingCount
   ] = await Promise.all([
     countRows("live_streams", (q) => q.eq("status", "live")),
-    countRows("gallery_uploads"),
+    countGalleryDrops(),
     countRows("uploads"),
     currentUser
       ? countRows("notifications", (q) => q.eq("user_id", currentUser.id).eq("is_read", false))
@@ -197,31 +253,31 @@ async function loadHubStats() {
     countRows("profiles", (q) => q.eq("online_status", "online")),
     countRows("meta_visits"),
     countRows("sports_posts"),
-    countRows("products"),
+    countRows("products", (q) => q.eq("status", "active")),
     countRows("music_tracks"),
-    countRows("game_scores")
+    countGamingActivity()
   ]);
 
-  els.liveDialSub.textContent = liveCount ? `${shortCount(liveCount)} LIVE` : "STREAM";
-  els.galleryDialSub.textContent = galleryCount ? `${shortCount(galleryCount)} DROPS` : "PHOTOS";
-  els.uploadDialSub.textContent = uploadCount ? `${shortCount(uploadCount)} FILES` : "CONTENT";
-  els.metaDialSub.textContent = metaVisits ? `${shortCount(metaVisits)} VISITS` : "VERSE";
+  safeSet(els.liveDialSub, liveCount ? `${shortCount(liveCount)} LIVE` : "STREAM");
+  safeSet(els.galleryDialSub, galleryCount ? `${shortCount(galleryCount)} DROPS` : "PHOTOS");
+  safeSet(els.uploadDialSub, uploadCount ? `${shortCount(uploadCount)} FILES` : "CONTENT");
+  safeSet(els.metaDialSub, metaVisits ? `${shortCount(metaVisits)} VISITS` : "VERSE");
 
-  els.sportsDialSub.textContent = sportsCount ? `${shortCount(sportsCount)} POSTS` : "HIGHLIGHTS";
-  els.storeDialSub.textContent = storeCount ? `${shortCount(storeCount)} ITEMS` : "SHOP";
-  els.musicDialSub.textContent = musicCount ? `${shortCount(musicCount)} TRACKS` : "VIBES";
-  els.gamingDialSub.textContent = gamingCount ? `${shortCount(gamingCount)} SCORES` : "PLAY";
+  safeSet(els.sportsDialSub, sportsCount ? `${shortCount(sportsCount)} POSTS` : "HIGHLIGHTS");
+  safeSet(els.storeDialSub, storeCount ? `${shortCount(storeCount)} ITEMS` : "SHOP");
+  safeSet(els.musicDialSub, musicCount ? `${shortCount(musicCount)} TRACKS` : "VIBES");
+  safeSet(els.gamingDialSub, gamingCount ? `${shortCount(gamingCount)} SCORES` : "PLAY");
 
-  els.homeOnline.textContent = shortCount(onlineCount);
-  setNotificationGlow(unreadCount > 0);
-
-  if (unreadCount > 0) {
-    els.notificationBtn?.setAttribute("data-count", String(unreadCount));
-  } else {
-    els.notificationBtn?.removeAttribute("data-count");
-  }
+  safeSet(els.homeOnline, shortCount(onlineCount));
+  setNotificationGlow(unreadCount);
 
   setHubStatus("LIVE");
+
+  statsLoading = false;
+
+  if (statsQueued) {
+    loadHubStats();
+  }
 }
 
 function startRealtime() {
@@ -230,7 +286,7 @@ function startRealtime() {
   }
 
   realtimeChannel = supabase
-    .channel("rich-bizness-index-command-hub")
+    .channel("rich-bizness-index-hd4d-command-core")
     .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, async (payload) => {
       if (payload.new?.id === currentUser?.id) {
         currentProfile = payload.new;
@@ -247,6 +303,7 @@ function startRealtime() {
     .on("postgres_changes", { event: "*", schema: "public", table: "products" }, loadHubStats)
     .on("postgres_changes", { event: "*", schema: "public", table: "music_tracks" }, loadHubStats)
     .on("postgres_changes", { event: "*", schema: "public", table: "game_scores" }, loadHubStats)
+    .on("postgres_changes", { event: "*", schema: "public", table: "games" }, loadHubStats)
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
         setHubStatus("LIVE");
@@ -254,27 +311,58 @@ function startRealtime() {
     });
 }
 
-window.addEventListener("beforeunload", () => {
+async function markAway() {
   if (!currentUser) return;
 
-  supabase
+  await supabase
     .from("profiles")
     .update({
       online_status: "away",
-      last_seen_at: new Date().toISOString()
+      last_seen_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     })
     .eq("id", currentUser.id);
+}
+
+window.addEventListener("beforeunload", () => {
+  markAway();
+});
+
+document.addEventListener("visibilitychange", async () => {
+  if (!currentUser) return;
+
+  if (document.visibilityState === "visible") {
+    await supabase
+      .from("profiles")
+      .update({
+        online_status: "online",
+        last_seen_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", currentUser.id);
+
+    await loadHubStats();
+  } else {
+    await markAway();
+  }
+});
+
+supabase.auth.onAuthStateChange(async (_event, session) => {
+  currentUser = session?.user || null;
+
+  await loadUserAndProfile();
+  await loadHubStats();
 });
 
 async function bootIndex() {
   setHubStatus("BOOT");
 
+  if (els.activateMain) els.activateMain.textContent = "ACTIVATE";
+  if (els.activateSub) els.activateSub.textContent = "ENTER LIVE";
+
   await loadUserAndProfile();
   await loadHubStats();
-
   startRealtime();
-
-  if (els.activateMain) els.activateMain.textContent = "ACTIVATE";
 }
 
 bootIndex();
