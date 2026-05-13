@@ -1,6 +1,6 @@
 /* =========================
    RICH BIZNESS LLC
-   CINEMATIC UNIVERSE INDEX
+   CINEMATIC UNIVERSAL HD 4D APP STAGE
    styles/main.css
 ========================= */
 
@@ -16,7 +16,27 @@
   --rb-green-2:#6dff3f;
   --rb-gold:#ffe58a;
   --rb-dark:#020402;
-  --rb-glass:rgba(5,12,5,.72);
+
+  --app-w:100vw;
+  --app-h:100svh;
+
+  --stage-top:0px;
+  --stage-bottom:0px;
+
+  --dial-center-x:50vw;
+  --dial-center-y:55.5svh;
+  --dial-radius-x:34vw;
+  --dial-radius-y:25.2svh;
+
+  --card-size:78px;
+  --card-radius:19px;
+
+  --portal-size:144px;
+  --portal-inner-size:100px;
+
+  --activate-bottom:112px;
+  --stats-height:106px;
+
   --rb-dial-rotation:0rad;
 }
 
@@ -24,12 +44,23 @@ html,
 body{
   width:100%;
   height:100%;
+  min-height:100svh;
   overflow:hidden;
   background:#000;
   color:#fff;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
   touch-action:none;
+  overscroll-behavior:none;
 }
+
+body{
+  position:fixed;
+  inset:0;
+}
+
+/* =========================
+   CINEMATIC WORLD
+========================= */
 
 body::before{
   content:"";
@@ -38,12 +69,13 @@ body::before{
   z-index:0;
   pointer-events:none;
   background:
-    linear-gradient(to bottom,rgba(0,0,0,.2),rgba(0,0,0,.55) 52%,rgba(0,0,0,.9)),
-    radial-gradient(circle at 50% 46%,rgba(126,255,76,.28),transparent 32%),
+    linear-gradient(to bottom,rgba(0,0,0,.22),rgba(0,0,0,.56) 52%,rgba(0,0,0,.92)),
+    radial-gradient(circle at 50% 49%,rgba(126,255,76,.25),transparent 34%),
     url("/images/background-v2.png");
   background-size:cover;
   background-position:center;
-  filter:saturate(1.18) contrast(1.08) brightness(.78);
+  filter:saturate(1.16) contrast(1.1) brightness(.68);
+  transform:scale(1.02);
 }
 
 body::after{
@@ -53,27 +85,32 @@ body::after{
   z-index:2;
   pointer-events:none;
   background:
-    radial-gradient(circle at 50% 52%,transparent 19%,rgba(0,0,0,.22) 48%,rgba(0,0,0,.84) 100%),
-    linear-gradient(to bottom,rgba(0,0,0,.12),transparent 40%,rgba(0,0,0,.66));
+    radial-gradient(circle at var(--dial-center-x) var(--dial-center-y),transparent 13%,rgba(0,0,0,.18) 42%,rgba(0,0,0,.88) 100%),
+    linear-gradient(to bottom,rgba(0,0,0,.12),transparent 35%,rgba(0,0,0,.72));
 }
 
 #engine{
   position:fixed;
   inset:0;
   width:100vw;
-  height:100vh;
+  height:100svh;
   z-index:1;
   display:block;
-  opacity:.78;
+  opacity:.82;
   mix-blend-mode:screen;
 }
+
+/* =========================
+   SCREEN FX
+========================= */
 
 .screen-vignette{
   position:fixed;
   inset:0;
   z-index:3;
   pointer-events:none;
-  background:radial-gradient(circle at center,transparent 33%,rgba(0,0,0,.35) 64%,rgba(0,0,0,.94) 100%);
+  background:
+    radial-gradient(circle at var(--dial-center-x) var(--dial-center-y),transparent 33%,rgba(0,0,0,.34) 65%,rgba(0,0,0,.96) 100%);
 }
 
 .screen-noise{
@@ -82,8 +119,12 @@ body::after{
   z-index:4;
   pointer-events:none;
   opacity:.055;
-  background-image:repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.5),transparent 1px);
+  background-image:repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.48),transparent 1px);
 }
+
+/* =========================
+   TOP HUD
+========================= */
 
 .topbar{
   position:fixed;
@@ -91,7 +132,7 @@ body::after{
   left:0;
   width:100%;
   z-index:30;
-  padding:calc(18px + env(safe-area-inset-top)) 26px 14px;
+  padding:calc(18px + env(safe-area-inset-top)) 22px 14px;
   display:grid;
   grid-template-columns:1fr auto 1fr;
   align-items:start;
@@ -142,7 +183,10 @@ body::after{
     linear-gradient(145deg,rgba(20,26,18,.92),rgba(0,0,0,.76)),
     radial-gradient(circle at left,rgba(124,255,76,.24),transparent 52%);
   border:1px solid rgba(255,223,125,.62);
-  box-shadow:inset 0 0 18px rgba(255,255,255,.08),0 0 26px rgba(0,0,0,.92),0 0 22px rgba(128,255,76,.2);
+  box-shadow:
+    inset 0 0 18px rgba(255,255,255,.08),
+    0 0 26px rgba(0,0,0,.92),
+    0 0 22px rgba(128,255,76,.2);
 }
 
 .rank-icon{
@@ -184,6 +228,10 @@ body::after{
   text-shadow:0 0 16px rgba(157,255,99,.72);
 }
 
+/* =========================
+   BRAND
+========================= */
+
 .brand-lockup{
   display:flex;
   flex-direction:column;
@@ -192,7 +240,10 @@ body::after{
   text-align:center;
   font-family:Georgia,"Times New Roman",serif;
   transform:translateY(6px);
-  text-shadow:0 3px 0 #1b1200,0 0 20px rgba(162,255,81,.62),0 8px 28px rgba(0,0,0,1);
+  text-shadow:
+    0 3px 0 #1b1200,
+    0 0 20px rgba(162,255,81,.62),
+    0 8px 28px rgba(0,0,0,1);
 }
 
 .brand-rich,
@@ -213,6 +264,10 @@ body::after{
   letter-spacing:.24em;
 }
 
+/* =========================
+   TOP ICONS
+========================= */
+
 .icon{
   position:relative;
   width:60px;
@@ -226,7 +281,10 @@ body::after{
     linear-gradient(145deg,rgba(45,45,45,.88),rgba(0,0,0,.74)),
     radial-gradient(circle at top,rgba(157,255,99,.16),transparent 60%);
   border:1px solid rgba(255,214,110,.65);
-  box-shadow:inset 0 0 14px rgba(255,255,255,.08),0 0 18px rgba(0,0,0,.9),0 0 22px rgba(132,255,85,.2);
+  box-shadow:
+    inset 0 0 14px rgba(255,255,255,.08),
+    0 0 18px rgba(0,0,0,.9),
+    0 0 22px rgba(132,255,85,.2);
 }
 
 .icon:active{
@@ -268,13 +326,17 @@ body::after{
   font-weight:950;
 }
 
+/* =========================
+   QUICK MENU
+========================= */
+
 .quick-menu{
   position:fixed;
   top:96px;
   right:20px;
   z-index:60;
   width:240px;
-  max-height:calc(100vh - 120px);
+  max-height:calc(100svh - 120px);
   overflow:auto;
   padding:14px;
   border-radius:25px;
@@ -305,6 +367,10 @@ body::after{
   background:rgba(128,255,80,.2);
 }
 
+/* =========================
+   DIAL APP STAGE
+========================= */
+
 .dial-ui{
   position:fixed;
   inset:0;
@@ -314,9 +380,9 @@ body::after{
 
 .dial-card{
   position:absolute;
-  width:116px;
-  height:116px;
-  border-radius:26px;
+  width:var(--card-size);
+  height:var(--card-size);
+  border-radius:var(--card-radius);
   pointer-events:auto;
   display:flex;
   flex-direction:column;
@@ -329,7 +395,11 @@ body::after{
     linear-gradient(145deg,rgba(18,24,17,.92),rgba(0,0,0,.8));
   border:1px solid rgba(148,255,92,.28);
   backdrop-filter:blur(10px);
-  box-shadow:inset 0 0 22px rgba(255,255,255,.06),inset 0 -10px 26px rgba(0,0,0,.72),0 0 26px rgba(0,0,0,.95),0 0 20px rgba(120,255,80,.16);
+  box-shadow:
+    inset 0 0 22px rgba(255,255,255,.06),
+    inset 0 -10px 26px rgba(0,0,0,.72),
+    0 0 26px rgba(0,0,0,.95),
+    0 0 20px rgba(120,255,80,.16);
   transition:.18s ease;
 }
 
@@ -356,7 +426,10 @@ body::after{
 .dial-card.is-active{
   border-color:rgba(177,255,113,.95);
   filter:brightness(1.25);
-  box-shadow:inset 0 0 22px rgba(255,255,255,.1),0 0 36px rgba(128,255,79,.62),0 0 82px rgba(128,255,79,.22);
+  box-shadow:
+    inset 0 0 22px rgba(255,255,255,.1),
+    0 0 36px rgba(128,255,79,.62),
+    0 0 82px rgba(128,255,79,.22);
 }
 
 .dial-card.is-active::after{
@@ -368,19 +441,19 @@ body::after{
 }
 
 .dial-icon{
-  font-size:30px;
+  font-size:21px;
   color:#aaff75;
   text-shadow:0 0 15px rgba(123,255,77,.82);
 }
 
 .dial-title{
-  font-size:17px;
+  font-size:12px;
   font-weight:950;
   letter-spacing:.08em;
 }
 
 .dial-sub{
-  font-size:10px;
+  font-size:8px;
   color:#9eff75;
   letter-spacing:.14em;
   font-weight:900;
@@ -390,27 +463,71 @@ body::after{
   white-space:nowrap;
 }
 
-.top-card{top:37%;left:50%;transform:translateX(-50%)}
-.top-left-card{top:43%;left:23%}
-.top-right-card{top:43%;right:23%}
-.left-card{top:55.2%;left:18.5%;transform:translateY(-50%)}
-.right-card{top:55.2%;right:18.5%;transform:translateY(-50%)}
-.bottom-left-card{bottom:24.7%;left:23%}
-.bottom-card{bottom:20.2%;left:50%;transform:translateX(-50%)}
-.bottom-right-card{bottom:24.7%;right:23%}
+/* shared wheel math */
+.top-card{
+  left:var(--dial-center-x);
+  top:calc(var(--dial-center-y) - var(--dial-radius-y));
+  transform:translate(-50%,-50%);
+}
+
+.top-left-card{
+  left:calc(var(--dial-center-x) - (var(--dial-radius-x) * .74));
+  top:calc(var(--dial-center-y) - (var(--dial-radius-y) * .46));
+  transform:translate(-50%,-50%);
+}
+
+.top-right-card{
+  left:calc(var(--dial-center-x) + (var(--dial-radius-x) * .74));
+  top:calc(var(--dial-center-y) - (var(--dial-radius-y) * .46));
+  transform:translate(-50%,-50%);
+}
+
+.left-card{
+  left:calc(var(--dial-center-x) - var(--dial-radius-x));
+  top:var(--dial-center-y);
+  transform:translate(-50%,-50%);
+}
+
+.right-card{
+  left:calc(var(--dial-center-x) + var(--dial-radius-x));
+  top:var(--dial-center-y);
+  transform:translate(-50%,-50%);
+}
+
+.bottom-left-card{
+  left:calc(var(--dial-center-x) - (var(--dial-radius-x) * .74));
+  top:calc(var(--dial-center-y) + (var(--dial-radius-y) * .46));
+  transform:translate(-50%,-50%);
+}
+
+.bottom-card{
+  left:var(--dial-center-x);
+  top:calc(var(--dial-center-y) + var(--dial-radius-y));
+  transform:translate(-50%,-50%);
+}
+
+.bottom-right-card{
+  left:calc(var(--dial-center-x) + (var(--dial-radius-x) * .74));
+  top:calc(var(--dial-center-y) + (var(--dial-radius-y) * .46));
+  transform:translate(-50%,-50%);
+}
+
+/* =========================
+   CENTER PORTAL
+========================= */
 
 .center-ui{
   position:fixed;
-  top:55%;
-  left:50%;
+  left:var(--dial-center-x);
+  top:var(--dial-center-y);
   transform:translate(-50%,-50%);
   z-index:14;
   pointer-events:none;
 }
 
 .portal-core{
-  width:252px;
-  height:252px;
+  width:var(--portal-size);
+  height:var(--portal-size);
   border-radius:50%;
   position:relative;
   display:grid;
@@ -418,7 +535,10 @@ body::after{
   background:
     radial-gradient(circle,rgba(196,255,139,.35),rgba(71,255,57,.2) 36%,rgba(0,0,0,.82) 72%),
     conic-gradient(from var(--rb-dial-rotation),rgba(157,255,99,.95),rgba(0,0,0,.08),rgba(157,255,99,.56),rgba(0,0,0,.18),rgba(157,255,99,.95));
-  box-shadow:0 0 94px rgba(112,255,74,.55),inset 0 0 42px rgba(255,255,255,.12),inset 0 0 75px rgba(68,255,50,.25);
+  box-shadow:
+    0 0 94px rgba(112,255,74,.55),
+    inset 0 0 42px rgba(255,255,255,.12),
+    inset 0 0 75px rgba(68,255,50,.25);
 }
 
 .portal-core::before{
@@ -443,8 +563,8 @@ body::after{
 }
 
 .portal-inner{
-  width:172px;
-  height:172px;
+  width:var(--portal-inner-size);
+  height:var(--portal-inner-size);
   border-radius:50%;
   position:relative;
   z-index:2;
@@ -489,7 +609,7 @@ body::after{
 }
 
 .portal-title span{
-  font-size:33px;
+  font-size:20px;
   font-weight:950;
   background:linear-gradient(to bottom,#fff6c1,#a8ff70 45%,#547a1b);
   -webkit-background-clip:text;
@@ -501,23 +621,31 @@ body::after{
   margin-top:6px;
   color:#f5d87d;
   letter-spacing:.22em;
+  font-size:9px;
   text-shadow:0 0 14px rgba(157,255,99,.8);
 }
+
+/* =========================
+   ACTIVATE
+========================= */
 
 .enter{
   position:fixed;
   left:50%;
-  bottom:118px;
+  bottom:var(--activate-bottom);
   transform:translateX(-50%);
   z-index:20;
   width:min(430px,84vw);
-  padding:19px 20px;
+  padding:15px;
   border-radius:25px;
   background:
     linear-gradient(to bottom,rgba(64,78,35,.94),rgba(6,7,5,.98)),
     radial-gradient(circle at center,rgba(157,255,99,.22),transparent 72%);
   border:1px solid rgba(255,219,123,.62);
-  box-shadow:inset 0 0 20px rgba(255,255,255,.08),0 0 44px rgba(122,255,77,.38),0 10px 34px rgba(0,0,0,.9);
+  box-shadow:
+    inset 0 0 20px rgba(255,255,255,.08),
+    0 0 44px rgba(122,255,77,.38),
+    0 10px 34px rgba(0,0,0,.9);
 }
 
 .enter:active{
@@ -526,7 +654,7 @@ body::after{
 
 .enter-main{
   display:block;
-  font-size:38px;
+  font-size:27px;
   font-weight:950;
   letter-spacing:.14em;
   font-family:Georgia,serif;
@@ -540,9 +668,13 @@ body::after{
   margin-top:5px;
   color:#ffe890;
   letter-spacing:.24em;
-  font-size:14px;
+  font-size:11px;
   font-weight:900;
 }
+
+/* =========================
+   STATS
+========================= */
 
 .stats{
   position:fixed;
@@ -554,7 +686,7 @@ body::after{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:1px;
-  padding:12px 12px calc(12px + env(safe-area-inset-bottom));
+  padding:12px 4px calc(12px + env(safe-area-inset-bottom));
   background:
     linear-gradient(to top,rgba(0,0,0,.97),rgba(0,0,0,.84)),
     radial-gradient(circle at center,rgba(157,255,99,.12),transparent 70%);
@@ -563,7 +695,7 @@ body::after{
 }
 
 .stat-card{
-  min-height:88px;
+  min-height:76px;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -579,22 +711,26 @@ body::after{
 }
 
 .stat-icon{
-  font-size:24px;
+  font-size:18px;
   color:#9eff6d;
   text-shadow:0 0 14px rgba(157,255,99,.65);
 }
 
 .stat-card small{
-  font-size:11px;
+  font-size:8px;
   letter-spacing:.15em;
   color:#8fff67;
   font-weight:900;
 }
 
 .stat-card strong{
-  font-size:18px;
+  font-size:11px;
   text-shadow:0 0 12px rgba(157,255,99,.22);
 }
+
+/* =========================
+   ANIMATION
+========================= */
 
 @keyframes rbPing{
   0%,100%{transform:scale(1);opacity:1}
@@ -615,46 +751,24 @@ body::after{
   50%{opacity:.76;translate:55% 0}
 }
 
-@media (max-width:900px){
-  .brand-rich,
-  .brand-biz{
-    font-size:54px;
-  }
+/* =========================
+   PHONE APP STAGE
+========================= */
 
-  .dial-card{
-    width:104px;
-    height:104px;
-  }
-
-  .portal-core{
-    width:205px;
-    height:205px;
-  }
-
-  .portal-inner{
-    width:140px;
-    height:140px;
-  }
-
-  .portal-title span{
-    font-size:27px;
-  }
-}
-
-/* PHONE CINEMATIC WHEEL SNAP LOCK */
 @media (max-width:640px){
-  body::before{
-    background:
-      linear-gradient(to bottom,rgba(0,0,0,.28),rgba(0,0,0,.58) 50%,rgba(0,0,0,.92)),
-      radial-gradient(circle at 50% 48%,rgba(126,255,76,.26),transparent 32%),
-      url("/images/background-v2.png");
-    background-size:cover;
-    background-position:center;
-    filter:saturate(1.16) contrast(1.1) brightness(.68);
-  }
+  :root{
+    --dial-center-x:50vw;
+    --dial-center-y:55.8svh;
+    --dial-radius-x:34vw;
+    --dial-radius-y:23.4svh;
 
-  #engine{
-    opacity:.82;
+    --card-size:78px;
+    --card-radius:19px;
+
+    --portal-size:144px;
+    --portal-inner-size:100px;
+
+    --activate-bottom:112px;
   }
 
   .topbar{
@@ -697,127 +811,160 @@ body::after{
     height:54px;
   }
 
-  .dial-card{
-    width:78px;
-    height:78px;
-    border-radius:19px;
-  }
-
   .dial-card::before{
     inset:7px;
     border-radius:14px;
   }
+}
 
-  .dial-title{
-    font-size:12px;
+/* SHORT PHONE / SAFARI PREVIEW */
+@media (max-width:640px) and (max-height:760px){
+  :root{
+    --dial-center-y:54.7svh;
+    --dial-radius-y:22.2svh;
+    --activate-bottom:104px;
   }
 
-  .dial-sub{
-    font-size:8px;
+  .top-center{
+    top:112px;
+  }
+
+  .brand-rich,
+  .brand-biz{
+    font-size:36px;
+  }
+
+  .dial-card{
+    --card-size:72px;
+  }
+}
+
+/* TALL PHONE */
+@media (max-width:640px) and (min-height:820px){
+  :root{
+    --dial-center-y:55.9svh;
+    --dial-radius-y:23.8svh;
+    --activate-bottom:116px;
+  }
+}
+
+/* TABLET */
+@media (min-width:641px) and (max-width:1024px){
+  :root{
+    --dial-center-x:50vw;
+    --dial-center-y:55svh;
+    --dial-radius-x:28vw;
+    --dial-radius-y:24svh;
+
+    --card-size:104px;
+    --card-radius:24px;
+
+    --portal-size:205px;
+    --portal-inner-size:140px;
+
+    --activate-bottom:124px;
   }
 
   .dial-icon{
-    font-size:21px;
+    font-size:28px;
   }
 
-  .top-card{
-    top:41.2%;
-    left:50%;
-    transform:translateX(-50%);
+  .dial-title{
+    font-size:16px;
   }
 
-  .top-left-card{
-    top:46.8%;
-    left:7.8%;
-  }
-
-  .top-right-card{
-    top:46.8%;
-    right:7.8%;
-  }
-
-  .left-card{
-    top:55.5%;
-    left:5.4%;
-    transform:translateY(-50%);
-  }
-
-  .right-card{
-    top:55.5%;
-    right:5.4%;
-    transform:translateY(-50%);
-  }
-
-  .bottom-left-card{
-    bottom:30.2%;
-    left:9%;
-  }
-
-  .bottom-card{
-    bottom:25.4%;
-    left:50%;
-    transform:translateX(-50%);
-  }
-
-  .bottom-right-card{
-    bottom:30.2%;
-    right:9%;
-  }
-
-  .center-ui{
-    top:55.6%;
-  }
-
-  .portal-core{
-    width:144px;
-    height:144px;
-  }
-
-  .portal-inner{
-    width:100px;
-    height:100px;
+  .dial-sub{
+    font-size:10px;
   }
 
   .portal-title span{
-    font-size:20px;
-  }
-
-  .portal-title small{
-    font-size:9px;
-  }
-
-  .enter{
-    bottom:112px;
-    width:84vw;
-    padding:15px;
-  }
-
-  .enter-main{
     font-size:27px;
   }
 
+  .enter-main{
+    font-size:36px;
+  }
+
   .enter-sub{
-    font-size:11px;
-  }
-
-  .stats{
-    padding-left:4px;
-    padding-right:4px;
-  }
-
-  .stat-card{
-    min-height:76px;
-  }
-
-  .stat-icon{
-    font-size:18px;
-  }
-
-  .stat-card small{
-    font-size:8px;
+    font-size:14px;
   }
 
   .stat-card strong{
+    font-size:17px;
+  }
+}
+
+/* DESKTOP / LARGE STAGE */
+@media (min-width:1025px){
+  :root{
+    --dial-center-x:50vw;
+    --dial-center-y:56vh;
+    --dial-radius-x:25vw;
+    --dial-radius-y:27vh;
+
+    --card-size:118px;
+    --card-radius:26px;
+
+    --portal-size:252px;
+    --portal-inner-size:172px;
+
+    --activate-bottom:118px;
+  }
+
+  #engine{
+    opacity:.88;
+  }
+
+  .dial-icon{
+    font-size:31px;
+  }
+
+  .dial-title{
+    font-size:17px;
+  }
+
+  .dial-sub{
+    font-size:10px;
+  }
+
+  .portal-title span{
+    font-size:33px;
+  }
+
+  .portal-title small{
     font-size:11px;
+  }
+
+  .enter{
+    padding:19px 20px;
+  }
+
+  .enter-main{
+    font-size:38px;
+  }
+
+  .enter-sub{
+    font-size:14px;
+  }
+
+  .stats{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .stat-card{
+    min-height:88px;
+  }
+
+  .stat-icon{
+    font-size:24px;
+  }
+
+  .stat-card small{
+    font-size:11px;
+  }
+
+  .stat-card strong{
+    font-size:18px;
   }
 }
