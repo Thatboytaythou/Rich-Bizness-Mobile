@@ -1,8 +1,13 @@
-/* =========================
+/* =========================================================
    RICH BIZNESS LLC
-   CINEMATIC UNIVERSAL HD 4D APP STAGE
-   styles/main.css
-========================= */
+   CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
+   HD4D MASTERPIECE MAIN.CSS
+   MOBILE-FIRST APP ENGINE
+========================================================= */
+
+/* =========================================================
+   RESET
+========================================================= */
 
 *{
   margin:0;
@@ -12,194 +17,288 @@
 }
 
 :root{
-  --rb-green:#9dff63;
-  --rb-green-2:#6dff3f;
-  --rb-gold:#ffe58a;
-  --rb-dark:#020402;
 
-  --app-w:100vw;
-  --app-h:100svh;
+  --rb-green:#8dff5b;
+  --rb-green-soft:#6bff8d;
+  --rb-green-deep:#17391a;
 
-  --stage-top:0px;
-  --stage-bottom:0px;
+  --rb-gold:#ffd76a;
+  --rb-black:#020302;
+  --rb-panel:#071008;
+  --rb-panel-2:#0a150d;
 
-  --dial-center-x:50vw;
-  --dial-center-y:55.5svh;
-  --dial-radius-x:34vw;
-  --dial-radius-y:25.2svh;
+  --rb-glow:
+    0 0 8px rgba(141,255,91,.45),
+    0 0 24px rgba(141,255,91,.18);
 
-  --card-size:78px;
-  --card-radius:19px;
+  --rb-heavy-glow:
+    0 0 12px rgba(141,255,91,.75),
+    0 0 38px rgba(141,255,91,.38),
+    0 0 90px rgba(141,255,91,.14);
 
-  --portal-size:144px;
-  --portal-inner-size:100px;
+  --safe-top:env(safe-area-inset-top);
+  --safe-bottom:env(safe-area-inset-bottom);
 
-  --activate-bottom:112px;
-  --stats-height:106px;
-
-  --rb-dial-rotation:0rad;
+  --topbar-h:122px;
+  --stats-h:112px;
 }
 
 html,
 body{
   width:100%;
   height:100%;
-  min-height:100svh;
   overflow:hidden;
+
   background:#000;
   color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
-  touch-action:none;
+
+  font-family:
+    Inter,
+    SF Pro Display,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  touch-action:manipulation;
+
   overscroll-behavior:none;
+
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 
-body{
-  position:fixed;
-  inset:0;
-}
-
-/* =========================
-   CINEMATIC WORLD
-========================= */
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:
-    linear-gradient(to bottom,rgba(0,0,0,.22),rgba(0,0,0,.56) 52%,rgba(0,0,0,.92)),
-    radial-gradient(circle at 50% 49%,rgba(126,255,76,.25),transparent 34%),
-    url("/images/background-v2.png");
-  background-size:cover;
-  background-position:center;
-  filter:saturate(1.16) contrast(1.1) brightness(.68);
-  transform:scale(1.02);
-}
-
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at var(--dial-center-x) var(--dial-center-y),transparent 13%,rgba(0,0,0,.18) 42%,rgba(0,0,0,.88) 100%),
-    linear-gradient(to bottom,rgba(0,0,0,.12),transparent 35%,rgba(0,0,0,.72));
-}
+/* =========================================================
+   ENGINE
+========================================================= */
 
 #engine{
   position:fixed;
   inset:0;
+
   width:100vw;
-  height:100svh;
+  height:100vh;
+
   z-index:1;
+
   display:block;
-  opacity:.82;
-  mix-blend-mode:screen;
+
+  filter:
+    saturate(1.06)
+    contrast(1.04)
+    brightness(.98);
 }
 
-/* =========================
-   SCREEN FX
-========================= */
+/* =========================================================
+   GLOBAL ATMOSPHERE
+========================================================= */
+
+body::before{
+  content:"";
+
+  position:fixed;
+  inset:0;
+
+  z-index:2;
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      circle at 50% 46%,
+      rgba(120,255,120,.12),
+      transparent 24%
+    ),
+
+    radial-gradient(
+      circle at top,
+      rgba(125,255,105,.08),
+      transparent 42%
+    ),
+
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.08),
+      rgba(0,0,0,.34),
+      rgba(0,0,0,.72)
+    );
+}
 
 .screen-vignette{
   position:fixed;
   inset:0;
+
   z-index:3;
   pointer-events:none;
+
   background:
-    radial-gradient(circle at var(--dial-center-x) var(--dial-center-y),transparent 33%,rgba(0,0,0,.34) 65%,rgba(0,0,0,.96) 100%);
+    radial-gradient(
+      circle at center,
+      transparent 38%,
+      rgba(0,0,0,.22) 58%,
+      rgba(0,0,0,.76) 100%
+    );
 }
 
 .screen-noise{
   position:fixed;
   inset:0;
+
   z-index:4;
   pointer-events:none;
-  opacity:.055;
-  background-image:repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.48),transparent 1px);
+
+  opacity:.045;
+
+  background-image:
+    repeating-radial-gradient(
+      circle at center,
+      rgba(255,255,255,.08) 0,
+      rgba(255,255,255,.02) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+
+  mix-blend-mode:soft-light;
+
+  animation:noiseMove 12s linear infinite;
 }
 
-/* =========================
-   TOP HUD
-========================= */
+@keyframes noiseMove{
+  from{
+    transform:translate3d(0,0,0);
+  }
+  to{
+    transform:translate3d(0,-120px,0);
+  }
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
 
 .topbar{
   position:fixed;
   top:0;
   left:0;
+
   width:100%;
-  z-index:30;
-  padding:calc(18px + env(safe-area-inset-top)) 22px 14px;
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:start;
-  background:linear-gradient(to bottom,rgba(0,0,0,.84),rgba(0,0,0,.28),transparent);
+
+  z-index:40;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+
+  padding:
+    calc(var(--safe-top) + 16px)
+    18px
+    0;
+
+  pointer-events:none;
 }
 
-.top-left{
+.top-left,
+.top-right{
   display:flex;
   flex-direction:column;
   gap:14px;
+
+  pointer-events:auto;
 }
 
 .top-center{
-  display:flex;
-  justify-content:center;
+  pointer-events:none;
 }
 
-.top-right{
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome-block{
   display:flex;
-  justify-content:flex-end;
-  gap:14px;
+  flex-direction:column;
+  gap:3px;
 }
 
 .welcome-text{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.28em;
+
   color:var(--rb-green);
-  font-size:13px;
-  font-weight:950;
-  letter-spacing:.22em;
-  text-shadow:0 0 15px rgba(157,255,99,.9);
+
+  text-shadow:0 0 14px rgba(141,255,91,.45);
 }
 
 .welcome-name{
+  font-size:1.12rem;
+  font-weight:900;
+
   color:#fff;
-  font-size:clamp(24px,3vw,36px);
-  font-weight:950;
-  text-shadow:0 4px 24px rgba(0,0,0,.95);
+
+  text-shadow:
+    0 0 18px rgba(255,255,255,.14);
 }
 
+/* =========================================================
+   PROFILE PANEL
+========================================================= */
+
 .rank-panel{
-  width:fit-content;
+  border:none;
+  outline:none;
+
   display:flex;
   align-items:center;
-  gap:14px;
-  padding:12px 18px;
-  border-radius:20px;
-  color:#eaffdc;
+  gap:12px;
+
+  min-width:174px;
+
+  border-radius:24px;
+
+  padding:12px 16px;
+
   background:
-    linear-gradient(145deg,rgba(20,26,18,.92),rgba(0,0,0,.76)),
-    radial-gradient(circle at left,rgba(124,255,76,.24),transparent 52%);
-  border:1px solid rgba(255,223,125,.62);
+    linear-gradient(
+      180deg,
+      rgba(18,26,18,.95),
+      rgba(4,8,4,.94)
+    );
+
+  border:1px solid rgba(255,216,106,.55);
+
   box-shadow:
-    inset 0 0 18px rgba(255,255,255,.08),
-    0 0 26px rgba(0,0,0,.92),
-    0 0 22px rgba(128,255,76,.2);
+    inset 0 0 22px rgba(141,255,91,.08),
+    0 0 28px rgba(0,0,0,.55);
+
+  backdrop-filter:blur(18px);
+
+  color:#fff;
 }
 
 .rank-icon{
-  width:46px;
-  height:46px;
+  width:48px;
+  height:48px;
+
   border-radius:50%;
-  display:grid;
-  place-items:center;
-  color:#a9ff80;
-  font-weight:950;
-  background:radial-gradient(circle,rgba(0,255,174,.32),rgba(0,0,0,.45));
-  border:1px solid rgba(145,255,104,.42);
-  box-shadow:0 0 22px rgba(97,255,84,.42);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(141,255,91,.3),
+      rgba(5,15,5,.92)
+    );
+
+  border:1px solid rgba(141,255,91,.45);
+
+  font-weight:900;
+
+  color:var(--rb-green);
+
+  box-shadow:var(--rb-glow);
+
   overflow:hidden;
 }
 
@@ -212,759 +311,741 @@ body::after{
 .rank-copy{
   display:flex;
   flex-direction:column;
+  gap:3px;
 }
 
 .rank-copy small{
-  color:#9dff63;
-  font-size:12px;
-  letter-spacing:.14em;
+  font-size:.66rem;
   font-weight:900;
+  letter-spacing:.22em;
+
+  color:#d9ffca;
 }
 
 .rank-copy strong{
-  color:#aaff75;
-  font-size:28px;
+  font-size:1.58rem;
   line-height:1;
-  text-shadow:0 0 16px rgba(157,255,99,.72);
+
+  font-weight:900;
+
+  color:var(--rb-green);
+
+  text-shadow:var(--rb-heavy-glow);
 }
 
-/* =========================
+/* =========================================================
    BRAND
-========================= */
+========================================================= */
 
 .brand-lockup{
   display:flex;
   flex-direction:column;
   align-items:center;
+
   line-height:.82;
-  text-align:center;
-  font-family:Georgia,"Times New Roman",serif;
-  transform:translateY(6px);
-  text-shadow:
-    0 3px 0 #1b1200,
-    0 0 20px rgba(162,255,81,.62),
-    0 8px 28px rgba(0,0,0,1);
+
+  user-select:none;
 }
 
 .brand-rich,
 .brand-biz{
-  font-size:clamp(58px,7.3vw,124px);
-  font-weight:950;
-  letter-spacing:.045em;
-  background:linear-gradient(to bottom,#fff8c7 0%,#b8ff78 32%,#406f15 72%,#fff1a7 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 10px rgba(151,255,91,.38));
+  font-family:
+    Georgia,
+    Times New Roman,
+    serif;
+
+  font-weight:900;
+
+  letter-spacing:.03em;
+
+  color:#d7bf67;
+
+  text-shadow:
+    0 0 18px rgba(141,255,91,.5),
+    0 0 42px rgba(141,255,91,.18),
+    0 4px 10px rgba(0,0,0,.7);
+}
+
+.brand-rich{
+  font-size:clamp(2.3rem,7vw,4.2rem);
+}
+
+.brand-biz{
+  font-size:clamp(2.7rem,8vw,4.9rem);
 }
 
 .brand-llc{
-  margin-top:9px;
-  font-size:clamp(18px,2vw,36px);
-  color:var(--rb-gold);
-  letter-spacing:.24em;
+  margin-top:6px;
+
+  font-size:.86rem;
+  letter-spacing:.34em;
+  font-weight:800;
+
+  color:#ffe08a;
 }
 
-/* =========================
-   TOP ICONS
-========================= */
+/* =========================================================
+   ICON BUTTONS
+========================================================= */
 
 .icon{
-  position:relative;
-  width:60px;
-  height:60px;
+  width:66px;
+  height:66px;
+
   border-radius:50%;
-  color:#ffe08a;
-  font-size:24px;
-  display:grid;
-  place-items:center;
+
+  border:1px solid rgba(255,216,106,.55);
+
   background:
-    linear-gradient(145deg,rgba(45,45,45,.88),rgba(0,0,0,.74)),
-    radial-gradient(circle at top,rgba(157,255,99,.16),transparent 60%);
-  border:1px solid rgba(255,214,110,.65);
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255,255,255,.08),
+      rgba(8,10,8,.95)
+    );
+
+  color:#ffe08a;
+
+  font-size:1.55rem;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  backdrop-filter:blur(20px);
+
   box-shadow:
-    inset 0 0 14px rgba(255,255,255,.08),
-    0 0 18px rgba(0,0,0,.9),
-    0 0 22px rgba(132,255,85,.2);
-}
+    inset 0 0 18px rgba(255,255,255,.04),
+    0 0 22px rgba(0,0,0,.42);
 
-.icon:active{
-  transform:scale(.92);
-}
-
-.notification::after{
-  content:"";
-  position:absolute;
-  top:7px;
-  right:8px;
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:#97ff67;
-  box-shadow:0 0 18px #97ff67;
+  position:relative;
 }
 
 .notification.has-unread::after{
-  width:15px;
-  height:15px;
-  animation:rbPing 1.25s ease-in-out infinite;
-}
+  content:"";
 
-.notification.has-unread::before{
-  content:attr(data-count);
   position:absolute;
-  top:-5px;
-  right:-5px;
-  min-width:21px;
-  height:21px;
-  padding:0 5px;
-  border-radius:999px;
-  display:grid;
-  place-items:center;
-  background:#9dff63;
-  color:#071007;
-  font-size:10px;
-  font-weight:950;
+  top:10px;
+  right:11px;
+
+  width:12px;
+  height:12px;
+
+  border-radius:50%;
+
+  background:var(--rb-green);
+
+  box-shadow:
+    0 0 12px rgba(141,255,91,.9);
 }
 
-/* =========================
+/* =========================================================
    QUICK MENU
-========================= */
+========================================================= */
 
 .quick-menu{
   position:fixed;
-  top:96px;
-  right:20px;
-  z-index:60;
-  width:240px;
-  max-height:calc(100svh - 120px);
-  overflow:auto;
-  padding:14px;
-  border-radius:25px;
-  display:none;
+  top:108px;
+  right:18px;
+
+  width:220px;
+
+  z-index:120;
+
+  display:flex;
   flex-direction:column;
   gap:8px;
-  background:rgba(2,8,2,.9);
-  border:1px solid rgba(151,255,106,.35);
-  box-shadow:0 0 45px rgba(0,0,0,.88),0 0 28px rgba(119,255,76,.2);
-  backdrop-filter:blur(24px);
+
+  padding:14px;
+
+  border-radius:24px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,14,10,.96),
+      rgba(2,4,2,.98)
+    );
+
+  border:1px solid rgba(141,255,91,.16);
+
+  transform:
+    translateY(-12px)
+    scale(.96);
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:.28s;
 }
 
 .quick-menu.open{
-  display:flex;
+  opacity:1;
+  pointer-events:auto;
+
+  transform:
+    translateY(0)
+    scale(1);
 }
 
 .quick-menu a{
-  color:#eaffdc;
   text-decoration:none;
-  padding:12px 14px;
-  border-radius:15px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.06);
-  font-weight:900;
+
+  padding:14px 16px;
+
+  border-radius:18px;
+
+  color:#fff;
+
+  font-weight:700;
+
+  background:rgba(255,255,255,.03);
 }
 
-.quick-menu a:active{
-  background:rgba(128,255,80,.2);
-}
-
-/* =========================
-   DIAL APP STAGE
-========================= */
+/* =========================================================
+   DIAL UI
+========================================================= */
 
 .dial-ui{
   position:fixed;
   inset:0;
-  z-index:12;
+
+  z-index:20;
   pointer-events:none;
 }
 
 .dial-card{
   position:absolute;
-  width:var(--card-size);
-  height:var(--card-size);
-  border-radius:var(--card-radius);
+
+  width:108px;
+  height:108px;
+
+  border:none;
+  outline:none;
+
+  border-radius:30px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+
   pointer-events:auto;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(16,22,16,.95),
+      rgba(3,5,3,.98)
+    );
+
+  border:1px solid rgba(141,255,91,.14);
+
+  color:#fff;
+
+  backdrop-filter:blur(18px);
+
+  box-shadow:
+    inset 0 0 20px rgba(141,255,91,.04),
+    0 0 22px rgba(0,0,0,.5);
+
+  transition:
+    transform .22s,
+    box-shadow .22s,
+    border-color .22s;
+}
+
+.dial-card.is-active{
+  transform:scale(1.08);
+
+  border-color:rgba(141,255,91,.72);
+
+  box-shadow:
+    0 0 22px rgba(141,255,91,.42),
+    0 0 60px rgba(141,255,91,.16);
+}
+
+.dial-icon{
+  font-size:1.55rem;
+
+  color:var(--rb-green);
+
+  text-shadow:var(--rb-glow);
+}
+
+.dial-title{
+  font-size:1.02rem;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.dial-sub{
+  font-size:.66rem;
+  letter-spacing:.18em;
+  font-weight:800;
+
+  color:var(--rb-green-soft);
+}
+
+/* =========================================================
+   CARD POSITIONS
+========================================================= */
+
+.top-card{
+  left:50%;
+  top:31%;
+
+  transform:translateX(-50%);
+}
+
+.top-left-card{
+  left:19%;
+  top:43%;
+}
+
+.top-right-card{
+  right:19%;
+  top:43%;
+}
+
+.left-card{
+  left:12%;
+  top:56%;
+}
+
+.right-card{
+  right:12%;
+  top:56%;
+}
+
+.bottom-left-card{
+  left:19%;
+  bottom:23%;
+}
+
+.bottom-right-card{
+  right:19%;
+  bottom:23%;
+}
+
+.bottom-card{
+  left:50%;
+  bottom:14%;
+
+  transform:translateX(-50%);
+}
+
+/* =========================================================
+   PORTAL CORE
+========================================================= */
+
+.center-ui{
+  position:fixed;
+  inset:0;
+
+  z-index:18;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  pointer-events:none;
+}
+
+.portal-core{
+  width:min(42vw,230px);
+  aspect-ratio:1;
+
+  border-radius:50%;
+
+  position:relative;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(144,255,91,.95),
+      rgba(62,132,43,.55) 34%,
+      rgba(0,0,0,.92) 66%
+    );
+
+  box-shadow:
+    0 0 34px rgba(141,255,91,.45),
+    0 0 110px rgba(141,255,91,.18);
+
+  animation:
+    portalPulse 4s ease-in-out infinite;
+}
+
+.portal-core::before{
+  content:"";
+
+  position:absolute;
+  inset:-20px;
+
+  border-radius:50%;
+
+  border:2px solid rgba(141,255,91,.12);
+
+  animation:spinSlow 18s linear infinite;
+}
+
+.portal-core::after{
+  content:"";
+
+  position:absolute;
+  inset:10px;
+
+  border-radius:50%;
+
+  border:1px solid rgba(255,255,255,.12);
+
+  backdrop-filter:blur(4px);
+}
+
+.portal-inner{
+  position:absolute;
+  inset:18px;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(8,12,8,.55),
+      rgba(0,0,0,.96)
+    );
+}
+
+.portal-title{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  line-height:.84;
+}
+
+.portal-title span{
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:clamp(1.2rem,5vw,2.3rem);
+  font-weight:900;
+
+  color:#d9c46f;
+
+  text-shadow:
+    0 0 18px rgba(141,255,91,.42);
+}
+
+.portal-title small{
+  margin-top:8px;
+
+  letter-spacing:.3em;
+  font-size:.72rem;
+  font-weight:900;
+
+  color:var(--rb-green);
+}
+
+/* =========================================================
+   ACTIVATE BUTTON
+========================================================= */
+
+.enter{
+  position:fixed;
+  left:50%;
+  bottom:calc(var(--stats-h) + 28px);
+
+  transform:translateX(-50%);
+
+  width:min(88vw,620px);
+  height:102px;
+
+  z-index:45;
+
+  border:none;
+  outline:none;
+
+  border-radius:34px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(65,82,36,.82),
+      rgba(10,14,8,.98)
+    );
+
+  border:1px solid rgba(255,216,106,.45);
+
+  box-shadow:
+    inset 0 0 26px rgba(141,255,91,.12),
+    0 0 44px rgba(141,255,91,.14);
+
+  color:#fff;
+
+  overflow:hidden;
+}
+
+.enter::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent 10%,
+      rgba(255,255,255,.08),
+      transparent 60%
+    );
+
+  animation:buttonSweep 4s linear infinite;
+}
+
+.enter-main{
+  position:relative;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:clamp(2.2rem,8vw,4rem);
+  font-weight:900;
+
+  color:#d9f38c;
+
+  text-shadow:
+    0 0 18px rgba(141,255,91,.45);
+}
+
+.enter-sub{
+  position:relative;
+
+  font-size:.82rem;
+  letter-spacing:.32em;
+  font-weight:900;
+
+  color:#ffe38c;
+}
+
+/* =========================================================
+   STATS BAR
+========================================================= */
+
+.stats{
+  position:fixed;
+  left:0;
+  bottom:0;
+
+  width:100%;
+  height:var(--stats-h);
+
+  z-index:50;
+
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+
+  padding-bottom:var(--safe-bottom);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.1),
+      rgba(0,0,0,.92)
+    );
+
+  backdrop-filter:blur(20px);
+
+  border-top:1px solid rgba(141,255,91,.12);
+}
+
+.stat-card{
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:6px;
-  color:#eaffdc;
-  background:
-    radial-gradient(circle at top,rgba(70,95,49,.38),rgba(0,0,0,.82) 68%),
-    linear-gradient(145deg,rgba(18,24,17,.92),rgba(0,0,0,.8));
-  border:1px solid rgba(148,255,92,.28);
-  backdrop-filter:blur(10px);
-  box-shadow:
-    inset 0 0 22px rgba(255,255,255,.06),
-    inset 0 -10px 26px rgba(0,0,0,.72),
-    0 0 26px rgba(0,0,0,.95),
-    0 0 20px rgba(120,255,80,.16);
-  transition:.18s ease;
-}
 
-.dial-card::before{
-  content:"";
-  position:absolute;
-  inset:9px;
-  border-radius:19px;
-  border:1px solid rgba(255,255,255,.05);
-  box-shadow:inset 0 0 14px rgba(157,255,99,.08);
-  pointer-events:none;
-}
-
-.dial-card::after{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius:inherit;
-  opacity:0;
-  background:radial-gradient(circle at center,rgba(157,255,99,.22),transparent 68%);
-  pointer-events:none;
-}
-
-.dial-card.is-active{
-  border-color:rgba(177,255,113,.95);
-  filter:brightness(1.25);
-  box-shadow:
-    inset 0 0 22px rgba(255,255,255,.1),
-    0 0 36px rgba(128,255,79,.62),
-    0 0 82px rgba(128,255,79,.22);
-}
-
-.dial-card.is-active::after{
-  opacity:1;
-}
-
-.dial-card:active{
-  scale:.94;
-}
-
-.dial-icon{
-  font-size:21px;
-  color:#aaff75;
-  text-shadow:0 0 15px rgba(123,255,77,.82);
-}
-
-.dial-title{
-  font-size:12px;
-  font-weight:950;
-  letter-spacing:.08em;
-}
-
-.dial-sub{
-  font-size:8px;
-  color:#9eff75;
-  letter-spacing:.14em;
-  font-weight:900;
-  max-width:94%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-/* shared wheel math */
-.top-card{
-  left:var(--dial-center-x);
-  top:calc(var(--dial-center-y) - var(--dial-radius-y));
-  transform:translate(-50%,-50%);
-}
-
-.top-left-card{
-  left:calc(var(--dial-center-x) - (var(--dial-radius-x) * .74));
-  top:calc(var(--dial-center-y) - (var(--dial-radius-y) * .46));
-  transform:translate(-50%,-50%);
-}
-
-.top-right-card{
-  left:calc(var(--dial-center-x) + (var(--dial-radius-x) * .74));
-  top:calc(var(--dial-center-y) - (var(--dial-radius-y) * .46));
-  transform:translate(-50%,-50%);
-}
-
-.left-card{
-  left:calc(var(--dial-center-x) - var(--dial-radius-x));
-  top:var(--dial-center-y);
-  transform:translate(-50%,-50%);
-}
-
-.right-card{
-  left:calc(var(--dial-center-x) + var(--dial-radius-x));
-  top:var(--dial-center-y);
-  transform:translate(-50%,-50%);
-}
-
-.bottom-left-card{
-  left:calc(var(--dial-center-x) - (var(--dial-radius-x) * .74));
-  top:calc(var(--dial-center-y) + (var(--dial-radius-y) * .46));
-  transform:translate(-50%,-50%);
-}
-
-.bottom-card{
-  left:var(--dial-center-x);
-  top:calc(var(--dial-center-y) + var(--dial-radius-y));
-  transform:translate(-50%,-50%);
-}
-
-.bottom-right-card{
-  left:calc(var(--dial-center-x) + (var(--dial-radius-x) * .74));
-  top:calc(var(--dial-center-y) + (var(--dial-radius-y) * .46));
-  transform:translate(-50%,-50%);
-}
-
-/* =========================
-   CENTER PORTAL
-========================= */
-
-.center-ui{
-  position:fixed;
-  left:var(--dial-center-x);
-  top:var(--dial-center-y);
-  transform:translate(-50%,-50%);
-  z-index:14;
-  pointer-events:none;
-}
-
-.portal-core{
-  width:var(--portal-size);
-  height:var(--portal-size);
-  border-radius:50%;
   position:relative;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(circle,rgba(196,255,139,.35),rgba(71,255,57,.2) 36%,rgba(0,0,0,.82) 72%),
-    conic-gradient(from var(--rb-dial-rotation),rgba(157,255,99,.95),rgba(0,0,0,.08),rgba(157,255,99,.56),rgba(0,0,0,.18),rgba(157,255,99,.95));
-  box-shadow:
-    0 0 94px rgba(112,255,74,.55),
-    inset 0 0 42px rgba(255,255,255,.12),
-    inset 0 0 75px rgba(68,255,50,.25);
 }
 
-.portal-core::before{
+.stat-card:not(:last-child)::after{
   content:"";
+
   position:absolute;
-  inset:-10px;
-  border-radius:50%;
-  border:2px solid rgba(139,255,84,.55);
-  box-shadow:0 0 30px rgba(132,255,78,.62),inset 0 0 24px rgba(132,255,78,.44);
-  animation:portalPulse 2.4s ease-in-out infinite;
-}
+  right:0;
+  top:22%;
 
-.portal-core::after{
-  content:"";
-  position:absolute;
-  inset:20px;
-  border-radius:50%;
+  width:1px;
+  height:56%;
+
   background:
-    radial-gradient(circle at 50% 40%,rgba(205,255,165,.36),transparent 28%),
-    conic-gradient(from calc(var(--rb-dial-rotation) * -1),transparent,rgba(151,255,94,.75),transparent,rgba(255,232,130,.38),transparent);
-  animation:portalSpin 5s linear infinite;
-}
-
-.portal-inner{
-  width:var(--portal-inner-size);
-  height:var(--portal-inner-size);
-  border-radius:50%;
-  position:relative;
-  z-index:2;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(circle at center,rgba(125,255,84,.38),rgba(0,0,0,.94) 66%),
-    url("/images/IMG_4629.jpeg");
-  background-size:cover;
-  background-position:center;
-  border:1px solid rgba(151,255,106,.52);
-  box-shadow:0 0 38px rgba(128,255,87,.62),inset 0 0 26px rgba(255,255,255,.1);
-  overflow:hidden;
-}
-
-.portal-inner::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.58) 76%);
-}
-
-.portal-inner::after{
-  content:"";
-  position:absolute;
-  width:44%;
-  height:120%;
-  background:linear-gradient(to bottom,transparent,rgba(180,255,124,.46),transparent);
-  transform:rotate(35deg);
-  animation:portalBeam 3.2s ease-in-out infinite;
-}
-
-.portal-title{
-  position:relative;
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  line-height:.84;
-  text-align:center;
-  font-family:Georgia,serif;
-}
-
-.portal-title span{
-  font-size:20px;
-  font-weight:950;
-  background:linear-gradient(to bottom,#fff6c1,#a8ff70 45%,#547a1b);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 8px rgba(132,255,82,.6));
-}
-
-.portal-title small{
-  margin-top:6px;
-  color:#f5d87d;
-  letter-spacing:.22em;
-  font-size:9px;
-  text-shadow:0 0 14px rgba(157,255,99,.8);
-}
-
-/* =========================
-   ACTIVATE
-========================= */
-
-.enter{
-  position:fixed;
-  left:50%;
-  bottom:var(--activate-bottom);
-  transform:translateX(-50%);
-  z-index:20;
-  width:min(430px,84vw);
-  padding:15px;
-  border-radius:25px;
-  background:
-    linear-gradient(to bottom,rgba(64,78,35,.94),rgba(6,7,5,.98)),
-    radial-gradient(circle at center,rgba(157,255,99,.22),transparent 72%);
-  border:1px solid rgba(255,219,123,.62);
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,.08),
-    0 0 44px rgba(122,255,77,.38),
-    0 10px 34px rgba(0,0,0,.9);
-}
-
-.enter:active{
-  transform:translateX(-50%) scale(.95);
-}
-
-.enter-main{
-  display:block;
-  font-size:27px;
-  font-weight:950;
-  letter-spacing:.14em;
-  font-family:Georgia,serif;
-  background:linear-gradient(to bottom,#fff6be,#aaff75 45%,#547d19);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.enter-sub{
-  display:block;
-  margin-top:5px;
-  color:#ffe890;
-  letter-spacing:.24em;
-  font-size:11px;
-  font-weight:900;
-}
-
-/* =========================
-   STATS
-========================= */
-
-.stats{
-  position:fixed;
-  left:50%;
-  bottom:0;
-  transform:translateX(-50%);
-  z-index:20;
-  width:min(980px,100%);
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  padding:12px 4px calc(12px + env(safe-area-inset-bottom));
-  background:
-    linear-gradient(to top,rgba(0,0,0,.97),rgba(0,0,0,.84)),
-    radial-gradient(circle at center,rgba(157,255,99,.12),transparent 70%);
-  border-top:1px solid rgba(130,255,84,.2);
-  backdrop-filter:blur(18px);
-}
-
-.stat-card{
-  min-height:76px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  text-align:center;
-  color:#d8ffc8;
-  border-right:1px solid rgba(255,255,255,.07);
-}
-
-.stat-card:last-child{
-  border-right:none;
+    linear-gradient(
+      transparent,
+      rgba(141,255,91,.18),
+      transparent
+    );
 }
 
 .stat-icon{
-  font-size:18px;
-  color:#9eff6d;
-  text-shadow:0 0 14px rgba(157,255,99,.65);
+  font-size:1.2rem;
+
+  color:var(--rb-green);
+
+  text-shadow:var(--rb-glow);
 }
 
 .stat-card small{
-  font-size:8px;
-  letter-spacing:.15em;
-  color:#8fff67;
+  font-size:.62rem;
+  letter-spacing:.22em;
   font-weight:900;
+
+  color:var(--rb-green-soft);
 }
 
 .stat-card strong{
-  font-size:11px;
-  text-shadow:0 0 12px rgba(157,255,99,.22);
+  font-size:1.05rem;
+  font-weight:900;
+
+  color:#fff;
 }
 
-/* =========================
-   ANIMATION
-========================= */
+/* =========================================================
+   REALTIME STATES
+========================================================= */
 
-@keyframes rbPing{
-  0%,100%{transform:scale(1);opacity:1}
-  50%{transform:scale(1.25);opacity:.72}
+.is-live{
+  animation:livePulse 1.8s infinite;
 }
+
+.syncing{
+  opacity:.72;
+  filter:brightness(1.15);
+}
+
+.online{
+  color:#8dff5b;
+}
+
+.offline{
+  color:#ff6f6f;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
 
 @keyframes portalPulse{
-  0%,100%{opacity:.66;transform:scale(.98)}
-  50%{opacity:1;transform:scale(1.03)}
-}
-
-@keyframes portalSpin{
-  to{transform:rotate(360deg)}
-}
-
-@keyframes portalBeam{
-  0%,100%{opacity:.15;translate:-55% 0}
-  50%{opacity:.76;translate:55% 0}
-}
-
-/* =========================
-   PHONE APP STAGE
-========================= */
-
-@media (max-width:640px){
-  :root{
-    --dial-center-x:50vw;
-    --dial-center-y:55.8svh;
-    --dial-radius-x:34vw;
-    --dial-radius-y:23.4svh;
-
-    --card-size:78px;
-    --card-radius:19px;
-
-    --portal-size:144px;
-    --portal-inner-size:100px;
-
-    --activate-bottom:112px;
+  0%{
+    transform:scale(1);
   }
-
-  .topbar{
-    grid-template-columns:1fr auto;
-    padding-left:22px;
-    padding-right:22px;
+  50%{
+    transform:scale(1.03);
   }
-
-  .top-center{
-    position:absolute;
-    top:120px;
-    left:50%;
-    transform:translateX(-50%);
-  }
-
-  .brand-rich,
-  .brand-biz{
-    font-size:40px;
-  }
-
-  .brand-llc{
-    font-size:17px;
-  }
-
-  .rank-panel{
-    padding:9px 13px;
-  }
-
-  .rank-icon{
-    width:40px;
-    height:40px;
-  }
-
-  .rank-copy strong{
-    font-size:23px;
-  }
-
-  .icon{
-    width:54px;
-    height:54px;
-  }
-
-  .dial-card::before{
-    inset:7px;
-    border-radius:14px;
+  100%{
+    transform:scale(1);
   }
 }
 
-/* SHORT PHONE / SAFARI PREVIEW */
-@media (max-width:640px) and (max-height:760px){
-  :root{
-    --dial-center-y:54.7svh;
-    --dial-radius-y:22.2svh;
-    --activate-bottom:104px;
+@keyframes spinSlow{
+  from{
+    transform:rotate(0deg);
+  }
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+@keyframes livePulse{
+  0%{
+    box-shadow:
+      0 0 0 rgba(141,255,91,.2);
   }
 
-  .top-center{
-    top:112px;
+  50%{
+    box-shadow:
+      0 0 34px rgba(141,255,91,.42);
   }
 
-  .brand-rich,
-  .brand-biz{
-    font-size:36px;
+  100%{
+    box-shadow:
+      0 0 0 rgba(141,255,91,.2);
   }
+}
+
+@keyframes buttonSweep{
+  from{
+    transform:translateX(-120%);
+  }
+  to{
+    transform:translateX(120%);
+  }
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (min-width:700px){
 
   .dial-card{
-    --card-size:72px;
-  }
-}
-
-/* TALL PHONE */
-@media (max-width:640px) and (min-height:820px){
-  :root{
-    --dial-center-y:55.9svh;
-    --dial-radius-y:23.8svh;
-    --activate-bottom:116px;
-  }
-}
-
-/* TABLET */
-@media (min-width:641px) and (max-width:1024px){
-  :root{
-    --dial-center-x:50vw;
-    --dial-center-y:55svh;
-    --dial-radius-x:28vw;
-    --dial-radius-y:24svh;
-
-    --card-size:104px;
-    --card-radius:24px;
-
-    --portal-size:205px;
-    --portal-inner-size:140px;
-
-    --activate-bottom:124px;
+    width:132px;
+    height:132px;
   }
 
-  .dial-icon{
-    font-size:28px;
+  .top-card{
+    top:28%;
   }
 
-  .dial-title{
-    font-size:16px;
+  .left-card,
+  .right-card{
+    top:53%;
   }
 
-  .dial-sub{
-    font-size:10px;
-  }
-
-  .portal-title span{
-    font-size:27px;
-  }
-
-  .enter-main{
-    font-size:36px;
-  }
-
-  .enter-sub{
-    font-size:14px;
-  }
-
-  .stat-card strong{
-    font-size:17px;
-  }
-}
-
-/* DESKTOP / LARGE STAGE */
-@media (min-width:1025px){
-  :root{
-    --dial-center-x:50vw;
-    --dial-center-y:56vh;
-    --dial-radius-x:25vw;
-    --dial-radius-y:27vh;
-
-    --card-size:118px;
-    --card-radius:26px;
-
-    --portal-size:252px;
-    --portal-inner-size:172px;
-
-    --activate-bottom:118px;
-  }
-
-  #engine{
-    opacity:.88;
-  }
-
-  .dial-icon{
-    font-size:31px;
-  }
-
-  .dial-title{
-    font-size:17px;
-  }
-
-  .dial-sub{
-    font-size:10px;
-  }
-
-  .portal-title span{
-    font-size:33px;
-  }
-
-  .portal-title small{
-    font-size:11px;
+  .portal-core{
+    width:250px;
   }
 
   .enter{
-    padding:19px 20px;
+    height:116px;
+  }
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width:1100px){
+
+  .topbar{
+    padding:
+      28px
+      34px
+      0;
   }
 
-  .enter-main{
-    font-size:38px;
+  .dial-card{
+    width:146px;
+    height:146px;
   }
 
-  .enter-sub{
-    font-size:14px;
+  .portal-core{
+    width:280px;
   }
 
-  .stats{
-    padding-left:12px;
-    padding-right:12px;
-  }
-
-  .stat-card{
-    min-height:88px;
-  }
-
-  .stat-icon{
-    font-size:24px;
-  }
-
-  .stat-card small{
-    font-size:11px;
-  }
-
-  .stat-card strong{
-    font-size:18px;
+  .enter{
+    width:620px;
   }
 }
