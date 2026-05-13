@@ -747,3 +747,145 @@ body::after{
     font-size:1.75rem;
   }
 }
+
+/* =========================================================
+   OMNI MACHINE ROTATION SYSTEM
+========================================================= */
+
+/* MASTER DIAL ROTATION */
+.dial-ui{
+  animation:
+    omniRotate 28s linear infinite;
+  transform-origin:center center;
+}
+
+/* COUNTER ROTATE CARDS SO TEXT STAYS STRAIGHT */
+.dial-card{
+  animation:
+    omniCardCounter 28s linear infinite;
+}
+
+/* CENTER CORE FLOAT */
+.center-ui{
+  animation:
+    omniCenterFloat 6s ease-in-out infinite;
+}
+
+/* EXTRA ENERGY RINGS */
+.portal-core::before{
+  animation:
+    spinSlow 14s linear infinite;
+}
+
+.portal-core::after{
+  animation:
+    innerPulse 3s ease-in-out infinite;
+}
+
+/* LIGHT BEAMS */
+.dial-ui::before{
+  animation:
+    omniRotateReverse 40s linear infinite,
+    machineBreath 4s ease-in-out infinite;
+}
+
+/* PARTICLE FEEL */
+.dial-ui::after{
+  animation:
+    omniRotate 60s linear infinite;
+}
+
+/* ACTIVE CARD BOOST */
+.dial-card.is-active{
+  z-index:5;
+
+  box-shadow:
+    0 0 22px rgba(141,255,91,.65),
+    0 0 48px rgba(141,255,91,.35),
+    0 0 120px rgba(141,255,91,.16);
+
+  border-color:
+    rgba(180,255,130,.95);
+}
+
+/* =========================================================
+   ROTATION ANIMATIONS
+========================================================= */
+
+@keyframes omniRotate{
+  from{
+    transform:
+      translate(-50%,-50%)
+      rotate(0deg);
+  }
+
+  to{
+    transform:
+      translate(-50%,-50%)
+      rotate(360deg);
+  }
+}
+
+@keyframes omniRotateReverse{
+  from{
+    transform:rotate(360deg);
+  }
+
+  to{
+    transform:rotate(0deg);
+  }
+}
+
+/* COUNTER ROTATE CONTENT */
+@keyframes omniCardCounter{
+  from{
+    transform:
+      translate(-50%,-50%)
+      rotate(0deg);
+  }
+
+  to{
+    transform:
+      translate(-50%,-50%)
+      rotate(-360deg);
+  }
+}
+
+/* CENTER FLOAT */
+@keyframes omniCenterFloat{
+  0%{
+    transform:
+      translate(-50%,-50%)
+      scale(1);
+  }
+
+  50%{
+    transform:
+      translate(-50%,-50%)
+      scale(1.03);
+  }
+
+  100%{
+    transform:
+      translate(-50%,-50%)
+      scale(1);
+  }
+}
+
+/* INNER ENERGY */
+@keyframes innerPulse{
+  0%{
+    opacity:.45;
+    filter:blur(0px);
+  }
+
+  50%{
+    opacity:.95;
+    filter:blur(2px);
+  }
+
+  100%{
+    opacity:.45;
+    filter:blur(0px);
+  }
+}
