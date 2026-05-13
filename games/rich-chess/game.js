@@ -1,7 +1,7 @@
 /* =========================
    RICH BIZNESS — RICH CHESS
    /games/rich-chess/game.js
-   Final Game Controller
+   Final Elite Controller + Camera + FX + Sound
 ========================= */
 
 import {
@@ -24,7 +24,6 @@ import {
 import { getCpuMove, getCpuMoveLabel, explainCpuMove } from "./ai.js";
 
 import {
-  supabase,
   createChessRoom,
   joinChessRoom,
   loadChessRoom,
@@ -45,39 +44,58 @@ import {
   renderTournamentOptions
 } from "./tournaments.js";
 
+import {
+  resetCamera,
+  pulseBoard,
+  cinematicMove,
+  flashVictory
+} from "./camera.js";
+
+import {
+  explodeSquare,
+  glowPiece,
+  showMoveTrail,
+  rainVictory,
+  boardPowerPulse
+} from "./effects.js";
+
+import {
+  playMoveSound,
+  playSelectSound,
+  playCaptureSound,
+  playCheckSound,
+  playWinSound,
+  playErrorSound,
+  playRoomSound,
+  playTournamentSound
+} from "./sound.js";
+
 const $ = (id) => document.getElementById(id);
 
 const els = {
   board: $("chessBoard"),
-
   statMode: $("statMode"),
   statTurn: $("statTurn"),
   statMoves: $("statMoves"),
   statStatus: $("statStatus"),
-
   whiteName: $("whiteName"),
   blackName: $("blackName"),
   whiteClock: $("whiteClock"),
   blackClock: $("blackClock"),
   whiteAvatar: $("whiteAvatar"),
   blackAvatar: $("blackAvatar"),
-
   newGameBtn: $("newGameBtn"),
   createRoomBtn: $("createRoomBtn"),
   joinRoomBtn: $("joinRoomBtn"),
   resignBtn: $("resignBtn"),
-
   roomCodeInput: $("roomCodeInput"),
   matchTypeInput: $("matchTypeInput"),
   copyRoomBtn: $("copyRoomBtn"),
-
   tournamentSelect: $("tournamentSelect"),
   joinTournamentBtn: $("joinTournamentBtn"),
-
   moveList: $("moveList"),
   whiteCaptured: $("whiteCaptured"),
   blackCaptured: $("blackCaptured"),
-
   status: $("chessStatus")
 };
 
@@ -88,12 +106,10 @@ let legalMoves = [];
 let moveHistory = [];
 let capturedWhite = [];
 let capturedBlack = [];
-
 let mode = "solo";
 let cpuEnabled = true;
 let cpuLevel = "elite";
 let gameOver = false;
-
 let currentUser = null;
 let currentProfile = null;
 let currentRoom = null;
@@ -114,12 +130,7 @@ function escapeHtml(value = "") {
 }
 
 function getName() {
-  return (
-    currentProfile?.display_name ||
-    currentProfile?.username ||
-    currentUser?.email?.split("@")[0] ||
-    "Rich Player"
-  );
+  return currentProfile?.display_name || currentProfile?.username || currentUser?.email?.split("@")[0] || "Rich Player";
 }
 
 function getInitial(name = "R") {
@@ -152,9 +163,9 @@ function hydrateRoomState(room) {
   const roomBoard = roomToBoard(room);
 
   if (roomBoard) board = roomBoard;
+
   turn = room.current_turn || room.board_state?.turn || COLORS.WHITE;
   moveHistory = Array.isArray(room.moves) ? room.moves : [];
-
   mode = "multiplayer";
   cpuEnabled = false;
   playerColor = getPlayerColor(room, currentUser?.id);
@@ -171,6 +182,7 @@ function hydrateRoomState(room) {
   legalMoves = [];
 
   renderAll();
+  boardPowerPulse();
 }
 
 function renderBoard() {
@@ -186,7 +198,7 @@ function renderBoard() {
         "square",
         squareColor(row, col),
         sameSquare(selected, { row, col }) ? "selected" : "",
-        move ? (move.capture ? "capture" : "legal") : ""
+        move ? (move.capture || move.captured ? "capture" : "legal") : ""
       ].filter(Boolean).join(" ");
 
       square.type = "button";
@@ -196,7 +208,7 @@ function renderBoard() {
 
       if (piece) {
         const span = document.createElement("span");
-        span.className = getPieceClass(piece);
+        span.className = `piece ${getPieceClass(piece)} ${piece.color}`;
         span.textContent = getPieceSymbol(piece);
         square.appendChild(span);
       }
@@ -204,6 +216,8 @@ function renderBoard() {
       els.board.appendChild(square);
     }
   }
+
+  resetCamera();
 }
 
 function renderHud() {
@@ -258,9 +272,7 @@ function renderAll() {
 function canTouchBoard() {
   if (gameOver) return false;
 
-  if (mode === "solo") {
-    return turn === COLORS.WHITE;
-  }
+  if (mode === "solo") return turn === COLORS.WHITE;
 
   if (!currentRoom || !currentUser) return false;
 
@@ -271,6 +283,7 @@ function selectSquare(row, col) {
   const piece = board[row][col];
 
   if (!canTouchBoard()) {
+    playErrorSound();
     setStatus(mode === "multiplayer" ? "WAITING ON YOUR TURN" : "CPU THINKING");
     return;
   }
@@ -287,26 +300,43 @@ function selectSquare(row, col) {
   if (!piece || piece.color !== turn) {
     selected = null;
     legalMoves = [];
+    playErrorSound();
     renderBoard();
     return;
   }
 
   selected = { row, col };
   legalMoves = getLegalMoves(board, selected);
+
+  playSelectSound();
+
   setStatus(`${piece.label.toUpperCase()} SELECTED — ${legalMoves.length} MOVES`);
   renderBoard();
+
+  const selectedSquare = els.board.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+  glowPiece(selectedSquare?.querySelector(".piece"));
 }
 
 async function playMove(move, saveRemote = true) {
   const beforeTurn = turn;
-  const result = makeMove(board, move);
+  const fromSquare = els.board.querySelector(`[data-row="${move.from.row}"][data-col="${move.from.col}"]`);
+  const toSquare = els.board.querySelector(`[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
 
+  const result = makeMove(board, move);
   board = result.board;
 
   if (result.captured) {
+    playCaptureSound();
+    explodeSquare(toSquare);
+
     if (result.captured.color === COLORS.WHITE) capturedWhite.push(result.captured);
     if (result.captured.color === COLORS.BLACK) capturedBlack.push(result.captured);
+  } else {
+    playMoveSound();
   }
+
+  showMoveTrail(fromSquare, toSquare);
+  cinematicMove(fromSquare, toSquare);
 
   const record = {
     color: beforeTurn,
@@ -333,8 +363,12 @@ async function playMove(move, saveRemote = true) {
 
   if (status.status === "checkmate" || status.status === "stalemate") {
     gameOver = true;
+    playWinSound();
+    rainVictory();
+    flashVictory();
     setStatus(status.label);
   } else if (status.status === "check") {
+    playCheckSound();
     setStatus(`${turn.toUpperCase()} IN CHECK`);
   } else {
     setStatus(`${turn.toUpperCase()} TO MOVE`);
@@ -367,7 +401,7 @@ async function playMove(move, saveRemote = true) {
   }
 
   if (mode === "solo" && cpuEnabled && !gameOver && turn === COLORS.BLACK) {
-    window.setTimeout(cpuMove, 450);
+    window.setTimeout(cpuMove, 520);
   }
 }
 
@@ -406,6 +440,8 @@ function newGame() {
 
   els.roomCodeInput.value = "";
 
+  playRoomSound();
+  pulseBoard();
   renderAll();
   setStatus("NEW ELITE SOLO GAME READY");
 }
@@ -417,22 +453,18 @@ async function createRoom() {
 
     setStatus("CREATING MULTIPLAYER ROOM...");
 
-    const room = await createChessRoom({
-      board,
-      turn,
-      matchType,
-      tournamentId
-    });
+    const room = await createChessRoom({ board, turn, matchType, tournamentId });
 
     hydrateRoomState(room);
-
     subscribeToRoom(room.id, hydrateRoomState);
 
     const link = getRoomLink(room.room_code);
     await navigator.clipboard?.writeText(link).catch(() => null);
 
+    playRoomSound();
     setStatus(`ROOM CREATED: ${room.room_code}`);
   } catch (error) {
+    playErrorSound();
     setStatus(`ROOM ERROR: ${error.message}`);
   }
 }
@@ -441,6 +473,7 @@ async function joinRoom() {
   const roomCode = els.roomCodeInput.value.trim() || getRoomCodeFromUrl();
 
   if (!roomCode) {
+    playErrorSound();
     setStatus("ROOM CODE REQUIRED");
     return;
   }
@@ -450,11 +483,12 @@ async function joinRoom() {
 
     const room = await joinChessRoom(roomCode);
     hydrateRoomState(room);
-
     subscribeToRoom(room.id, hydrateRoomState);
 
+    playRoomSound();
     setStatus(`JOINED ROOM: ${room.room_code}`);
   } catch (error) {
+    playErrorSound();
     setStatus(`JOIN ERROR: ${error.message}`);
   }
 }
@@ -463,6 +497,7 @@ async function copyRoom() {
   const roomCode = els.roomCodeInput.value.trim() || currentRoom?.room_code;
 
   if (!roomCode) {
+    playErrorSound();
     setStatus("NO ROOM TO COPY");
     return;
   }
@@ -471,6 +506,7 @@ async function copyRoom() {
 
   try {
     await navigator.clipboard.writeText(link);
+    playRoomSound();
     setStatus("ROOM LINK COPIED");
   } catch {
     prompt("Copy room link:", link);
@@ -483,6 +519,7 @@ async function resign() {
       const room = await resignRoom(currentRoom.id);
       hydrateRoomState(room);
       gameOver = true;
+      playErrorSound();
       setStatus("YOU RESIGNED");
     } catch (error) {
       setStatus(`RESIGN ERROR: ${error.message}`);
@@ -491,6 +528,7 @@ async function resign() {
   }
 
   gameOver = true;
+  playErrorSound();
   setStatus("GAME RESIGNED");
   renderAll();
 }
@@ -505,8 +543,10 @@ async function joinTournament() {
 
   try {
     const entry = await joinChessTournament(tournamentId);
+    playTournamentSound();
     setStatus(`TOURNAMENT JOINED — SEED ${entry.seed || "READY"}`);
   } catch (error) {
+    playErrorSound();
     setStatus(`TOURNAMENT ERROR: ${error.message}`);
   }
 }
@@ -533,6 +573,7 @@ async function bootFromRoomIfPresent() {
     }
 
     subscribeToRoom(room.id, hydrateRoomState);
+    playRoomSound();
     setStatus(`ROOM LOADED: ${room.room_code}`);
     return true;
   } catch (error) {
@@ -565,6 +606,7 @@ async function bootGame() {
   await loadTournaments();
 
   renderAll();
+  boardPowerPulse();
 
   const loadedRoom = await bootFromRoomIfPresent();
 
