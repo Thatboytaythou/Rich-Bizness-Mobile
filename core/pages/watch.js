@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE WATCH
    /core/pages/watch.js
+   TABLE-SAFE VERSION
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -64,6 +65,7 @@ let realtimeChannel = null;
 
 let chatMessages = [];
 let members = [];
+let profilesById = new Map();
 
 function setStatus(message) {
   if (els.watchStatus) els.watchStatus.textContent = message || "";
@@ -113,6 +115,11 @@ function getDisplayName() {
   );
 }
 
+function getProfileName(userId, fallback = "Viewer") {
+  const profile = profilesById.get(userId);
+  return profile?.display_name || profile?.username || fallback;
+}
+
 function getRoomName() {
   return currentStream?.livekit_room_name || currentStream?.slug || "richbiz-live";
 }
@@ -124,7 +131,6 @@ function canWatchStream() {
   const price = Number(currentStream.price_cents || 0);
 
   if (access === "free" || price <= 0) return true;
-
   if (!currentUser) return false;
 
   return currentPurchase?.status === "paid";
@@ -186,15 +192,39 @@ async function loadUser() {
   currentProfile = profile || null;
 }
 
+async function loadProfilesForRoom() {
+  profilesById = new Map();
+
+  const ids = [
+    ...chatMessages.map((row) => row.user_id),
+    ...members.map((row) => row.user_id)
+  ].filter(Boolean);
+
+  const uniqueIds = [...new Set(ids)];
+  if (!uniqueIds.length) return;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .in("id", uniqueIds);
+
+  if (error) {
+    console.warn("Watch profile map skipped:", error.message);
+    return;
+  }
+
+  for (const profile of data || []) {
+    profilesById.set(profile.id, profile);
+  }
+}
+
 /* =========================
    STREAM LOAD
 ========================= */
 async function loadStreamBySlug() {
   const slug = getParam("slug");
 
-  let query = supabase
-    .from("live_streams")
-    .select("*");
+  let query = supabase.from("live_streams").select("*");
 
   if (slug) {
     query = query.eq("slug", slug).maybeSingle();
@@ -209,7 +239,6 @@ async function loadStreamBySlug() {
   const { data, error } = await query;
 
   if (error) {
-    console.warn("Watch stream error:", error);
     setStatus(`STREAM ERROR: ${error.message}`);
     return null;
   }
@@ -275,10 +304,7 @@ async function loadPurchase() {
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    console.warn("Purchase read error:", error);
-    return null;
-  }
+  if (error) return null;
 
   currentPurchase = data || null;
   return currentPurchase;
@@ -305,7 +331,11 @@ async function unlockVip() {
       amount_cents: price,
       currency: currentStream.currency || "usd",
       status: price > 0 ? "pending" : "paid",
-      purchased_at: price > 0 ? null : new Date().toISOString()
+      purchased_at: price > 0 ? null : new Date().toISOString(),
+      metadata: {
+        source: "watch.html",
+        app: "Rich Bizness Mobile"
+      }
     })
     .select("*")
     .single();
@@ -316,13 +346,7 @@ async function unlockVip() {
   }
 
   currentPurchase = data;
-
-  if (price <= 0) {
-    setMoneyStatus("VIP UNLOCKED");
-  } else {
-    setMoneyStatus("VIP CREATED — STRIPE CHECKOUT NEXT");
-  }
-
+  setMoneyStatus(price <= 0 ? "VIP UNLOCKED" : "VIP CREATED — STRIPE CHECKOUT NEXT");
   updateHud();
 }
 
@@ -332,13 +356,16 @@ async function unlockVip() {
 async function startViewSession() {
   if (!currentStream?.id) return;
 
+  const guestId = localStorage.getItem("rb_guest_id") || crypto.randomUUID();
+  if (!currentUser) localStorage.setItem("rb_guest_id", guestId);
+
   const { data, error } = await supabase
     .from("live_view_sessions")
     .insert({
       stream_id: currentStream.id,
       user_id: currentUser?.id || null,
       username: currentUser ? getUsername() : "guest",
-      anonymous_id: currentUser ? null : localStorage.getItem("rb_guest_id") || crypto.randomUUID(),
+      anonymous_id: currentUser ? null : guestId,
       metadata: {
         source: "watch.html",
         user_agent: navigator.userAgent
@@ -347,13 +374,7 @@ async function startViewSession() {
     .select("*")
     .single();
 
-  if (!error) {
-    currentViewSession = data;
-
-    if (data.anonymous_id) {
-      localStorage.setItem("rb_guest_id", data.anonymous_id);
-    }
-  }
+  if (!error) currentViewSession = data;
 }
 
 async function endViewSession() {
@@ -374,9 +395,10 @@ async function getToken(role = "viewer") {
   const roomName = getRoomName();
   const identity = cleanIdentity(getUsername());
 
-  const url = `/api/livekit-token?room=${encodeURIComponent(roomName)}&username=${encodeURIComponent(identity)}&role=${encodeURIComponent(role)}`;
+  const response = await fetch(
+    `/api/livekit-token?room=${encodeURIComponent(roomName)}&username=${encodeURIComponent(identity)}&role=${encodeURIComponent(role)}`
+  );
 
-  const response = await fetch(url);
   const data = await response.json();
 
   if (!response.ok || !data.token) {
@@ -392,10 +414,7 @@ async function joinLive() {
     return;
   }
 
-  if (!currentStream) {
-    await findLatestLive();
-  }
-
+  if (!currentStream) await findLatestLive();
   if (!currentStream) return;
 
   if (currentStream.status !== "live") {
@@ -456,17 +475,15 @@ async function joinLive() {
     });
 
     await room.connect(LIVEKIT_URL, tokenData.token);
-
     await startViewSession();
+
+    const nextViewers = Number(currentStream.viewer_count || 0) + 1;
 
     await supabase
       .from("live_streams")
       .update({
-        viewer_count: Number(currentStream.viewer_count || 0) + 1,
-        peak_viewers: Math.max(
-          Number(currentStream.peak_viewers || 0),
-          Number(currentStream.viewer_count || 0) + 1
-        ),
+        viewer_count: nextViewers,
+        peak_viewers: Math.max(Number(currentStream.peak_viewers || 0), nextViewers),
         last_activity_at: new Date().toISOString()
       })
       .eq("id", currentStream.id);
@@ -474,7 +491,6 @@ async function joinLive() {
     setStatus("WATCHING LIVE 🔥");
     updateHud();
   } catch (error) {
-    console.error("Join live error:", error);
     setStatus(`JOIN FAILED: ${error.message}`);
   }
 }
@@ -496,12 +512,10 @@ async function loadChat() {
     .order("created_at", { ascending: true })
     .limit(100);
 
-  if (error) {
-    console.warn("Chat load error:", error);
-    return;
-  }
+  if (error) return;
 
   chatMessages = data || [];
+  await loadProfilesForRoom();
   renderChat();
 }
 
@@ -516,10 +530,10 @@ function renderChat() {
     return;
   }
 
-  els.chatBox.innerHTML = chatMessages.map((message) => `
+  els.chatBox.innerHTML = chatMessages.map((msg) => `
     <div class="chat-message">
-      <strong>${escapeHtml(message.username || message.display_name || "fan")}</strong>
-      <p>${escapeHtml(message.body)}</p>
+      <strong>${escapeHtml(getProfileName(msg.user_id, msg.user_id === currentUser?.id ? getDisplayName() : "fan"))}</strong>
+      <p>${escapeHtml(msg.message || "")}</p>
     </div>
   `).join("");
 
@@ -537,18 +551,15 @@ async function sendChat() {
     return;
   }
 
-  const body = els.chatInput.value.trim();
-  if (!body) return;
+  const message = els.chatInput.value.trim();
+  if (!message) return;
 
   const { error } = await supabase
     .from("live_chat_messages")
     .insert({
       stream_id: currentStream.id,
       user_id: currentUser.id,
-      username: getUsername(),
-      display_name: getDisplayName(),
-      body,
-      message_type: "chat"
+      message
     });
 
   if (error) {
@@ -569,7 +580,7 @@ async function sendChat() {
   setStatus("CHAT SENT");
 }
 
-async function sendReaction(emoji) {
+async function sendReaction(reaction) {
   if (!currentStream?.id) {
     setStatus("NO STREAM SELECTED");
     return;
@@ -580,8 +591,7 @@ async function sendReaction(emoji) {
     .insert({
       stream_id: currentStream.id,
       user_id: currentUser?.id || null,
-      emoji,
-      reaction_type: "emoji"
+      reaction
     });
 
   if (error) {
@@ -597,7 +607,7 @@ async function sendReaction(emoji) {
     })
     .eq("id", currentStream.id);
 
-  flashEmoji(emoji);
+  flashEmoji(reaction);
 }
 
 function flashEmoji(emoji) {
@@ -638,12 +648,10 @@ async function loadMembers() {
     .eq("stream_id", currentStream.id)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.warn("Members load error:", error);
-    return;
-  }
+  if (error) return;
 
   members = data || [];
+  await loadProfilesForRoom();
   renderMembers();
 }
 
@@ -660,7 +668,7 @@ function renderMembers() {
 
   els.membersList.innerHTML = members.map((member) => `
     <div class="member">
-      <strong>${escapeHtml(member.display_name || member.username || "Viewer")}</strong>
+      <strong>${escapeHtml(getProfileName(member.user_id, member.user_id === currentUser?.id ? getDisplayName() : "Viewer"))}</strong>
       <small>${escapeHtml(member.role || "viewer").toUpperCase()}</small>
     </div>
   `).join("");
@@ -682,11 +690,8 @@ async function requestCohost() {
     .insert({
       stream_id: currentStream.id,
       user_id: currentUser.id,
-      username: getUsername(),
-      display_name: getDisplayName(),
       role: "cohost_request",
-      status: "pending",
-      livekit_identity: cleanIdentity(getUsername())
+      status: "pending"
     });
 
   if (error) {
@@ -701,53 +706,39 @@ async function requestCohost() {
    REALTIME
 ========================= */
 function startRealtime() {
-  if (realtimeChannel) {
-    supabase.removeChannel(realtimeChannel);
-  }
+  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
 
   realtimeChannel = supabase
     .channel("rich-bizness-watch-room")
     .on("postgres_changes", { event: "*", schema: "public", table: "live_streams" }, async (payload) => {
-      if (!currentStream?.id) return;
-      if (payload.new?.id !== currentStream.id) return;
-
+      if (payload.new?.id !== currentStream?.id) return;
       currentStream = payload.new;
       updateHud();
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "live_chat_messages" }, async (payload) => {
-      if (!currentStream?.id) return;
-      if (payload.new?.stream_id !== currentStream.id) return;
-
+      if (payload.new?.stream_id !== currentStream?.id) return;
       await loadChat();
       updateHud();
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "live_reactions" }, async (payload) => {
-      if (!currentStream?.id) return;
-      if (payload.new?.stream_id !== currentStream.id) return;
-
-      flashEmoji(payload.new.emoji || "🔥");
+      if (payload.new?.stream_id !== currentStream?.id) return;
+      flashEmoji(payload.new.reaction || "🔥");
       await loadStreamBySlug();
       updateHud();
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "live_stream_members" }, async (payload) => {
-      if (!currentStream?.id) return;
-      if (payload.new?.stream_id !== currentStream.id) return;
-
+      if (payload.new?.stream_id !== currentStream?.id) return;
       await loadMembers();
       updateHud();
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "live_stream_purchases" }, async (payload) => {
-      if (!currentStream?.id) return;
-      if (payload.new?.stream_id !== currentStream.id) return;
-
+      if (payload.new?.stream_id !== currentStream?.id) return;
       await loadPurchase();
       updateHud();
       setMoneyStatus("VIP ACCESS UPDATED");
     })
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setStatus("WATCH REALTIME CONNECTED");
-      }
+      if (status === "SUBSCRIBED") setStatus("WATCH REALTIME CONNECTED");
     });
 }
 
