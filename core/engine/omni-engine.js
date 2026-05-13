@@ -39,7 +39,7 @@ function isPhone() {
 }
 
 /* =========================
-   LIGHTING — CINEMATIC
+   LIGHTING
 ========================= */
 
 scene.add(new THREE.AmbientLight(0xd8ffd0, 0.82));
@@ -104,14 +104,6 @@ const darkPanel = new THREE.MeshStandardMaterial({
   emissiveIntensity: 0.68
 });
 
-const activePanelMat = new THREE.MeshStandardMaterial({
-  color: 0x0b1b08,
-  metalness: 0.9,
-  roughness: 0.12,
-  emissive: 0x83ff43,
-  emissiveIntensity: 1.55
-});
-
 const glowMat = new THREE.MeshBasicMaterial({
   color: 0x9cff63,
   transparent: true,
@@ -137,7 +129,7 @@ const portalGlassMat = new THREE.MeshStandardMaterial({
 });
 
 /* =========================
-   ATMOSPHERE / PARTICLES
+   ATMOSPHERE
 ========================= */
 
 function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity) {
@@ -187,7 +179,7 @@ dial.rotation.x = -0.105;
 dialRig.add(dial);
 
 /* =========================
-   BACK DISC / ARMOR
+   DISC / ARMOR
 ========================= */
 
 const backPlate = new THREE.Mesh(
@@ -218,7 +210,7 @@ const innerGlow = torus(1.76, 0.065, glowMat, 0.51);
 const centerArmor = torus(1.31, 0.17, heavyEdgeMetal, 0.61);
 
 /* =========================
-   HEX / MACHINE FRAME
+   HEX MACHINE FRAME
 ========================= */
 
 const frameGroup = new THREE.Group();
@@ -319,7 +311,6 @@ portalRing3.rotation.x = Math.PI / 2;
 portalRing3.position.z = 0.26;
 portalGroup.add(portalRing3);
 
-/* PORTAL ENERGY FIELD */
 const energyGeo = new THREE.BufferGeometry();
 const energyPositions = [];
 
@@ -346,10 +337,8 @@ const energy = new THREE.Points(
     depthWrite: false
   })
 );
-
 portalGroup.add(energy);
 
-/* ORBITALS */
 const orbitGroup = new THREE.Group();
 orbitGroup.position.z = 0.45;
 portalGroup.add(orbitGroup);
@@ -370,7 +359,6 @@ for (let i = 0; i < 4; i++) {
   orbitGroup.add(orbit);
 }
 
-/* LIGHTNING */
 const lightningGroup = new THREE.Group();
 lightningGroup.position.z = 0.42;
 portalGroup.add(lightningGroup);
@@ -531,7 +519,6 @@ for (let i = 0; i < 16; i++) {
   }
 }
 
-/* SIDE ARMOR CAPS */
 for (const side of [-1, 1]) {
   const armor = new THREE.Mesh(
     new THREE.BoxGeometry(0.62, 1.48, 0.42),
@@ -553,7 +540,7 @@ for (const side of [-1, 1]) {
 }
 
 /* =========================
-   MONEY BASE / DEPTH
+   MONEY BASE
 ========================= */
 
 const moneyGroup = new THREE.Group();
@@ -584,7 +571,7 @@ for (let i = 0; i < 34; i++) {
 }
 
 /* =========================
-   ROTATION / STATE
+   ROTATION STATE
 ========================= */
 
 let rotation = 0;
@@ -701,7 +688,7 @@ window.enterWorld = function () {
 window.enter = window.enterWorld;
 
 /* =========================
-   RESIZE — MOBILE LOCK
+   RESIZE — MATCHED TO CSS
 ========================= */
 
 function resize() {
@@ -715,10 +702,10 @@ function resize() {
   renderer.setSize(w, h);
 
   if (phone) {
-    dialRig.scale.setScalar(0.76);
-    dialRig.position.set(0, -0.3, 0);
-    camera.position.set(0, 0.92, 11.6);
-    camera.lookAt(0, 0.02, 0);
+    dialRig.scale.setScalar(0.83);
+    dialRig.position.set(0, -0.42, 0);
+    camera.position.set(0, 0.84, 11.25);
+    camera.lookAt(0, -0.04, 0);
   } else {
     dialRig.scale.setScalar(1.1);
     dialRig.position.set(0, -0.36, 0);
@@ -731,7 +718,7 @@ window.addEventListener("resize", resize);
 resize();
 
 /* =========================
-   LOOP — REALISTIC CINEMA MOTION
+   LOOP
 ========================= */
 
 function animate() {
@@ -760,10 +747,7 @@ function animate() {
   dial.rotation.z = rotation;
 
   window.RB_DIAL_ROTATION = rotation;
-  document.documentElement.style.setProperty(
-    "--rb-dial-rotation",
-    `${rotation}rad`
-  );
+  document.documentElement.style.setProperty("--rb-dial-rotation", `${rotation}rad`);
 
   outerArmor.rotation.z = -rotation * 0.14;
   outerHalo.rotation.z = -rotation * 0.22;
@@ -777,17 +761,8 @@ function animate() {
   const pulse = Math.sin(t * 2.65);
   const fastPulse = Math.sin(t * 5.3);
 
-  portalGlass.scale.set(
-    1 + pulse * 0.045,
-    1 + pulse * 0.045,
-    0.28
-  );
-
-  portalAura.scale.set(
-    1.04 + pulse * 0.07,
-    1.04 + pulse * 0.07,
-    0.16
-  );
+  portalGlass.scale.set(1 + pulse * 0.045, 1 + pulse * 0.045, 0.28);
+  portalAura.scale.set(1.04 + pulse * 0.07, 1.04 + pulse * 0.07, 0.16);
 
   portalGlass.material.emissiveIntensity = 4.1 + Math.sin(t * 3.4) * 0.85;
   portalAura.material.opacity = 0.12 + Math.abs(pulse) * 0.08;
