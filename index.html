@@ -2,25 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   />
 
-  <title>Rich Bizness LLC — Omni Dial</title>
+  <title>Rich Bizness LLC — Cinematic Universal Omni Dial</title>
   <link rel="stylesheet" href="/styles/main.css" />
 </head>
 
 <body>
-
   <canvas id="engine"></canvas>
 
   <div class="screen-vignette"></div>
   <div class="screen-noise"></div>
 
   <header class="topbar">
-
     <div class="top-left">
       <div class="welcome-block">
         <div class="welcome-text" id="welcomeStatus">WELCOME BACK</div>
@@ -45,21 +42,9 @@
     </div>
 
     <div class="top-right">
-      <button
-        class="icon notification"
-        id="notificationBtn"
-        data-route="/notifications.html"
-        type="button"
-        aria-label="Notifications"
-      >
-        🔔
-      </button>
-
-      <button class="icon" id="menuBtn" type="button" aria-label="Open Menu">
-        ☰
-      </button>
+      <button class="icon notification" id="notificationBtn" data-route="/notifications.html" type="button" aria-label="Notifications">🔔</button>
+      <button class="icon" id="menuBtn" type="button" aria-label="Open Menu">☰</button>
     </div>
-
   </header>
 
   <aside class="quick-menu" id="quickMenu">
@@ -77,56 +62,70 @@
     <a href="/messages.html">Messages</a>
     <a href="/notifications.html">Notifications</a>
     <a href="/profile.html">Profile</a>
+    <a href="/profile.html?mode=edit">Edit Profile</a>
+    <a href="/settings.html">Settings</a>
   </aside>
 
   <main class="dial-ui" id="dialUi">
 
-    <button class="dial-card top-card" data-dial-card="live" data-route="/live.html" type="button">
+    <button class="dial-card card-feed" data-dial-card="feed" data-route="/feed.html" type="button">
+      <div class="dial-icon">◆</div>
+      <div class="dial-title">FEED</div>
+      <div class="dial-sub" id="feedDialSub">SOCIAL</div>
+    </button>
+
+    <button class="dial-card card-watch" data-dial-card="watch" data-route="/watch.html" type="button">
+      <div class="dial-icon">▶</div>
+      <div class="dial-title">WATCH</div>
+      <div class="dial-sub" id="watchDialSub">VIEW</div>
+    </button>
+
+    <button class="dial-card card-live" data-dial-card="live" data-route="/live.html" type="button">
       <div class="dial-icon">◉</div>
       <div class="dial-title">LIVE</div>
       <div class="dial-sub" id="liveDialSub">STREAM</div>
     </button>
 
-    <button class="dial-card top-left-card" data-dial-card="gallery" data-route="/gallery.html" type="button">
-      <div class="dial-icon">▣</div>
-      <div class="dial-title">GALLERY</div>
-      <div class="dial-sub" id="galleryDialSub">PHOTOS</div>
-    </button>
-
-    <button class="dial-card top-right-card" data-dial-card="music" data-route="/music.html" type="button">
+    <button class="dial-card card-music" data-dial-card="music" data-route="/music.html" type="button">
       <div class="dial-icon">♪</div>
       <div class="dial-title">MUSIC</div>
       <div class="dial-sub" id="musicDialSub">VIBES</div>
     </button>
 
-    <button class="dial-card left-card" data-dial-card="upload" data-route="/upload.html" type="button">
-      <div class="dial-icon">⬆</div>
-      <div class="dial-title">UPLOAD</div>
-      <div class="dial-sub" id="uploadDialSub">CONTENT</div>
-    </button>
-
-    <button class="dial-card right-card" data-dial-card="gaming" data-route="/gaming.html" type="button">
+    <button class="dial-card card-gaming" data-dial-card="gaming" data-route="/gaming.html" type="button">
       <div class="dial-icon">🎮</div>
       <div class="dial-title">GAMING</div>
       <div class="dial-sub" id="gamingDialSub">PLAY</div>
     </button>
 
-    <button class="dial-card bottom-left-card" data-dial-card="sports" data-route="/sports.html" type="button">
+    <button class="dial-card card-sports" data-dial-card="sports" data-route="/sports.html" type="button">
       <div class="dial-icon">🏆</div>
       <div class="dial-title">SPORTS</div>
       <div class="dial-sub" id="sportsDialSub">HIGHLIGHTS</div>
     </button>
 
-    <button class="dial-card bottom-card" data-dial-card="meta" data-route="/meta.html" type="button">
-      <div class="dial-icon">◎</div>
-      <div class="dial-title">META</div>
-      <div class="dial-sub" id="metaDialSub">VERSE</div>
+    <button class="dial-card card-gallery" data-dial-card="gallery" data-route="/gallery.html" type="button">
+      <div class="dial-icon">▣</div>
+      <div class="dial-title">GALLERY</div>
+      <div class="dial-sub" id="galleryDialSub">PHOTOS</div>
     </button>
 
-    <button class="dial-card bottom-right-card" data-dial-card="store" data-route="/store.html" type="button">
+    <button class="dial-card card-upload" data-dial-card="upload" data-route="/upload.html" type="button">
+      <div class="dial-icon">⬆</div>
+      <div class="dial-title">UPLOAD</div>
+      <div class="dial-sub" id="uploadDialSub">CONTENT</div>
+    </button>
+
+    <button class="dial-card card-store" data-dial-card="store" data-route="/store.html" type="button">
       <div class="dial-icon">🛒</div>
       <div class="dial-title">STORE</div>
       <div class="dial-sub" id="storeDialSub">SHOP</div>
+    </button>
+
+    <button class="dial-card card-meta" data-dial-card="meta" data-route="/meta.html" type="button">
+      <div class="dial-icon">◎</div>
+      <div class="dial-title">META</div>
+      <div class="dial-sub" id="metaDialSub">VERSE</div>
     </button>
 
   </main>
@@ -145,7 +144,7 @@
 
   <button class="enter" id="activateBtn" type="button">
     <span class="enter-main" id="activateMain">ACTIVATE</span>
-    <span class="enter-sub" id="activateSub">TAP TO ENTER</span>
+    <span class="enter-sub" id="activateSub">ENTER LIVE</span>
   </button>
 
   <footer class="stats">
@@ -176,14 +175,16 @@
 
   <script>
     window.RB_ROUTES = {
-      gallery: "/gallery.html",
+      feed: "/feed.html",
+      watch: "/watch.html",
       live: "/live.html",
       music: "/music.html",
       gaming: "/gaming.html",
-      store: "/store.html",
-      meta: "/meta.html",
       sports: "/sports.html",
-      upload: "/upload.html"
+      gallery: "/gallery.html",
+      upload: "/upload.html",
+      store: "/store.html",
+      meta: "/meta.html"
     };
 
     window.RB_ACTIVE_KEY = "live";
@@ -242,6 +243,7 @@
       }
 
       const quickMenu = document.getElementById("quickMenu");
+
       if (
         quickMenu?.classList.contains("open") &&
         !event.target.closest("#quickMenu") &&
@@ -279,6 +281,5 @@
 
   <script type="module" src="/core/pages/index.js"></script>
   <script type="module" src="/core/engine/omni-engine.js"></script>
-
 </body>
 </html>
