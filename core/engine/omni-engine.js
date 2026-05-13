@@ -2,8 +2,8 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 /* =========================================================
    RICH BIZNESS OMNI ENGINE
-   CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
-   HD4D MASTERPIECE ATMOSPHERE CORE
+   FULL MATCHING CINEMA ENGINE
+   10 CORE REALISTIC APP ATMOSPHERE
    /core/engine/omni-engine.js
 ========================================================= */
 
@@ -11,7 +11,7 @@ const canvas = document.getElementById("engine");
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020402);
-scene.fog = new THREE.FogExp2(0x041204, 0.035);
+scene.fog = new THREE.FogExp2(0x031003, 0.038);
 
 const camera = new THREE.PerspectiveCamera(
   38,
@@ -31,7 +31,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.45;
+renderer.toneMappingExposure = 1.46;
 
 const clock = new THREE.Clock();
 
@@ -44,10 +44,51 @@ function isTablet(){
 }
 
 /* =========================================================
+   10 CORE ROUTE STATE
+========================================================= */
+
+const labels = [
+  "feed",
+  "watch",
+  "live",
+  "music",
+  "gaming",
+  "sports",
+  "gallery",
+  "upload",
+  "store",
+  "meta"
+];
+
+const routes = {
+  feed: "/feed.html",
+  watch: "/watch.html",
+  live: "/live.html",
+  music: "/music.html",
+  gaming: "/gaming.html",
+  sports: "/sports.html",
+  gallery: "/gallery.html",
+  upload: "/upload.html",
+  store: "/store.html",
+  meta: "/meta.html"
+};
+
+let activeIndex = labels.indexOf(window.RB_ACTIVE_KEY || "live");
+if (activeIndex < 0) activeIndex = 2;
+
+let activeName = labels[activeIndex] || "live";
+let targetRotation = -activeIndex * ((Math.PI * 2) / labels.length);
+let currentRotation = targetRotation;
+
+window.RB_ACTIVE_KEY = activeName;
+window.RB_ACTIVE_ROUTE = routes[activeName] || "/live.html";
+window.RB_DIAL_ROTATION = currentRotation;
+
+/* =========================================================
    LIGHTS
 ========================================================= */
 
-scene.add(new THREE.AmbientLight(0xd9ffd2, 0.75));
+scene.add(new THREE.AmbientLight(0xd8ffd0, 0.76));
 
 const topGlow = new THREE.PointLight(0x9dff63, 22, 95);
 topGlow.position.set(0, 6.5, 7.5);
@@ -111,7 +152,7 @@ const goldGlowMat = new THREE.MeshBasicMaterial({
 });
 
 /* =========================================================
-   ATMOSPHERE POINT FIELD
+   ATMOSPHERE PARTICLES
 ========================================================= */
 
 function makePoints(count, spreadX, spreadY, zMin, zDepth, color, size, opacity){
@@ -150,7 +191,7 @@ const goldDust = makePoints(520, 22, 14, -3, 18, 0xffd76a, 0.03, 0.18);
 scene.add(goldDust);
 
 /* =========================================================
-   MAIN CINEMA RIG
+   MAIN RIG
 ========================================================= */
 
 const rig = new THREE.Group();
@@ -161,7 +202,7 @@ portalRig.position.z = 0.2;
 rig.add(portalRig);
 
 /* =========================================================
-   SUBTLE MACHINE RINGS BEHIND HTML
+   BACK MACHINE RINGS
 ========================================================= */
 
 function addRing(radius, tube, material, z){
@@ -192,7 +233,38 @@ const midGlow = addRing(1.5, 0.018, softGlowMat, 0.24);
 const innerGlow = addRing(1.05, 0.032, glowMat, 0.32);
 
 /* =========================================================
-   PORTAL ENERGY CORE
+   10 CORE GHOST ORBIT — BEHIND HTML CARDS
+========================================================= */
+
+const ghostOrbit = new THREE.Group();
+ghostOrbit.position.z = 0.18;
+portalRig.add(ghostOrbit);
+
+for(let i = 0; i < labels.length; i++){
+  const angle = (Math.PI * 2 / labels.length) * i - Math.PI / 2;
+
+  const node = new THREE.Mesh(
+    new THREE.SphereGeometry(0.055, 18, 18),
+    new THREE.MeshBasicMaterial({
+      color: i === activeIndex ? 0xffd76a : 0x8dff5b,
+      transparent: true,
+      opacity: i === activeIndex ? 0.8 : 0.28,
+      depthWrite: false
+    })
+  );
+
+  node.position.set(
+    Math.cos(angle) * 2.86,
+    Math.sin(angle) * 2.86,
+    0.28
+  );
+
+  node.userData.index = i;
+  ghostOrbit.add(node);
+}
+
+/* =========================================================
+   PORTAL CORE ENERGY
 ========================================================= */
 
 const coreGroup = new THREE.Group();
@@ -248,7 +320,7 @@ goldOrbit.position.z = 0.32;
 coreGroup.add(goldOrbit);
 
 /* =========================================================
-   ENERGY PARTICLES INSIDE PORTAL
+   ENERGY PARTICLES INSIDE CORE
 ========================================================= */
 
 const energyGeo = new THREE.BufferGeometry();
@@ -281,29 +353,29 @@ const energy = new THREE.Points(
 coreGroup.add(energy);
 
 /* =========================================================
-   CINEMA HEX LINES / MACHINE DEPTH
+   CINEMA HEX DEPTH LINES
 ========================================================= */
 
 const hexGroup = new THREE.Group();
 hexGroup.position.z = -0.05;
 portalRig.add(hexGroup);
 
-for(let i = 0; i < 8; i++){
-  const angle = (Math.PI * 2 / 8) * i + Math.PI / 8;
+for(let i = 0; i < 10; i++){
+  const angle = (Math.PI * 2 / 10) * i - Math.PI / 2;
 
   const bar = new THREE.Mesh(
-    new THREE.BoxGeometry(1.25, 0.035, 0.035),
+    new THREE.BoxGeometry(1.1, 0.035, 0.035),
     new THREE.MeshBasicMaterial({
       color: 0x8dff5b,
       transparent: true,
-      opacity: 0.19,
+      opacity: 0.18,
       depthWrite: false
     })
   );
 
   bar.position.set(
-    Math.cos(angle) * 3.32,
-    Math.sin(angle) * 3.32,
+    Math.cos(angle) * 3.22,
+    Math.sin(angle) * 3.22,
     0.1
   );
 
@@ -312,7 +384,7 @@ for(let i = 0; i < 8; i++){
 }
 
 /* =========================================================
-   SIDE ATMOSPHERE / MONEY FLOOR HINT
+   MONEY FLOOR / DEPTH HINT
 ========================================================= */
 
 const floorGroup = new THREE.Group();
@@ -344,39 +416,17 @@ for(let i = 0; i < 22; i++){
 }
 
 /* =========================================================
-   ACTIVE DIAL SYNC
+   ACTIVE SYNC
 ========================================================= */
 
-const labels = [
-  "live",
-  "music",
-  "gaming",
-  "store",
-  "meta",
-  "sports",
-  "upload",
-  "gallery"
-];
-
-const routes = {
-  gallery: "/gallery.html",
-  live: "/live.html",
-  music: "/music.html",
-  gaming: "/gaming.html",
-  store: "/store.html",
-  meta: "/meta.html",
-  sports: "/sports.html",
-  upload: "/upload.html"
-};
-
-let activeIndex = 0;
-let activeName = "live";
-let targetRotation = 0;
-let currentRotation = 0;
-
-window.RB_ACTIVE_KEY = activeName;
-window.RB_ACTIVE_ROUTE = routes[activeName] || "/live.html";
-window.RB_DIAL_ROTATION = 0;
+function updateGhostNodes(){
+  ghostOrbit.children.forEach((node) => {
+    const isActive = node.userData.index === activeIndex;
+    node.material.opacity = isActive ? 0.82 : 0.28;
+    node.material.color.setHex(isActive ? 0xffd76a : 0x8dff5b);
+    node.scale.setScalar(isActive ? 1.45 : 1);
+  });
+}
 
 function setActive(name){
   const index = labels.indexOf(name);
@@ -388,6 +438,8 @@ function setActive(name){
 
   window.RB_ACTIVE_KEY = activeName;
   window.RB_ACTIVE_ROUTE = routes[activeName] || "/feed.html";
+
+  updateGhostNodes();
 
   if(typeof window.setActiveDial === "function"){
     window.setActiveDial(activeName, true);
@@ -422,7 +474,7 @@ window.addEventListener("pointermove", (event) => {
 });
 
 /* =========================================================
-   RESIZE / APP MATCHING
+   RESIZE
 ========================================================= */
 
 function resize(){
@@ -484,7 +536,7 @@ function animate(){
   midRing.rotation.z = currentRotation * 0.18;
   midGlow.rotation.z = currentRotation * 0.32;
   innerGlow.rotation.z = -currentRotation * 0.42;
-
+  ghostOrbit.rotation.z = currentRotation * 0.1;
   hexGroup.rotation.z = -currentRotation * 0.05;
 
   const pulse = Math.sin(t * 2.4);
@@ -532,5 +584,5 @@ function animate(){
   renderer.render(scene, camera);
 }
 
-setActive("live");
+setActive(activeName || "live");
 animate();
