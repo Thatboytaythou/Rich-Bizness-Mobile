@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Rich Bizness LLC — Rich Chess</title>
+
+  <link rel="stylesheet" href="/games/rich-chess/style.css" />
+</head>
+
+<body>
+  <main class="chess-page">
+    <header class="topbar">
+      <a class="circle-btn" href="/gaming.html" aria-label="Back to Gaming">‹</a>
+
+      <div class="brand">
+        <strong>RICH CHESS</strong>
+        <small>RICH BIZNESS LLC</small>
+      </div>
+
+      <a class="circle-btn" href="/profile.html" aria-label="Profile">◈</a>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="kicker">ELITE MULTIPLAYER CHESS ARENA</div>
+        <h1>Strategy. Tournaments. Rich Moves.</h1>
+        <p>
+          Play solo, create ranked rooms, join multiplayer battles, and enter Rich Bizness tournaments.
+        </p>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat">
+        <small>MODE</small>
+        <strong id="statMode">SOLO</strong>
+      </div>
+
+      <div class="stat">
+        <small>TURN</small>
+        <strong id="statTurn">WHITE</strong>
+      </div>
+
+      <div class="stat">
+        <small>MOVES</small>
+        <strong id="statMoves">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>STATUS</small>
+        <strong id="statStatus">READY</strong>
+      </div>
+    </section>
+
+    <section class="arena">
+      <div class="player-card top-player">
+        <div class="avatar" id="blackAvatar">B</div>
+        <div>
+          <strong id="blackName">Black Player</strong>
+          <small id="blackClock">10:00</small>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board-glow"></div>
+        <div class="chess-board" id="chessBoard" aria-label="Rich Chess Board"></div>
+      </div>
+
+      <div class="player-card bottom-player">
+        <div class="avatar" id="whiteAvatar">W</div>
+        <div>
+          <strong id="whiteName">White Player</strong>
+          <small id="whiteClock">10:00</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button class="main-btn" id="newGameBtn" type="button">NEW GAME</button>
+      <button class="ghost-btn" id="createRoomBtn" type="button">CREATE ROOM</button>
+      <button class="ghost-btn" id="joinRoomBtn" type="button">JOIN ROOM</button>
+      <button class="danger-btn" id="resignBtn" type="button">RESIGN</button>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <h2>MULTIPLAYER ROOM</h2>
+
+        <div class="field">
+          <label>ROOM CODE</label>
+          <input id="roomCodeInput" type="text" placeholder="Auto-created or paste code" />
+        </div>
+
+        <div class="field">
+          <label>MATCH TYPE</label>
+          <select id="matchTypeInput">
+            <option value="casual">Casual</option>
+            <option value="ranked">Ranked</option>
+            <option value="tournament">Tournament</option>
+            <option value="wager">Wager Ready</option>
+          </select>
+        </div>
+
+        <button class="main-btn full" id="copyRoomBtn" type="button">COPY ROOM LINK</button>
+      </section>
+
+      <section class="panel">
+        <h2>TOURNAMENT LOBBY</h2>
+
+        <div class="field">
+          <label>TOURNAMENT</label>
+          <select id="tournamentSelect">
+            <option value="">No tournament selected</option>
+          </select>
+        </div>
+
+        <button class="main-btn full" id="joinTournamentBtn" type="button">JOIN TOURNAMENT</button>
+      </section>
+
+      <section class="panel">
+        <h2>MOVE HISTORY</h2>
+        <div class="move-list" id="moveList">
+          <div class="empty">No moves yet.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>CAPTURED PIECES</h2>
+        <div class="captured">
+          <div>
+            <small>WHITE CAPTURED</small>
+            <div id="whiteCaptured" class="piece-row"></div>
+          </div>
+
+          <div>
+            <small>BLACK CAPTURED</small>
+            <div id="blackCaptured" class="piece-row"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div class="status" id="chessStatus">RICH CHESS READY</div>
+  </main>
+
+  <script type="module" src="/games/rich-chess/game.js"></script>
+</body>
+</html>
