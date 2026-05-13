@@ -31,7 +31,6 @@ body{
   touch-action:none;
 }
 
-/* REAL CINEMATIC WORLD */
 body::before{
   content:"";
   position:fixed;
@@ -65,18 +64,16 @@ body::after{
   height:100vh;
   z-index:1;
   display:block;
-  opacity:.88;
+  opacity:.78;
   mix-blend-mode:screen;
 }
 
-/* SCREEN FX */
 .screen-vignette{
   position:fixed;
   inset:0;
   z-index:3;
   pointer-events:none;
-  background:
-    radial-gradient(circle at center,transparent 33%,rgba(0,0,0,.35) 64%,rgba(0,0,0,.94) 100%);
+  background:radial-gradient(circle at center,transparent 33%,rgba(0,0,0,.35) 64%,rgba(0,0,0,.94) 100%);
 }
 
 .screen-noise{
@@ -88,7 +85,6 @@ body::after{
   background-image:repeating-radial-gradient(circle at 0 0,rgba(255,255,255,.5),transparent 1px);
 }
 
-/* TOP HUD */
 .topbar{
   position:fixed;
   top:0;
@@ -146,10 +142,7 @@ body::after{
     linear-gradient(145deg,rgba(20,26,18,.92),rgba(0,0,0,.76)),
     radial-gradient(circle at left,rgba(124,255,76,.24),transparent 52%);
   border:1px solid rgba(255,223,125,.62);
-  box-shadow:
-    inset 0 0 18px rgba(255,255,255,.08),
-    0 0 26px rgba(0,0,0,.92),
-    0 0 22px rgba(128,255,76,.2);
+  box-shadow:inset 0 0 18px rgba(255,255,255,.08),0 0 26px rgba(0,0,0,.92),0 0 22px rgba(128,255,76,.2);
 }
 
 .rank-icon{
@@ -160,8 +153,7 @@ body::after{
   place-items:center;
   color:#a9ff80;
   font-weight:950;
-  background:
-    radial-gradient(circle,rgba(0,255,174,.32),rgba(0,0,0,.45));
+  background:radial-gradient(circle,rgba(0,255,174,.32),rgba(0,0,0,.45));
   border:1px solid rgba(145,255,104,.42);
   box-shadow:0 0 22px rgba(97,255,84,.42);
   overflow:hidden;
@@ -192,7 +184,6 @@ body::after{
   text-shadow:0 0 16px rgba(157,255,99,.72);
 }
 
-/* BRAND */
 .brand-lockup{
   display:flex;
   flex-direction:column;
@@ -201,10 +192,7 @@ body::after{
   text-align:center;
   font-family:Georgia,"Times New Roman",serif;
   transform:translateY(6px);
-  text-shadow:
-    0 3px 0 #1b1200,
-    0 0 20px rgba(162,255,81,.62),
-    0 8px 28px rgba(0,0,0,1);
+  text-shadow:0 3px 0 #1b1200,0 0 20px rgba(162,255,81,.62),0 8px 28px rgba(0,0,0,1);
 }
 
 .brand-rich,
@@ -225,7 +213,6 @@ body::after{
   letter-spacing:.24em;
 }
 
-/* TOP ICONS */
 .icon{
   position:relative;
   width:60px;
@@ -239,10 +226,7 @@ body::after{
     linear-gradient(145deg,rgba(45,45,45,.88),rgba(0,0,0,.74)),
     radial-gradient(circle at top,rgba(157,255,99,.16),transparent 60%);
   border:1px solid rgba(255,214,110,.65);
-  box-shadow:
-    inset 0 0 14px rgba(255,255,255,.08),
-    0 0 18px rgba(0,0,0,.9),
-    0 0 22px rgba(132,255,85,.2);
+  box-shadow:inset 0 0 14px rgba(255,255,255,.08),0 0 18px rgba(0,0,0,.9),0 0 22px rgba(132,255,85,.2);
 }
 
 .icon:active{
@@ -284,7 +268,6 @@ body::after{
   font-weight:950;
 }
 
-/* QUICK MENU */
 .quick-menu{
   position:fixed;
   top:96px;
@@ -322,7 +305,6 @@ body::after{
   background:rgba(128,255,80,.2);
 }
 
-/* DIAL UI */
 .dial-ui{
   position:fixed;
   inset:0;
@@ -347,11 +329,7 @@ body::after{
     linear-gradient(145deg,rgba(18,24,17,.92),rgba(0,0,0,.8));
   border:1px solid rgba(148,255,92,.28);
   backdrop-filter:blur(10px);
-  box-shadow:
-    inset 0 0 22px rgba(255,255,255,.06),
-    inset 0 -10px 26px rgba(0,0,0,.72),
-    0 0 26px rgba(0,0,0,.95),
-    0 0 20px rgba(120,255,80,.16);
+  box-shadow:inset 0 0 22px rgba(255,255,255,.06),inset 0 -10px 26px rgba(0,0,0,.72),0 0 26px rgba(0,0,0,.95),0 0 20px rgba(120,255,80,.16);
   transition:.18s ease;
 }
 
@@ -378,10 +356,7 @@ body::after{
 .dial-card.is-active{
   border-color:rgba(177,255,113,.95);
   filter:brightness(1.25);
-  box-shadow:
-    inset 0 0 22px rgba(255,255,255,.1),
-    0 0 36px rgba(128,255,79,.62),
-    0 0 82px rgba(128,255,79,.22);
+  box-shadow:inset 0 0 22px rgba(255,255,255,.1),0 0 36px rgba(128,255,79,.62),0 0 82px rgba(128,255,79,.22);
 }
 
 .dial-card.is-active::after{
@@ -415,7 +390,6 @@ body::after{
   white-space:nowrap;
 }
 
-/* HARD CINEMATIC PLACEMENT */
 .top-card{top:37%;left:50%;transform:translateX(-50%)}
 .top-left-card{top:43%;left:23%}
 .top-right-card{top:43%;right:23%}
@@ -425,7 +399,6 @@ body::after{
 .bottom-card{bottom:20.2%;left:50%;transform:translateX(-50%)}
 .bottom-right-card{bottom:24.7%;right:23%}
 
-/* CENTER PORTAL */
 .center-ui{
   position:fixed;
   top:55%;
@@ -445,10 +418,7 @@ body::after{
   background:
     radial-gradient(circle,rgba(196,255,139,.35),rgba(71,255,57,.2) 36%,rgba(0,0,0,.82) 72%),
     conic-gradient(from var(--rb-dial-rotation),rgba(157,255,99,.95),rgba(0,0,0,.08),rgba(157,255,99,.56),rgba(0,0,0,.18),rgba(157,255,99,.95));
-  box-shadow:
-    0 0 94px rgba(112,255,74,.55),
-    inset 0 0 42px rgba(255,255,255,.12),
-    inset 0 0 75px rgba(68,255,50,.25);
+  box-shadow:0 0 94px rgba(112,255,74,.55),inset 0 0 42px rgba(255,255,255,.12),inset 0 0 75px rgba(68,255,50,.25);
 }
 
 .portal-core::before{
@@ -534,7 +504,6 @@ body::after{
   text-shadow:0 0 14px rgba(157,255,99,.8);
 }
 
-/* ACTIVATE */
 .enter{
   position:fixed;
   left:50%;
@@ -548,10 +517,7 @@ body::after{
     linear-gradient(to bottom,rgba(64,78,35,.94),rgba(6,7,5,.98)),
     radial-gradient(circle at center,rgba(157,255,99,.22),transparent 72%);
   border:1px solid rgba(255,219,123,.62);
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,.08),
-    0 0 44px rgba(122,255,77,.38),
-    0 10px 34px rgba(0,0,0,.9);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.08),0 0 44px rgba(122,255,77,.38),0 10px 34px rgba(0,0,0,.9);
 }
 
 .enter:active{
@@ -578,7 +544,6 @@ body::after{
   font-weight:900;
 }
 
-/* STATS */
 .stats{
   position:fixed;
   left:50%;
@@ -631,7 +596,6 @@ body::after{
   text-shadow:0 0 12px rgba(157,255,99,.22);
 }
 
-/* ANIMATION */
 @keyframes rbPing{
   0%,100%{transform:scale(1);opacity:1}
   50%{transform:scale(1.25);opacity:.72}
@@ -651,7 +615,6 @@ body::after{
   50%{opacity:.76;translate:55% 0}
 }
 
-/* TABLET */
 @media (max-width:900px){
   .brand-rich,
   .brand-biz{
@@ -678,7 +641,7 @@ body::after{
   }
 }
 
-/* PHONE CINEMATIC LOCK */
+/* PHONE CINEMATIC WHEEL SNAP LOCK */
 @media (max-width:640px){
   body::before{
     background:
@@ -691,7 +654,7 @@ body::after{
   }
 
   #engine{
-    opacity:.78;
+    opacity:.82;
   }
 
   .topbar{
@@ -757,17 +720,52 @@ body::after{
     font-size:21px;
   }
 
-  .top-card{top:38%}
-  .top-left-card{top:44%;left:8%}
-  .top-right-card{top:44%;right:8%}
-  .left-card{top:55.7%;left:5.5%}
-  .right-card{top:55.7%;right:5.5%}
-  .bottom-left-card{bottom:27.6%;left:9%}
-  .bottom-card{bottom:22.7%}
-  .bottom-right-card{bottom:27.6%;right:9%}
+  .top-card{
+    top:41.2%;
+    left:50%;
+    transform:translateX(-50%);
+  }
+
+  .top-left-card{
+    top:46.8%;
+    left:7.8%;
+  }
+
+  .top-right-card{
+    top:46.8%;
+    right:7.8%;
+  }
+
+  .left-card{
+    top:55.5%;
+    left:5.4%;
+    transform:translateY(-50%);
+  }
+
+  .right-card{
+    top:55.5%;
+    right:5.4%;
+    transform:translateY(-50%);
+  }
+
+  .bottom-left-card{
+    bottom:30.2%;
+    left:9%;
+  }
+
+  .bottom-card{
+    bottom:25.4%;
+    left:50%;
+    transform:translateX(-50%);
+  }
+
+  .bottom-right-card{
+    bottom:30.2%;
+    right:9%;
+  }
 
   .center-ui{
-    top:55.7%;
+    top:55.6%;
   }
 
   .portal-core{
@@ -789,7 +787,7 @@ body::after{
   }
 
   .enter{
-    bottom:103px;
+    bottom:112px;
     width:84vw;
     padding:15px;
   }
