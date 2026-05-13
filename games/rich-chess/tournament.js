@@ -1,130 +1,148 @@
 /* =========================
    RICH BIZNESS — RICH CHESS
    /games/rich-chess/tournaments.js
-   Tournament Lobby + Entry Engine
+   Realtime Tournament Lobby
 ========================= */
 
-import { supabase, getCurrentUserAndProfile, getPlayerName } from "./multiplayer.js";
+import { supabase, getCurrentUserAndProfile } from "./multiplayer.js";
 
-export async function loadChessTournaments() {
+function safeTitle(value = "") {
+  return String(value || "").trim() || "Rich Chess Tournament";
+}
+
+function makeTournamentSlug(title = "rich-chess") {
+  return String(title)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || `rich-chess-${Date.now()}`;
+}
+
+async function ensureTournamentLobby() {
   const { data, error } = await supabase
     .from("chess_tournaments")
     .select("*")
     .in("status", ["open", "active"])
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(20);
 
   if (error) {
-    console.warn("Tournament load error:", error.message);
+    console.warn("Tournament lobby load skipped:", error.message);
     return [];
   }
 
-  return data || [];
-}
+  if (data?.length) return data;
 
-export async function createStarterTournament() {
-  const { user, profile } = await getCurrentUserAndProfile();
+  const title = "Rich Chess Grandmaster Open";
 
-  if (!user) {
-    throw new Error("Sign in required to create tournament.");
-  }
-
-  const title = "Rich Chess Open Arena";
-
-  const { data, error } = await supabase
+  const { data: created, error: createError } = await supabase
     .from("chess_tournaments")
     .insert({
-      creator_id: user.id,
       title,
-      description: "Elite Rich Bizness chess bracket. Join, battle, rank up, and build your chess legacy.",
+      slug: makeTournamentSlug(title),
       status: "open",
+      tournament_type: "single_elimination",
       entry_fee_cents: 0,
       prize_cents: 0,
       currency: "usd",
-      max_players: 16,
+      max_players: 32,
       current_players: 0,
+      starts_at: null,
       metadata: {
         source: "rich-chess",
-        created_by_name: getPlayerName(profile, user),
-        created_at: new Date().toISOString()
+        app: "Rich Bizness Mobile",
+        created_by_system: true
       }
     })
     .select("*")
     .single();
 
-  if (error) throw error;
-  return data;
-}
-
-export async function ensureTournamentLobby() {
-  const tournaments = await loadChessTournaments();
-
-  if (tournaments.length) {
-    return tournaments;
-  }
-
-  try {
-    const starter = await createStarterTournament();
-    return starter ? [starter] : [];
-  } catch (error) {
-    console.warn("Starter tournament skipped:", error.message);
+  if (createError) {
+    console.warn("Default tournament create skipped:", createError.message);
     return [];
   }
+
+  return created ? [created] : [];
 }
 
-export async function joinChessTournament(tournamentId) {
+function renderTournamentOptions(selectEl, tournaments = []) {
+  if (!selectEl) return;
+
+  if (!tournaments.length) {
+    selectEl.innerHTML = `<option value="">No tournament open</option>`;
+    return;
+  }
+
+  selectEl.innerHTML = `
+    <option value="">Choose tournament</option>
+    ${tournaments.map((tournament) => {
+      const players = Number(tournament.current_players || 0);
+      const max = Number(tournament.max_players || 32);
+
+      return `
+        <option value="${tournament.id}">
+          ${safeTitle(tournament.title)} — ${players}/${max}
+        </option>
+      `;
+    }).join("")}
+  `;
+}
+
+async function joinChessTournament(tournamentId) {
+  if (!tournamentId) {
+    throw new Error("Choose a tournament first");
+  }
+
   const { user, profile } = await getCurrentUserAndProfile();
 
   if (!user) {
-    throw new Error("Sign in required to join tournament.");
-  }
-
-  if (!tournamentId) {
-    throw new Error("Choose a tournament first.");
-  }
-
-  const { data: existing, error: existingError } = await supabase
-    .from("chess_tournament_entries")
-    .select("*")
-    .eq("tournament_id", tournamentId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existingError) throw existingError;
-
-  if (existing) {
-    return existing;
+    window.location.href = "/auth.html";
+    throw new Error("Sign in required to join tournament");
   }
 
   const { data: tournament, error: tournamentError } = await supabase
     .from("chess_tournaments")
     .select("*")
     .eq("id", tournamentId)
-    .maybeSingle();
+    .single();
 
   if (tournamentError) throw tournamentError;
-  if (!tournament) throw new Error("Tournament not found.");
+  if (!tournament) throw new Error("Tournament not found");
 
-  const maxPlayers = Number(tournament.max_players || 16);
-  const currentPlayers = Number(tournament.current_players || 0);
+  const { data: existing } = await supabase
+    .from("chess_tournament_players")
+    .select("*")
+    .eq("tournament_id", tournamentId)
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  if (currentPlayers >= maxPlayers) {
-    throw new Error("Tournament is full.");
-  }
+  if (existing) return existing;
+
+  const { count } = await supabase
+    .from("chess_tournament_players")
+    .select("*", { count: "exact", head: true })
+    .eq("tournament_id", tournamentId);
+
+  const seed = Number(count || 0) + 1;
+
+  const playerName =
+    profile?.display_name ||
+    profile?.username ||
+    user.email?.split("@")[0] ||
+    "Rich Player";
 
   const { data, error } = await supabase
-    .from("chess_tournament_entries")
+    .from("chess_tournament_players")
     .insert({
       tournament_id: tournamentId,
       user_id: user.id,
-      username: profile?.username || user.email?.split("@")[0] || "player",
-      display_name: getPlayerName(profile, user),
-      status: "joined",
-      seed: currentPlayers + 1,
-      score: 0,
+      username: profile?.username || user.email?.split("@")[0] || null,
+      display_name: playerName,
+      seed,
+      status: "registered",
       metadata: {
-        source: "rich-chess",
-        joined_at: new Date().toISOString()
+        avatar_url: profile?.avatar_url || null,
+        joined_from: "rich-chess"
       }
     })
     .select("*")
@@ -135,7 +153,7 @@ export async function joinChessTournament(tournamentId) {
   await supabase
     .from("chess_tournaments")
     .update({
-      current_players: currentPlayers + 1,
+      current_players: seed,
       updated_at: new Date().toISOString()
     })
     .eq("id", tournamentId);
@@ -143,106 +161,26 @@ export async function joinChessTournament(tournamentId) {
   return data;
 }
 
-export async function loadTournamentEntries(tournamentId) {
+async function loadTournamentPlayers(tournamentId) {
   if (!tournamentId) return [];
 
   const { data, error } = await supabase
-    .from("chess_tournament_entries")
+    .from("chess_tournament_players")
     .select("*")
     .eq("tournament_id", tournamentId)
     .order("seed", { ascending: true });
 
   if (error) {
-    console.warn("Tournament entries error:", error.message);
+    console.warn("Tournament players skipped:", error.message);
     return [];
   }
 
   return data || [];
 }
 
-export function renderTournamentOptions(selectEl, tournaments = []) {
-  if (!selectEl) return;
-
-  if (!tournaments.length) {
-    selectEl.innerHTML = `<option value="">No tournaments open</option>`;
-    return;
-  }
-
-  selectEl.innerHTML = tournaments
-    .map((tournament) => {
-      const players = `${Number(tournament.current_players || 0)}/${Number(tournament.max_players || 16)}`;
-      return `
-        <option value="${tournament.id}">
-          ${escapeOption(tournament.title || "Rich Chess Tournament")} — ${players}
-        </option>
-      `;
-    })
-    .join("");
-}
-
-function escapeOption(value = "") {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-export async function recordTournamentResult({
-  tournamentId,
-  matchId,
-  winnerId,
-  loserId,
-  result = "win"
-}) {
-  if (!tournamentId || !winnerId) return null;
-
-  const { data: winnerEntry } = await supabase
-    .from("chess_tournament_entries")
-    .select("*")
-    .eq("tournament_id", tournamentId)
-    .eq("user_id", winnerId)
-    .maybeSingle();
-
-  if (winnerEntry?.id) {
-    await supabase
-      .from("chess_tournament_entries")
-      .update({
-        score: Number(winnerEntry.score || 0) + 1,
-        status: "advanced",
-        metadata: {
-          ...(winnerEntry.metadata || {}),
-          last_result: result,
-          last_match_id: matchId || null,
-          updated_at: new Date().toISOString()
-        }
-      })
-      .eq("id", winnerEntry.id);
-  }
-
-  if (loserId) {
-    const { data: loserEntry } = await supabase
-      .from("chess_tournament_entries")
-      .select("*")
-      .eq("tournament_id", tournamentId)
-      .eq("user_id", loserId)
-      .maybeSingle();
-
-    if (loserEntry?.id) {
-      await supabase
-        .from("chess_tournament_entries")
-        .update({
-          status: "eliminated",
-          metadata: {
-            ...(loserEntry.metadata || {}),
-            last_result: "loss",
-            last_match_id: matchId || null,
-            updated_at: new Date().toISOString()
-          }
-        })
-        .eq("id", loserEntry.id);
-    }
-  }
-
-  return true;
-}
+export {
+  ensureTournamentLobby,
+  joinChessTournament,
+  renderTournamentOptions,
+  loadTournamentPlayers
+};
