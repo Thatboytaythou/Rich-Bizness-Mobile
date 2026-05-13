@@ -1,81 +1,113 @@
+/* =========================================================
+   RICH BIZNESS LLC
+   CINEMATIC UNIVERSAL REALTIME INDEX
+   FULL MATCHING INDEX.JS
+   /core/pages/index.js
+========================================================= */
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* =========================
-   RICH BIZNESS MOBILE INDEX
-   CINEMATIC UNIVERSAL MASTERPIECE
-   ULTRA REALISTIC HD 4D APP HUB
-   REALTIME IMMERSIVE COMMAND CORE
-   MULTI-DEVICE CINEMA SYSTEM
-   /core/pages/index.js
-========================= */
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2";
+const SUPABASE_URL =
+  "https://zsancpcyhdidrlezggrl.supabase.co";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
+const SUPABASE_KEY =
+  "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2";
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true
+    },
+    realtime:{
+      params:{
+        eventsPerSecond:10
+      }
+    }
   }
-});
+);
+
+/* =========================================================
+   HELPERS
+========================================================= */
 
 const $ = (id) => document.getElementById(id);
 
 const els = {
-  welcomeStatus: $("welcomeStatus"),
-  homeUserName: $("homeUserName"),
-  homeAvatar: $("homeAvatar"),
-  homeRichLevel: $("homeRichLevel"),
 
-  notificationBtn: $("notificationBtn"),
-  portalStatus: $("portalStatus"),
-  activateMain: $("activateMain"),
-  activateSub: $("activateSub"),
+  welcomeStatus:$("welcomeStatus"),
+  homeUserName:$("homeUserName"),
+  homeAvatar:$("homeAvatar"),
+  homeRichLevel:$("homeRichLevel"),
 
-  homeBalance: $("homeBalance"),
-  homeRichPoints: $("homeRichPoints"),
-  homeRank: $("homeRank"),
-  homeOnline: $("homeOnline"),
+  notificationBtn:$("notificationBtn"),
 
-  liveDialSub: $("liveDialSub"),
-  galleryDialSub: $("galleryDialSub"),
-  musicDialSub: $("musicDialSub"),
-  uploadDialSub: $("uploadDialSub"),
-  gamingDialSub: $("gamingDialSub"),
-  sportsDialSub: $("sportsDialSub"),
-  metaDialSub: $("metaDialSub"),
-  storeDialSub: $("storeDialSub")
+  portalStatus:$("portalStatus"),
+
+  activateMain:$("activateMain"),
+  activateSub:$("activateSub"),
+
+  homeBalance:$("homeBalance"),
+  homeRichPoints:$("homeRichPoints"),
+  homeRank:$("homeRank"),
+  homeOnline:$("homeOnline"),
+
+  liveDialSub:$("liveDialSub"),
+  musicDialSub:$("musicDialSub"),
+  gamingDialSub:$("gamingDialSub"),
+  sportsDialSub:$("sportsDialSub"),
+  galleryDialSub:$("galleryDialSub"),
+  uploadDialSub:$("uploadDialSub"),
+  storeDialSub:$("storeDialSub"),
+  metaDialSub:$("metaDialSub")
 };
 
 let currentUser = null;
 let currentProfile = null;
 let realtimeChannel = null;
-let statsLoading = false;
-let statsQueued = false;
 
-function safeSet(el, value) {
-  if (el) el.textContent = value;
-}
+/* =========================================================
+   FORMATTERS
+========================================================= */
 
-function money(cents = 0) {
+function money(cents = 0){
   return `$${(Number(cents || 0) / 100).toFixed(2)}`;
 }
 
-function cleanText(value, fallback = "") {
-  return value === null || value === undefined || value === "" ? fallback : value;
-}
+function shortCount(value = 0){
 
-function shortCount(value = 0) {
   const n = Number(value || 0);
 
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  if(n >= 1000000){
+    return `${(n / 1000000).toFixed(1)}M`;
+  }
+
+  if(n >= 1000){
+    return `${(n / 1000).toFixed(1)}K`;
+  }
 
   return n.toLocaleString();
 }
 
-function getName(profile, user) {
+function text(value, fallback = ""){
+  return (
+    value === null ||
+    value === undefined ||
+    value === ""
+  )
+    ? fallback
+    : value;
+}
+
+function getName(profile, user){
+
   return (
     profile?.display_name ||
     profile?.username ||
@@ -84,285 +116,517 @@ function getName(profile, user) {
   );
 }
 
-function getInitial(name = "R") {
-  return String(name || "R").trim().slice(0, 1).toUpperCase();
+function getInitial(name = "R"){
+  return String(name || "R")
+    .trim()
+    .slice(0,1)
+    .toUpperCase();
 }
 
-function setHubStatus(message) {
-  safeSet(els.portalStatus, message || "LLC");
-}
+/* =========================================================
+   PORTAL STATUS
+========================================================= */
 
-function setNotificationGlow(count = 0) {
-  if (!els.notificationBtn) return;
+function setPortalStatus(status = "LIVE"){
 
-  const unread = Number(count || 0);
+  if(!els.portalStatus) return;
 
-  els.notificationBtn.classList.toggle("has-unread", unread > 0);
+  els.portalStatus.textContent = status;
 
-  if (unread > 0) {
-    els.notificationBtn.setAttribute("data-count", unread > 99 ? "99+" : String(unread));
-  } else {
-    els.notificationBtn.removeAttribute("data-count");
+  els.portalStatus.classList.remove(
+    "online",
+    "offline",
+    "syncing"
+  );
+
+  if(status === "LIVE"){
+    els.portalStatus.classList.add("online");
+  }
+
+  if(status === "SYNC"){
+    els.portalStatus.classList.add("syncing");
+  }
+
+  if(status === "OFFLINE"){
+    els.portalStatus.classList.add("offline");
   }
 }
 
-function renderGuest() {
-  safeSet(els.welcomeStatus, "TAP IN 💰");
-  safeSet(els.homeUserName, "Rich Guest");
-  safeSet(els.homeRichLevel, "GUEST");
-  safeSet(els.homeAvatar, "R");
-  safeSet(els.homeBalance, "$0.00");
-  safeSet(els.homeRichPoints, "0");
-  safeSet(els.homeRank, "VISITOR");
-  setHubStatus("GUEST");
-}
+/* =========================================================
+   PROFILE RENDER
+========================================================= */
 
-function renderProfile() {
-  if (!currentProfile && !currentUser) {
-    renderGuest();
-    return;
-  }
+function renderProfile(){
+
+  if(!els.homeUserName) return;
 
   const name = getName(currentProfile, currentUser);
-  const level = cleanText(currentProfile?.rich_level, "MAX").toUpperCase();
-  const rank = cleanText(currentProfile?.rank_title, "BIZ LEGEND").toUpperCase();
 
-  safeSet(els.homeUserName, name);
-  safeSet(els.homeRichLevel, level);
-  safeSet(els.homeBalance, money(currentProfile?.balance_cents || 0));
-  safeSet(els.homeRichPoints, shortCount(currentProfile?.rich_points || 0));
-  safeSet(els.homeRank, rank);
-  safeSet(els.welcomeStatus, currentUser ? "WELCOME BACK" : "WELCOME");
+  const richLevel = text(
+    currentProfile?.rich_level,
+    "MAX"
+  ).toUpperCase();
 
-  if (els.homeAvatar) {
-    if (currentProfile?.avatar_url) {
-      els.homeAvatar.innerHTML = `<img src="${currentProfile.avatar_url}" alt="Profile avatar" />`;
-    } else {
-      els.homeAvatar.textContent = getInitial(name);
-    }
+  const rank = text(
+    currentProfile?.rank_title,
+    "BIZ LEGEND"
+  ).toUpperCase();
+
+  els.homeUserName.textContent = name;
+  els.homeRichLevel.textContent = richLevel;
+  els.homeBalance.textContent = money(
+    currentProfile?.balance_cents || 0
+  );
+
+  els.homeRichPoints.textContent = shortCount(
+    currentProfile?.rich_points || 0
+  );
+
+  els.homeRank.textContent = rank;
+
+  if(currentProfile?.avatar_url){
+
+    els.homeAvatar.innerHTML = `
+      <img
+        src="${currentProfile.avatar_url}"
+        alt="Avatar"
+      />
+    `;
+
+  }else{
+
+    els.homeAvatar.textContent = getInitial(name);
+
+  }
+
+  if(currentUser){
+    els.welcomeStatus.textContent = "WELCOME BACK";
+  }else{
+    els.welcomeStatus.textContent = "WELCOME";
   }
 }
 
-async function loadUserAndProfile() {
-  const { data, error } = await supabase.auth.getUser();
+/* =========================================================
+   LOAD USER
+========================================================= */
 
-  if (error) {
-    console.warn("Index auth load:", error.message);
-  }
+async function loadUserAndProfile(){
+
+  const { data } =
+    await supabase.auth.getUser();
 
   currentUser = data?.user || null;
 
-  if (!currentUser) {
-    currentProfile = null;
-    renderGuest();
+  if(!currentUser){
+
+    els.welcomeStatus.textContent = "TAP IN 💰";
+    els.homeUserName.textContent = "Rich Guest";
+    els.homeRichLevel.textContent = "GUEST";
+
+    els.homeAvatar.textContent = "R";
+
+    els.homeBalance.textContent = "$0.00";
+    els.homeRichPoints.textContent = "0";
+    els.homeRank.textContent = "VISITOR";
+
+    setPortalStatus("GUEST");
+
     return;
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .maybeSingle();
+  const { data:profile, error } =
+    await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
 
-  if (profileError) {
-    console.warn("Index profile load:", profileError.message);
-    setHubStatus("PROFILE");
-    renderProfile();
+  if(error){
+
+    console.warn(
+      "Profile load failed:",
+      error.message
+    );
+
+    setPortalStatus("PROFILE");
+
     return;
   }
 
   currentProfile = profile || null;
+
   renderProfile();
 
   await supabase
     .from("profiles")
     .update({
-      online_status: "online",
-      last_seen_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      online_status:"online",
+      last_seen_at:new Date().toISOString()
     })
     .eq("id", currentUser.id);
 }
 
-async function countRows(table, filterBuilder = null) {
-  try {
+/* =========================================================
+   COUNTERS
+========================================================= */
+
+async function countRows(
+  table,
+  filterBuilder = null
+){
+
+  try{
+
     let query = supabase
       .from(table)
-      .select("id", { count: "exact", head: true });
+      .select("id", {
+        count:"exact",
+        head:true
+      });
 
-    if (typeof filterBuilder === "function") {
+    if(filterBuilder){
       query = filterBuilder(query);
     }
 
     const { count, error } = await query;
 
-    if (error) {
-      console.warn(`Index count skipped ${table}:`, error.message);
+    if(error){
+      console.warn(
+        `Count failed ${table}:`,
+        error.message
+      );
+
       return 0;
     }
 
     return count || 0;
-  } catch (err) {
-    console.warn(`Index count failed ${table}:`, err.message);
+
+  }catch(err){
+
+    console.warn(
+      `Count crashed ${table}:`,
+      err.message
+    );
+
     return 0;
   }
 }
 
-async function countGalleryDrops() {
-  const sectionGallery = await countRows("uploads", (q) => q.eq("section", "gallery"));
-  if (sectionGallery > 0) return sectionGallery;
+/* =========================================================
+   REALTIME HUB STATS
+========================================================= */
 
-  return countRows("uploads", (q) => q.eq("category", "gallery"));
-}
+async function loadHubStats(){
 
-async function countGamingActivity() {
-  const scores = await countRows("game_scores");
-  if (scores > 0) return scores;
-
-  return countRows("games", (q) => q.eq("is_active", true));
-}
-
-async function loadHubStats() {
-  if (statsLoading) {
-    statsQueued = true;
-    return;
-  }
-
-  statsLoading = true;
-  statsQueued = false;
-  setHubStatus("SYNC");
+  setPortalStatus("SYNC");
 
   const [
     liveCount,
+    musicCount,
+    gameCount,
+    sportsCount,
     galleryCount,
     uploadCount,
-    unreadCount,
-    onlineCount,
-    metaVisits,
-    sportsCount,
     storeCount,
-    musicCount,
-    gamingCount
+    metaVisits,
+    onlineUsers,
+    unreadNotifications
   ] = await Promise.all([
-    countRows("live_streams", (q) => q.eq("status", "live")),
-    countGalleryDrops(),
-    countRows("uploads"),
-    currentUser
-      ? countRows("notifications", (q) => q.eq("user_id", currentUser.id).eq("is_read", false))
-      : 0,
-    countRows("profiles", (q) => q.eq("online_status", "online")),
-    countRows("meta_visits"),
-    countRows("sports_posts"),
-    countRows("products", (q) => q.eq("status", "active")),
+
+    countRows(
+      "live_streams",
+      (q) => q.eq("status", "live")
+    ),
+
     countRows("music_tracks"),
-    countGamingActivity()
+
+    countRows("game_scores"),
+
+    countRows("sports_posts"),
+
+    countRows("gallery_views"),
+
+    countRows("uploads"),
+
+    countRows("products"),
+
+    countRows("meta_visits"),
+
+    countRows(
+      "profiles",
+      (q) => q.eq("online_status", "online")
+    ),
+
+    currentUser
+      ? countRows(
+          "notifications",
+          (q) =>
+            q
+              .eq("user_id", currentUser.id)
+              .eq("is_read", false)
+        )
+      : 0
   ]);
 
-  safeSet(els.liveDialSub, liveCount ? `${shortCount(liveCount)} LIVE` : "STREAM");
-  safeSet(els.galleryDialSub, galleryCount ? `${shortCount(galleryCount)} DROPS` : "PHOTOS");
-  safeSet(els.uploadDialSub, uploadCount ? `${shortCount(uploadCount)} FILES` : "CONTENT");
-  safeSet(els.metaDialSub, metaVisits ? `${shortCount(metaVisits)} VISITS` : "VERSE");
+  /* ========= DIAL LABELS ========= */
 
-  safeSet(els.sportsDialSub, sportsCount ? `${shortCount(sportsCount)} POSTS` : "HIGHLIGHTS");
-  safeSet(els.storeDialSub, storeCount ? `${shortCount(storeCount)} ITEMS` : "SHOP");
-  safeSet(els.musicDialSub, musicCount ? `${shortCount(musicCount)} TRACKS` : "VIBES");
-  safeSet(els.gamingDialSub, gamingCount ? `${shortCount(gamingCount)} SCORES` : "PLAY");
+  els.liveDialSub.textContent =
+    liveCount
+      ? `${shortCount(liveCount)} LIVE`
+      : "STREAM";
 
-  safeSet(els.homeOnline, shortCount(onlineCount));
-  setNotificationGlow(unreadCount);
+  els.musicDialSub.textContent =
+    musicCount
+      ? `${shortCount(musicCount)} TRACKS`
+      : "VIBES";
 
-  setHubStatus("LIVE");
+  els.gamingDialSub.textContent =
+    gameCount
+      ? `${shortCount(gameCount)} SCORES`
+      : "PLAY";
 
-  statsLoading = false;
+  els.sportsDialSub.textContent =
+    sportsCount
+      ? `${shortCount(sportsCount)} POSTS`
+      : "HIGHLIGHTS";
 
-  if (statsQueued) {
-    loadHubStats();
+  els.galleryDialSub.textContent =
+    galleryCount
+      ? `${shortCount(galleryCount)} DROPS`
+      : "PHOTOS";
+
+  els.uploadDialSub.textContent =
+    uploadCount
+      ? `${shortCount(uploadCount)} FILES`
+      : "CONTENT";
+
+  els.storeDialSub.textContent =
+    storeCount
+      ? `${shortCount(storeCount)} ITEMS`
+      : "SHOP";
+
+  els.metaDialSub.textContent =
+    metaVisits
+      ? `${shortCount(metaVisits)} VISITS`
+      : "VERSE";
+
+  /* ========= FOOTER ========= */
+
+  els.homeOnline.textContent =
+    shortCount(onlineUsers);
+
+  /* ========= NOTIFICATIONS ========= */
+
+  if(unreadNotifications > 0){
+
+    els.notificationBtn?.classList.add(
+      "has-unread"
+    );
+
+    els.notificationBtn?.setAttribute(
+      "data-count",
+      unreadNotifications
+    );
+
+  }else{
+
+    els.notificationBtn?.classList.remove(
+      "has-unread"
+    );
+
+    els.notificationBtn?.removeAttribute(
+      "data-count"
+    );
   }
+
+  setPortalStatus("LIVE");
 }
 
-function startRealtime() {
-  if (realtimeChannel) {
+/* =========================================================
+   REALTIME SYSTEM
+========================================================= */
+
+function startRealtime(){
+
+  if(realtimeChannel){
     supabase.removeChannel(realtimeChannel);
   }
 
   realtimeChannel = supabase
-    .channel("rich-bizness-index-hd4d-command-core")
-    .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, async (payload) => {
-      if (payload.new?.id === currentUser?.id) {
-        currentProfile = payload.new;
-        renderProfile();
-      }
+    .channel("rb-omni-live-index")
 
-      await loadHubStats();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "live_streams" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "uploads" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "meta_visits" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "sports_posts" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "products" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "music_tracks" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "game_scores" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "games" }, loadHubStats)
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"profiles"
+      },
+      async(payload) => {
+
+        if(
+          payload.new?.id === currentUser?.id
+        ){
+          currentProfile = payload.new;
+          renderProfile();
+        }
+
+        await loadHubStats();
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"live_streams"
+      },
+      loadHubStats
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"music_tracks"
+      },
+      loadHubStats
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"sports_posts"
+      },
+      loadHubStats
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"products"
+      },
+      loadHubStats
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"uploads"
+      },
+      loadHubStats
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"notifications"
+      },
+      loadHubStats
+    )
+
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setHubStatus("LIVE");
+
+      if(status === "SUBSCRIBED"){
+
+        setPortalStatus("LIVE");
+
+        document.body.classList.add(
+          "realtime-connected"
+        );
       }
     });
 }
 
-async function markAway() {
-  if (!currentUser) return;
+/* =========================================================
+   ONLINE PRESENCE
+========================================================= */
 
-  await supabase
-    .from("profiles")
-    .update({
-      online_status: "away",
-      last_seen_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", currentUser.id);
+window.addEventListener(
+  "beforeunload",
+  async() => {
+
+    if(!currentUser) return;
+
+    try{
+
+      await supabase
+        .from("profiles")
+        .update({
+          online_status:"away",
+          last_seen_at:new Date().toISOString()
+        })
+        .eq("id", currentUser.id);
+
+    }catch(err){
+
+      console.warn(
+        "Presence shutdown:",
+        err.message
+      );
+    }
+  }
+);
+
+/* =========================================================
+   UI FX
+========================================================= */
+
+function startCinemaFx(){
+
+  let glow = false;
+
+  setInterval(() => {
+
+    glow = !glow;
+
+    document.body.classList.toggle(
+      "is-live",
+      glow
+    );
+
+  }, 2400);
 }
 
-window.addEventListener("beforeunload", () => {
-  markAway();
-});
+/* =========================================================
+   BOOT
+========================================================= */
 
-document.addEventListener("visibilitychange", async () => {
-  if (!currentUser) return;
+async function bootIndex(){
 
-  if (document.visibilityState === "visible") {
-    await supabase
-      .from("profiles")
-      .update({
-        online_status: "online",
-        last_seen_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", currentUser.id);
-
-    await loadHubStats();
-  } else {
-    await markAway();
-  }
-});
-
-supabase.auth.onAuthStateChange(async (_event, session) => {
-  currentUser = session?.user || null;
+  setPortalStatus("BOOT");
 
   await loadUserAndProfile();
+
   await loadHubStats();
-});
 
-async function bootIndex() {
-  setHubStatus("BOOT");
-
-  if (els.activateMain) els.activateMain.textContent = "ACTIVATE";
-  if (els.activateSub) els.activateSub.textContent = "ENTER LIVE";
-
-  await loadUserAndProfile();
-  await loadHubStats();
   startRealtime();
+
+  startCinemaFx();
+
+  if(els.activateMain){
+    els.activateMain.textContent =
+      "ACTIVATE";
+  }
+
+  if(els.activateSub){
+    els.activateSub.textContent =
+      "ENTER LIVE";
+  }
+
+  console.log(
+    "RICH BIZNESS LLC — CINEMA INDEX READY"
+  );
 }
 
 bootIndex();
