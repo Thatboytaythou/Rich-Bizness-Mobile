@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================================================
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL INDEX BRAIN
+   REALTIME PROFILE / COUNTS / PORTAL STATE
    /core/pages/index.js
 ========================================================= */
 
@@ -29,6 +30,7 @@ const els = {
   portalStatus: $("portalStatus"),
   activateMain: $("activateMain"),
   activateSub: $("activateSub"),
+  centerPortal: $("centerPortal"),
 
   homeBalance: $("homeBalance"),
   homeRichPoints: $("homeRichPoints"),
@@ -50,6 +52,7 @@ const els = {
 let currentUser = null;
 let currentProfile = null;
 let realtimeChannel = null;
+let refreshTimer = null;
 
 function setText(el, value) {
   if (el) el.textContent = value;
@@ -85,8 +88,22 @@ function getInitial(name = "R") {
   return String(name || "R").trim().slice(0, 1).toUpperCase();
 }
 
+function getActiveKey() {
+  return window.RB_ACTIVE_KEY || "live";
+}
+
+function getActiveTitle() {
+  const key = getActiveKey();
+  const card = document.querySelector(`[data-dial-card="${key}"]`);
+  return card?.querySelector(".dial-title")?.textContent || key.toUpperCase();
+}
+
 function setPortalStatus(value) {
   setText(els.portalStatus, value || "LLC");
+}
+
+function setPageState(state) {
+  document.body.dataset.indexState = state;
 }
 
 function setNotificationGlow(count = 0) {
@@ -101,6 +118,38 @@ function setNotificationGlow(count = 0) {
     els.notificationBtn.setAttribute("data-count", String(unread));
   } else {
     els.notificationBtn.removeAttribute("data-count");
+  }
+}
+
+function setDialSub(key, value) {
+  const map = {
+    feed: els.feedDialSub,
+    watch: els.watchDialSub,
+    live: els.liveDialSub,
+    gallery: els.galleryDialSub,
+    music: els.musicDialSub,
+    upload: els.uploadDialSub,
+    gaming: els.gamingDialSub,
+    sports: els.sportsDialSub,
+    meta: els.metaDialSub,
+    store: els.storeDialSub
+  };
+
+  setText(map[key], value);
+}
+
+function syncPortalWithActive() {
+  const key = getActiveKey();
+  const title = getActiveTitle();
+
+  setPortalStatus(title);
+
+  if (els.centerPortal) {
+    els.centerPortal.dataset.activePortal = key;
+  }
+
+  if (els.activateSub) {
+    els.activateSub.textContent = `ENTER ${title}`;
   }
 }
 
@@ -120,7 +169,7 @@ function renderGuest() {
     els.homeAvatar.textContent = "R";
   }
 
-  setPortalStatus(window.RB_ACTIVE_KEY?.toUpperCase?.() || "LIVE");
+  syncPortalWithActive();
 }
 
 function renderProfile() {
@@ -208,7 +257,8 @@ async function countRows(table, filterBuilder = null) {
 }
 
 async function loadHubStats() {
-  setPortalStatus("SYNC");
+  setPageState("syncing");
+  document.body.classList.add("syncing");
 
   const [
     feedCount,
@@ -242,21 +292,32 @@ async function loadHubStats() {
     countRows("game_scores")
   ]);
 
-  setText(els.feedDialSub, feedCount ? `${shortCount(feedCount)} POSTS` : "SOCIAL");
-  setText(els.watchDialSub, watchCount ? `${shortCount(watchCount)} STREAMS` : "VIEW");
-  setText(els.liveDialSub, liveCount ? `${shortCount(liveCount)} LIVE` : "STREAM");
-  setText(els.galleryDialSub, galleryCount ? `${shortCount(galleryCount)} VIEWS` : "PHOTOS");
-  setText(els.uploadDialSub, uploadCount ? `${shortCount(uploadCount)} FILES` : "CONTENT");
-  setText(els.metaDialSub, metaVisits ? `${shortCount(metaVisits)} VISITS` : "VERSE");
-  setText(els.sportsDialSub, sportsCount ? `${shortCount(sportsCount)} POSTS` : "HIGHLIGHTS");
-  setText(els.storeDialSub, storeCount ? `${shortCount(storeCount)} ITEMS` : "SHOP");
-  setText(els.musicDialSub, musicCount ? `${shortCount(musicCount)} TRACKS` : "VIBES");
-  setText(els.gamingDialSub, gamingCount ? `${shortCount(gamingCount)} SCORES` : "PLAY");
+  setDialSub("feed", feedCount ? `${shortCount(feedCount)} POSTS` : "SOCIAL");
+  setDialSub("watch", watchCount ? `${shortCount(watchCount)} STREAMS` : "VIEW");
+  setDialSub("live", liveCount ? `${shortCount(liveCount)} LIVE` : "STREAM");
+  setDialSub("gallery", galleryCount ? `${shortCount(galleryCount)} VIEWS` : "PHOTOS");
+  setDialSub("upload", uploadCount ? `${shortCount(uploadCount)} FILES` : "CONTENT");
+  setDialSub("meta", metaVisits ? `${shortCount(metaVisits)} VISITS` : "VERSE");
+  setDialSub("sports", sportsCount ? `${shortCount(sportsCount)} POSTS` : "HIGHLIGHTS");
+  setDialSub("store", storeCount ? `${shortCount(storeCount)} ITEMS` : "SHOP");
+  setDialSub("music", musicCount ? `${shortCount(musicCount)} TRACKS` : "VIBES");
+  setDialSub("gaming", gamingCount ? `${shortCount(gamingCount)} SCORES` : "PLAY");
 
   setText(els.homeOnline, shortCount(onlineCount));
   setNotificationGlow(unreadCount);
 
-  setPortalStatus(window.RB_ACTIVE_KEY?.toUpperCase?.() || "LIVE");
+  syncPortalWithActive();
+
+  document.body.classList.remove("syncing");
+  setPageState("live");
+}
+
+function scheduleHubRefresh() {
+  clearTimeout(refreshTimer);
+
+  refreshTimer = setTimeout(() => {
+    loadHubStats();
+  }, 350);
 }
 
 function startRealtime() {
@@ -272,22 +333,43 @@ function startRealtime() {
         renderProfile();
       }
 
-      await loadHubStats();
+      scheduleHubRefresh();
     })
-    .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "feed_posts" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "live_streams" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "uploads" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "meta_visits" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "sports_posts" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "products" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "music_tracks" }, loadHubStats)
-    .on("postgres_changes", { event: "*", schema: "public", table: "game_scores" }, loadHubStats)
+    .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "feed_posts" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "live_streams" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "uploads" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "meta_visits" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "sports_posts" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "products" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "music_tracks" }, scheduleHubRefresh)
+    .on("postgres_changes", { event: "*", schema: "public", table: "game_scores" }, scheduleHubRefresh)
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        setPortalStatus(window.RB_ACTIVE_KEY?.toUpperCase?.() || "LIVE");
+        setPageState("live");
+        syncPortalWithActive();
       }
     });
+}
+
+function hookActiveWatcher() {
+  let lastKey = getActiveKey();
+
+  setInterval(() => {
+    const next = getActiveKey();
+
+    if (next !== lastKey) {
+      lastKey = next;
+      syncPortalWithActive();
+    }
+  }, 120);
+}
+
+function hookAuthChanges() {
+  supabase.auth.onAuthStateChange(async () => {
+    await loadUserAndProfile();
+    await loadHubStats();
+  });
 }
 
 window.addEventListener("beforeunload", () => {
@@ -303,21 +385,23 @@ window.addEventListener("beforeunload", () => {
 });
 
 async function bootIndex() {
+  setPageState("boot");
   setPortalStatus("BOOT");
+
+  if (!window.RB_ACTIVE_KEY) window.RB_ACTIVE_KEY = "live";
+  if (!window.RB_ACTIVE_ROUTE) window.RB_ACTIVE_ROUTE = "/live.html";
+
+  setText(els.activateMain, "ACTIVATE");
 
   await loadUserAndProfile();
   await loadHubStats();
 
   startRealtime();
+  hookActiveWatcher();
+  hookAuthChanges();
 
-  setText(els.activateMain, "ACTIVATE");
-
-  if (!window.RB_ACTIVE_KEY) {
-    window.RB_ACTIVE_KEY = "live";
-    window.RB_ACTIVE_ROUTE = "/live.html";
-  }
-
-  setPortalStatus(window.RB_ACTIVE_KEY.toUpperCase());
+  syncPortalWithActive();
+  setPageState("live");
 }
 
 bootIndex();
