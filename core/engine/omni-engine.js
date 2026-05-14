@@ -1,6 +1,6 @@
 /* =========================================================
    RICH BIZNESS LLC
-   TOUCH-TURN DECAGON OMNI ENGINE
+   CINEMATIC TOUCH-TURN DECAGON ENGINE
    /core/engine/omni-engine.js
 ========================================================= */
 
@@ -40,12 +40,13 @@ let dragging = false;
 let lastAngle = 0;
 let moved = false;
 let activeKey = "live";
+let raf = null;
 
-function normalizeAngle(angle) {
+function normalize(angle) {
   return Math.atan2(Math.sin(angle), Math.cos(angle));
 }
 
-function getCenter() {
+function centerOfDial() {
   const rect = dial.getBoundingClientRect();
 
   return {
@@ -54,114 +55,97 @@ function getCenter() {
   };
 }
 
-function getPointerAngle(event) {
-  const point = event.touches ? event.touches[0] : event;
-  const center = getCenter();
+function pointerAngle(event) {
+  const center = centerOfDial();
 
   return Math.atan2(
-    point.clientY - center.y,
-    point.clientX - center.x
+    event.clientY - center.y,
+    event.clientX - center.x
   );
 }
 
-function setVars() {
-  document.documentElement.style.setProperty(
-    "--rb-dial-rotation",
-    `${rotation}rad`
-  );
-
-  document.documentElement.style.setProperty(
-    "--rb-dial-counter-rotation",
-    `${-rotation}rad`
-  );
+function setDialVars() {
+  document.documentElement.style.setProperty("--rb-dial-rotation", `${rotation}rad`);
+  document.documentElement.style.setProperty("--rb-dial-counter-rotation", `${-rotation}rad`);
 }
 
-function getActiveFromRotation() {
+function activeFromRotation() {
   const normalized =
     ((-rotation + Math.PI / 2) % (Math.PI * 2) + Math.PI * 2) %
     (Math.PI * 2);
 
   const index = Math.round(normalized / step) % ORDER.length;
-
   return ORDER[index] || "live";
 }
 
-function setActive(key, fromEngine = true) {
-  activeKey = key || "live";
+function setActive(key) {
+  if (!key || !ROUTES[key]) return;
 
-  window.RB_ACTIVE_KEY = activeKey;
-  window.RB_ACTIVE_ROUTE = ROUTES[activeKey] || "/feed.html";
+  activeKey = key;
+
+  window.RB_ACTIVE_KEY = key;
+  window.RB_ACTIVE_ROUTE = ROUTES[key];
 
   document.querySelectorAll("[data-dial-card]").forEach((card) => {
-    card.classList.toggle("is-active", card.dataset.dialCard === activeKey);
+    card.classList.toggle("is-active", card.dataset.dialCard === key);
   });
 
-  const activeCard = document.querySelector(`[data-dial-card="${activeKey}"]`);
-  const title =
-    activeCard?.querySelector(".dial-title")?.textContent ||
-    activeKey.toUpperCase();
+  const card = document.querySelector(`[data-dial-card="${key}"]`);
+  const title = card?.querySelector(".dial-title")?.textContent || key.toUpperCase();
 
   const activateSub = document.getElementById("activateSub");
-  if (activateSub) activateSub.textContent = `ENTER ${title}`;
-
   const portalStatus = document.getElementById("portalStatus");
-  if (portalStatus) portalStatus.textContent = title;
 
-  if (!fromEngine && typeof window.RB_spinTo === "function") {
-    window.RB_spinTo(activeKey);
-  }
+  if (activateSub) activateSub.textContent = `ENTER ${title}`;
+  if (portalStatus) portalStatus.textContent = title;
 }
 
-function snapToActive() {
-  const index = ORDER.indexOf(activeKey);
+function snapRotationToKey(key) {
+  const index = ORDER.indexOf(key);
   if (index < 0) return;
 
-  const target = -(index * step) + Math.PI / 2;
-  rotation = target;
+  rotation = -(index * step) + Math.PI / 2;
   velocity = 0;
 
-  setVars();
+  setDialVars();
+  setActive(key);
 }
 
-function updateActiveFromWheel() {
-  const next = getActiveFromRotation();
-
-  if (next !== activeKey) {
-    setActive(next, true);
-  }
+function updateActive() {
+  const next = activeFromRotation();
+  if (next !== activeKey) setActive(next);
 }
 
-function pointerDown(event) {
+function onPointerDown(event) {
   if (!dial) return;
 
   dragging = true;
   moved = false;
   velocity = 0;
-  lastAngle = getPointerAngle(event);
+  lastAngle = pointerAngle(event);
 
   dial.classList.add("is-dragging");
 }
 
-function pointerMove(event) {
+function onPointerMove(event) {
   if (!dragging) return;
 
   event.preventDefault();
 
-  const angle = getPointerAngle(event);
-  const delta = normalizeAngle(angle - lastAngle);
+  const angle = pointerAngle(event);
+  const delta = normalize(angle - lastAngle);
 
-  if (Math.abs(delta) > 0.002) moved = true;
+  if (Math.abs(delta) > 0.003) moved = true;
 
   rotation += delta;
-  velocity = delta;
-
+  velocity = delta * 0.82;
   lastAngle = angle;
 
-  setVars();
-  updateActiveFromWheel();
+  setDialVars();
+  updateActive();
 }
 
-function pointerUp() {
+function onPointerUp() {
   if (!dragging) return;
 
   dragging = false;
@@ -169,59 +153,51 @@ function pointerUp() {
 }
 
 function animate() {
-  requestAnimationFrame(animate);
+  raf = requestAnimationFrame(animate);
 
   if (!dragging) {
     rotation += velocity;
-    velocity *= 0.91;
+    velocity *= 0.88;
 
-    if (Math.abs(velocity) < 0.0009) {
-      velocity = 0;
+    const activeIndex = Math.round((rotation - Math.PI / 2) / step);
+    const target = activeIndex * step + Math.PI / 2;
 
-      const snapIndex = Math.round((rotation - Math.PI / 2) / step);
-      const target = snapIndex * step + Math.PI / 2;
-
+    if (Math.abs(velocity) < 0.0025) {
       rotation += (target - rotation) * 0.12;
     }
 
-    setVars();
-    updateActiveFromWheel();
+    if (Math.abs(velocity) < 0.0002 && Math.abs(target - rotation) < 0.0008) {
+      velocity = 0;
+      rotation = target;
+    }
+
+    setDialVars();
+    updateActive();
   }
 }
 
-/* CLICK CARD = SNAP TO THAT CARD */
-document.addEventListener("click", (event) => {
-  const card = event.target.closest("[data-dial-card]");
-  if (!card) return;
+document.addEventListener(
+  "click",
+  (event) => {
+    const card = event.target.closest("[data-dial-card]");
 
-  if (moved) {
+    if (!card) return;
+
+    if (moved) {
+      event.preventDefault();
+      event.stopPropagation();
+      moved = false;
+      return;
+    }
+
     event.preventDefault();
-    event.stopPropagation();
-    return;
-  }
+    snapRotationToKey(card.dataset.dialCard);
+  },
+  true
+);
 
-  const key = card.dataset.dialCard;
-  const index = ORDER.indexOf(key);
-
-  if (index >= 0) {
-    rotation = -(index * step) + Math.PI / 2;
-    velocity = 0;
-
-    setVars();
-    setActive(key, true);
-  }
-});
-
-/* GLOBAL SPIN FUNCTION FOR HTML */
 window.RB_spinTo = function (key) {
-  const index = ORDER.indexOf(key);
-  if (index < 0) return;
-
-  rotation = -(index * step) + Math.PI / 2;
-  velocity = 0;
-
-  setVars();
-  setActive(key, true);
+  snapRotationToKey(key);
 };
 
 window.enterWorld = function () {
@@ -230,19 +206,12 @@ window.enterWorld = function () {
 
 window.enter = window.enterWorld;
 
-/* TOUCH + MOUSE CONTROL */
-window.addEventListener("pointerdown", pointerDown, { passive: false });
-window.addEventListener("pointermove", pointerMove, { passive: false });
-window.addEventListener("pointerup", pointerUp);
-window.addEventListener("pointercancel", pointerUp);
+if (dial) {
+  window.addEventListener("pointerdown", onPointerDown, { passive: false });
+  window.addEventListener("pointermove", onPointerMove, { passive: false });
+  window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointercancel", onPointerUp);
 
-/* BOOT */
-window.RB_ACTIVE_KEY = "live";
-window.RB_ACTIVE_ROUTE = "/live.html";
-
-setVars();
-setActive("live", true);
-snapToActive();
-animate();
-
-console.log("RICH BIZNESS TOUCH-TURN DECAGON ENGINE READY");
+  snapRotationToKey("live");
+  animate();
+}
