@@ -1,31 +1,23 @@
 /* =========================================================
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
-   TOUCH-TURN CONNECTED DIAL MASTER BUILD
+   DECAGON TOUCH-TURN DIAL MASTER BUILD
    /styles/main.css
 ========================================================= */
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 :root{
   --rb-green:#8dff5b;
   --rb-green-soft:#6bff8d;
   --rb-gold:#ffd76a;
-
   --safe-top:env(safe-area-inset-top);
   --safe-bottom:env(safe-area-inset-bottom);
-
   --stats-h:104px;
   --rb-dial-rotation:0rad;
 }
 
-html,
-body{
+html,body{
   width:100%;
   height:100%;
   overflow:hidden;
@@ -45,12 +37,12 @@ body::before{
   z-index:0;
   pointer-events:none;
   background:
-    linear-gradient(to bottom,rgba(0,0,0,.12),rgba(0,0,0,.44) 45%,rgba(0,0,0,.92)),
-    radial-gradient(circle at 50% 48%,rgba(141,255,91,.14),transparent 34%),
+    linear-gradient(to bottom,rgba(0,0,0,.08),rgba(0,0,0,.42) 44%,rgba(0,0,0,.92)),
+    radial-gradient(circle at 50% 50%,rgba(141,255,91,.18),transparent 34%),
     url("/images/background-v2.png");
   background-size:cover;
   background-position:center;
-  filter:brightness(.62) contrast(1.08) saturate(1.06);
+  filter:brightness(.66) contrast(1.1) saturate(1.12);
 }
 
 body::after{
@@ -59,10 +51,10 @@ body::after{
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.28) 62%,rgba(0,0,0,.9) 100%);
+  background:
+    radial-gradient(circle at 50% 55%,transparent 28%,rgba(0,0,0,.28) 62%,rgba(0,0,0,.92) 100%);
 }
 
-/* ENGINE */
 #engine{
   position:fixed;
   inset:0;
@@ -73,13 +65,12 @@ body::after{
   mix-blend-mode:screen;
 }
 
-/* FX */
 .screen-vignette{
   position:fixed;
   inset:0;
   z-index:3;
   pointer-events:none;
-  background:radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.18) 64%,rgba(0,0,0,.84) 100%);
+  background:radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.18) 64%,rgba(0,0,0,.86) 100%);
 }
 
 .screen-noise{
@@ -105,8 +96,7 @@ body::after{
   pointer-events:none;
 }
 
-.top-left,
-.top-right{
+.top-left,.top-right{
   display:flex;
   flex-direction:column;
   gap:12px;
@@ -120,11 +110,7 @@ body::after{
   transform:translateX(-50%);
 }
 
-.welcome-block{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
+.welcome-block{display:flex;flex-direction:column;gap:2px}
 
 .welcome-text{
   font-size:.72rem;
@@ -140,7 +126,6 @@ body::after{
   color:#fff;
 }
 
-/* PROFILE */
 .rank-panel{
   border:none;
   outline:none;
@@ -151,9 +136,9 @@ body::after{
   border-radius:22px;
   padding:10px 14px;
   background:linear-gradient(180deg,rgba(16,22,16,.94),rgba(2,4,2,.98));
-  border:1px solid rgba(255,216,106,.4);
+  border:1px solid rgba(255,216,106,.42);
   color:#fff;
-  box-shadow:inset 0 0 18px rgba(141,255,91,.08),0 0 24px rgba(0,0,0,.7);
+  box-shadow:inset 0 0 18px rgba(141,255,91,.08),0 0 24px rgba(0,0,0,.72);
   backdrop-filter:blur(16px);
 }
 
@@ -165,22 +150,14 @@ body::after{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:radial-gradient(circle,rgba(141,255,91,.22),rgba(5,10,5,.95));
-  border:1px solid rgba(141,255,91,.4);
+  background:radial-gradient(circle,rgba(141,255,91,.25),rgba(5,10,5,.95));
+  border:1px solid rgba(141,255,91,.42);
   color:var(--rb-green);
   font-weight:950;
 }
 
-.rank-icon img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.rank-copy{
-  display:flex;
-  flex-direction:column;
-}
+.rank-icon img{width:100%;height:100%;object-fit:cover}
+.rank-copy{display:flex;flex-direction:column}
 
 .rank-copy small{
   font-size:.6rem;
@@ -205,12 +182,11 @@ body::after{
   line-height:.82;
 }
 
-.brand-rich,
-.brand-biz{
+.brand-rich,.brand-biz{
   font-family:Georgia,serif;
   font-weight:950;
   color:#e2ca74;
-  text-shadow:0 0 18px rgba(141,255,91,.28),0 4px 14px rgba(0,0,0,.8);
+  text-shadow:0 0 18px rgba(141,255,91,.28),0 4px 14px rgba(0,0,0,.86);
 }
 
 .brand-rich{font-size:2rem}
@@ -237,7 +213,8 @@ body::after{
   align-items:center;
   justify-content:center;
   backdrop-filter:blur(14px);
-  box-shadow:0 0 24px rgba(0,0,0,.7);
+  box-shadow:0 0 24px rgba(0,0,0,.75);
+  position:relative;
 }
 
 .notification.has-unread::after{
@@ -288,10 +265,7 @@ body::after{
   font-weight:800;
 }
 
-/* =========================================================
-   TOUCH TURN OMNI DIAL — WHOLE MACHINE ROTATES TOGETHER
-========================================================= */
-
+/* DECAGON TOUCH DIAL */
 .dial-ui{
   position:fixed;
   left:50%;
@@ -305,21 +279,17 @@ body::after{
   transition:transform .08s linear;
 }
 
-/* DIAL RINGS */
 .dial-ui::before{
   content:"";
   position:absolute;
   inset:0;
   border-radius:50%;
   background:
-    radial-gradient(circle at center,transparent 28%,rgba(141,255,91,.13) 30%,transparent 32%),
-    radial-gradient(circle at center,transparent 45%,rgba(141,255,91,.28) 47%,transparent 50%),
-    radial-gradient(circle at center,transparent 62%,rgba(255,216,106,.18) 64%,transparent 66%),
-    repeating-conic-gradient(from 0deg,rgba(141,255,91,.16) 0deg,rgba(141,255,91,.16) 2deg,transparent 2deg,transparent 36deg);
-  box-shadow:
-    inset 0 0 34px rgba(141,255,91,.12),
-    0 0 44px rgba(141,255,91,.16),
-    0 0 110px rgba(141,255,91,.08);
+    radial-gradient(circle at center,transparent 27%,rgba(141,255,91,.13) 29%,transparent 32%),
+    radial-gradient(circle at center,transparent 44%,rgba(141,255,91,.3) 47%,transparent 50%),
+    radial-gradient(circle at center,transparent 62%,rgba(255,216,106,.2) 64%,transparent 67%),
+    repeating-conic-gradient(from 0deg,rgba(141,255,91,.18) 0deg,rgba(141,255,91,.18) 1.6deg,transparent 1.6deg,transparent 36deg);
+  box-shadow:inset 0 0 34px rgba(141,255,91,.12),0 0 48px rgba(141,255,91,.18),0 0 120px rgba(141,255,91,.08);
   animation:machineBreath 4s ease-in-out infinite;
 }
 
@@ -328,12 +298,12 @@ body::after{
   position:absolute;
   inset:10%;
   border-radius:50%;
-  border:1px solid rgba(141,255,91,.18);
+  border:1px solid rgba(141,255,91,.2);
   background:radial-gradient(circle,rgba(141,255,91,.08),transparent 68%);
   opacity:.78;
 }
 
-/* CARDS — LOCKED TO WHEEL, ROTATES WITH WHEEL */
+/* CARDS */
 .dial-card{
   position:absolute;
   width:82px;
@@ -366,7 +336,7 @@ body::after{
   height:72px;
   transform:translateX(-50%) translateY(28px);
   background:linear-gradient(to bottom,rgba(141,255,91,.48),rgba(141,255,91,0));
-  opacity:.6;
+  opacity:.58;
   pointer-events:none;
 }
 
@@ -385,8 +355,8 @@ body::after{
 
 .dial-card.is-active{
   border-color:rgba(180,255,120,.95);
-  filter:brightness(1.15);
-  box-shadow:0 0 24px rgba(141,255,91,.5),0 0 70px rgba(141,255,91,.16);
+  filter:brightness(1.18);
+  box-shadow:0 0 24px rgba(141,255,91,.55),0 0 76px rgba(141,255,91,.18);
 }
 
 .dial-icon{
@@ -408,29 +378,19 @@ body::after{
   color:var(--rb-green-soft);
 }
 
-/* 10 SOCKET POSITIONS — EVEN REAL DIAL */
-.card-feed{left:50%;top:4%}
+/* DECAGON SOCKETS */
+.card-feed,.top-card{left:50%;top:4%}
 .card-watch{left:78%;top:16%}
 .card-live{left:95%;top:45%}
-.card-music{left:83%;top:73%}
-.card-gaming{left:62%;top:91%}
-.card-meta{left:50%;top:99%}
-.card-sports{left:38%;top:91%}
-.card-gallery{left:17%;top:73%}
-.card-upload{left:5%;top:45%}
-.card-store{left:22%;top:16%}
+.card-music,.top-right-card{left:83%;top:73%}
+.card-gaming,.right-card{left:62%;top:91%}
+.card-meta,.bottom-card{left:50%;top:99%}
+.card-sports,.bottom-left-card{left:38%;top:91%}
+.card-gallery,.top-left-card{left:17%;top:73%}
+.card-upload,.left-card{left:5%;top:45%}
+.card-store,.bottom-right-card{left:22%;top:16%}
 
-/* old class safety */
-.top-card{left:50%;top:4%}
-.top-left-card{left:17%;top:73%}
-.top-right-card{left:83%;top:73%}
-.left-card{left:5%;top:45%}
-.right-card{left:62%;top:91%}
-.bottom-left-card{left:38%;top:91%}
-.bottom-card{left:50%;top:99%}
-.bottom-right-card{left:22%;top:16%}
-
-/* CENTER CORE — STAYS LOCKED, DOES NOT ROTATE */
+/* CENTER CORE */
 .center-ui{
   position:fixed;
   left:50%;
@@ -449,7 +409,7 @@ body::after{
     radial-gradient(circle,rgba(141,255,91,.14),transparent 58%),
     radial-gradient(circle,rgba(0,0,0,.32),rgba(0,0,0,.96) 72%);
   border:1px solid rgba(141,255,91,.26);
-  box-shadow:0 0 32px rgba(141,255,91,.26),inset 0 0 26px rgba(141,255,91,.12);
+  box-shadow:0 0 32px rgba(141,255,91,.28),inset 0 0 26px rgba(141,255,91,.12);
 }
 
 .portal-core::before{
@@ -587,10 +547,7 @@ body::after{
 @media (max-height:760px){
   :root{--stats-h:96px}
 
-  .dial-ui,
-  .center-ui{
-    top:56%;
-  }
+  .dial-ui,.center-ui{top:56%}
 
   .dial-ui{
     width:min(82vw,410px);
@@ -608,18 +565,14 @@ body::after{
     height:148px;
   }
 
-  .portal-title span{
-    font-size:1.38rem;
-  }
+  .portal-title span{font-size:1.38rem}
 
   .enter{
     height:80px;
     bottom:calc(var(--stats-h) + 12px);
   }
 
-  .enter-main{
-    font-size:1.7rem;
-  }
+  .enter-main{font-size:1.7rem}
 }
 
 /* ANIMATION */
