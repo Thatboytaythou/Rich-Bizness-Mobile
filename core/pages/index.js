@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* =========================================================
    RICH BIZNESS LLC
-   CINEMATIC OMNI INDEX BRAIN
+   CINEMATIC UNIVERSAL INDEX BRAIN
    /core/pages/index.js
 ========================================================= */
 
@@ -24,6 +24,7 @@ const els = {
   homeUserName: $("homeUserName"),
   homeAvatar: $("homeAvatar"),
   homeRichLevel: $("homeRichLevel"),
+
   notificationBtn: $("notificationBtn"),
   portalStatus: $("portalStatus"),
   activateMain: $("activateMain"),
@@ -60,9 +61,15 @@ function money(cents = 0) {
 
 function shortCount(value = 0) {
   const n = Number(value || 0);
+
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+
   return n.toLocaleString();
+}
+
+function safeUpper(value, fallback) {
+  return String(value || fallback || "").toUpperCase();
 }
 
 function getName(profile, user) {
@@ -85,11 +92,13 @@ function setPortalStatus(value) {
 function setNotificationGlow(count = 0) {
   if (!els.notificationBtn) return;
 
-  const hasUnread = Number(count || 0) > 0;
+  const unread = Number(count || 0);
+  const hasUnread = unread > 0;
+
   els.notificationBtn.classList.toggle("has-unread", hasUnread);
 
   if (hasUnread) {
-    els.notificationBtn.setAttribute("data-count", String(count));
+    els.notificationBtn.setAttribute("data-count", String(unread));
   } else {
     els.notificationBtn.removeAttribute("data-count");
   }
@@ -106,15 +115,23 @@ function renderGuest() {
   setText(els.homeRichPoints, "0");
   setText(els.homeRank, "VISITOR");
 
-  if (els.homeAvatar) els.homeAvatar.textContent = "R";
+  if (els.homeAvatar) {
+    els.homeAvatar.innerHTML = "";
+    els.homeAvatar.textContent = "R";
+  }
 
-  setPortalStatus("GUEST");
+  setPortalStatus(window.RB_ACTIVE_KEY?.toUpperCase?.() || "LIVE");
 }
 
 function renderProfile() {
+  if (!currentUser && !currentProfile) {
+    renderGuest();
+    return;
+  }
+
   const name = getName(currentProfile, currentUser);
-  const level = (currentProfile?.rich_level || "MAX").toUpperCase();
-  const rank = (currentProfile?.rank_title || "BIZ LEGEND").toUpperCase();
+  const level = safeUpper(currentProfile?.rich_level, "MAX");
+  const rank = safeUpper(currentProfile?.rank_title, "BIZ LEGEND");
 
   setText(els.welcomeStatus, currentUser ? "WELCOME BACK" : "TAP IN 💰");
   setText(els.homeUserName, name);
@@ -127,6 +144,7 @@ function renderProfile() {
     if (currentProfile?.avatar_url) {
       els.homeAvatar.innerHTML = `<img src="${currentProfile.avatar_url}" alt="Profile avatar" />`;
     } else {
+      els.homeAvatar.innerHTML = "";
       els.homeAvatar.textContent = getInitial(name);
     }
   }
@@ -148,7 +166,8 @@ async function loadUserAndProfile() {
     .maybeSingle();
 
   if (error) {
-    console.warn("Profile load skipped:", error.message);
+    console.warn("Rich Bizness profile load skipped:", error.message);
+    currentProfile = null;
     renderProfile();
     return;
   }
@@ -177,13 +196,13 @@ async function countRows(table, filterBuilder = null) {
     const { count, error } = await query;
 
     if (error) {
-      console.warn(`Count skipped ${table}:`, error.message);
+      console.warn(`Rich Bizness count skipped ${table}:`, error.message);
       return 0;
     }
 
     return count || 0;
   } catch (err) {
-    console.warn(`Count failed ${table}:`, err.message);
+    console.warn(`Rich Bizness count failed ${table}:`, err.message);
     return 0;
   }
 }
@@ -292,6 +311,13 @@ async function bootIndex() {
   startRealtime();
 
   setText(els.activateMain, "ACTIVATE");
+
+  if (!window.RB_ACTIVE_KEY) {
+    window.RB_ACTIVE_KEY = "live";
+    window.RB_ACTIVE_ROUTE = "/live.html";
+  }
+
+  setPortalStatus(window.RB_ACTIVE_KEY.toUpperCase());
 }
 
 bootIndex();
