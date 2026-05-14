@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE UPLOAD
    /core/pages/upload.js
-   MAX REALTIME SECTION ROUTER
+   FULL CORRECTED TABLE + BUCKET ROUTER
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -56,23 +56,38 @@ let realtimeChannel = null;
 
 const ROUTES = {
   general: { bucket: "general-uploads", section: "general", category: "general" },
-  "profile-avatar": { bucket: "avatars", section: "profile", category: "avatar" },
-  "profile-banner": { bucket: "profile-banners", section: "profile", category: "banner" },
+
   feed: { bucket: "general-uploads", section: "feed", category: "feed" },
 
+  "profile-avatar": { bucket: "avatars", section: "profile", category: "avatar" },
+  "profile-banner": { bucket: "profile-banners", section: "profile", category: "banner" },
+
   music: { bucket: "music-audio", section: "music", category: "music" },
+  "music-cover": { bucket: "music-covers", section: "music", category: "cover" },
+
   podcast: { bucket: "podcast-audio", section: "podcast", category: "podcast" },
+  "podcast-cover": { bucket: "podcast-covers", section: "podcast", category: "cover" },
+
+  radio: { bucket: "radio-covers", section: "radio", category: "cover" },
+
+  gallery: { bucket: "gallery-media", section: "gallery", category: "gallery" },
+
+  gaming: { bucket: "game-clips", section: "gaming", category: "gaming" },
+  "game-cover": { bucket: "game-covers", section: "gaming", category: "cover" },
+  "game-asset": { bucket: "game-assets", section: "gaming", category: "asset" },
 
   sports: { bucket: "sports-media", section: "sports", category: "sports" },
-  gaming: { bucket: "game-clips", section: "gaming", category: "gaming" },
-  gallery: { bucket: "gallery-media", section: "gallery", category: "gallery" },
+  "sports-clip": { bucket: "sports-clips", section: "sports", category: "clip" },
+  "sports-cover": { bucket: "sports-covers", section: "sports", category: "cover" },
 
   "store-product": { bucket: "store-products", section: "store", category: "product" },
   "store-digital": { bucket: "store-digital", section: "store", category: "digital" },
   "store-seller": { bucket: "store-seller-media", section: "store", category: "seller" },
 
   "live-thumbnail": { bucket: "live-thumbnails", section: "live", category: "thumbnail" },
-  "live-recording": { bucket: "live-recordings", section: "live", category: "recording" }
+  "live-recording": { bucket: "live-recordings", section: "live", category: "recording" },
+
+  "meta-avatar": { bucket: "meta-avatars", section: "meta", category: "avatar" }
 };
 
 function setStatus(message, mode = "idle") {
@@ -121,8 +136,12 @@ function getMediaType(file = selectedFile) {
   return "file";
 }
 
+function getRouteKey() {
+  return els.sectionInput?.value || "general";
+}
+
 function getRoute() {
-  return ROUTES[els.sectionInput?.value] || ROUTES.general;
+  return ROUTES[getRouteKey()] || ROUTES.general;
 }
 
 function getTitle() {
@@ -151,7 +170,12 @@ function getDisplayName() {
 }
 
 function getAvatarUrl() {
-  return currentProfile?.avatar_url || currentIdentity?.avatar_url || currentMetaAvatar?.avatar_url || null;
+  return (
+    currentProfile?.avatar_url ||
+    currentIdentity?.avatar_url ||
+    currentMetaAvatar?.avatar_url ||
+    null
+  );
 }
 
 function getIdentityPayload() {
@@ -165,7 +189,7 @@ function getIdentityPayload() {
     rich_level: currentProfile?.rich_level || "starter",
     rank_title: currentProfile?.rank_title || "new creator",
     meta_avatar: currentMetaAvatar || null,
-    avatar_config: currentMetaAvatar?.metadata?.avatar_config || currentMetaAvatar?.outfit || null
+    avatar_config: currentMetaAvatar?.metadata?.avatar_config || null
   };
 }
 
@@ -223,6 +247,7 @@ async function loadUser() {
     .maybeSingle();
 
   currentMetaAvatar = meta || null;
+
   return true;
 }
 
@@ -230,9 +255,9 @@ function setSelectedFile(file) {
   selectedFile = file || null;
 
   if (!selectedFile) {
-    els.previewCard.style.display = "none";
-    els.previewSlot.innerHTML = "";
-    els.fileMeta.textContent = "";
+    if (els.previewCard) els.previewCard.style.display = "none";
+    if (els.previewSlot) els.previewSlot.innerHTML = "";
+    if (els.fileMeta) els.fileMeta.textContent = "";
     updateStats();
     return;
   }
@@ -240,7 +265,7 @@ function setSelectedFile(file) {
   const mediaType = getMediaType(selectedFile);
   const previewUrl = URL.createObjectURL(selectedFile);
 
-  els.previewCard.style.display = "block";
+  if (els.previewCard) els.previewCard.style.display = "block";
 
   if (mediaType === "image") {
     els.previewSlot.innerHTML = `<img class="preview-media" src="${previewUrl}" alt="Preview" />`;
@@ -257,7 +282,7 @@ function setSelectedFile(file) {
     ${escapeHtml(selectedFile.type || "unknown file")} • ${formatBytes(selectedFile.size)}
   `;
 
-  if (!els.titleInput.value.trim()) {
+  if (els.titleInput && !els.titleInput.value.trim()) {
     els.titleInput.value = selectedFile.name.replace(/\.[^/.]+$/, "");
   }
 
@@ -305,8 +330,9 @@ async function insertFirstWorking(table, payloads = []) {
       .maybeSingle();
 
     if (!error) return { data, error: null };
+
     lastError = error;
-    console.warn(`${table} route attempt skipped:`, error.message);
+    console.warn(`${table} route skipped:`, error.message);
   }
 
   return { data: null, error: lastError };
@@ -321,8 +347,13 @@ async function updateFirstWorking(table, filters = [], payload) {
   }
 
   const { error } = await query;
-  if (error) console.warn(`${table} update skipped:`, error.message);
-  return !error;
+
+  if (error) {
+    console.warn(`${table} update skipped:`, error.message);
+    return false;
+  }
+
+  return true;
 }
 
 function buildBaseMetadata(upload, extra = {}) {
@@ -333,6 +364,7 @@ function buildBaseMetadata(upload, extra = {}) {
     route_key: upload?.metadata?.route_key,
     bucket: upload.bucket,
     file_path: upload.file_path,
+    public_url: upload.public_url,
     identity: getIdentityPayload(),
     ...extra
   };
@@ -346,6 +378,7 @@ async function runAutoRoute(upload) {
   const username = identity.username;
   const displayName = identity.display_name;
   const avatarUrl = identity.avatar_url;
+  const now = new Date().toISOString();
 
   try {
     if (routeKey === "profile-avatar") {
@@ -353,7 +386,7 @@ async function runAutoRoute(upload) {
         .from("profiles")
         .update({
           avatar_url: upload.public_url,
-          updated_at: new Date().toISOString()
+          updated_at: now
         })
         .eq("id", currentUser.id);
 
@@ -363,12 +396,11 @@ async function runAutoRoute(upload) {
           user_id: currentUser.id,
           display_name: displayName,
           avatar_url: upload.public_url,
-          presence_state: "online",
-          updated_at: new Date().toISOString(),
+          updated_at: now,
           metadata: {
             ...(currentMetaAvatar?.metadata || {}),
             avatar_image_source: "upload_page",
-            synced_at: new Date().toISOString()
+            synced_at: now
           }
         }, { onConflict: "user_id" });
 
@@ -380,9 +412,27 @@ async function runAutoRoute(upload) {
         .from("profiles")
         .update({
           banner_url: upload.public_url,
-          updated_at: new Date().toISOString()
+          updated_at: now
         })
         .eq("id", currentUser.id);
+
+      return;
+    }
+
+    if (routeKey === "meta-avatar") {
+      await supabase
+        .from("meta_avatars")
+        .upsert({
+          user_id: currentUser.id,
+          display_name: displayName,
+          avatar_url: upload.public_url,
+          updated_at: now,
+          metadata: buildBaseMetadata(upload, {
+            avatar_image_source: "upload_page",
+            synced_at: now
+          })
+        }, { onConflict: "user_id" });
+
       return;
     }
 
@@ -403,16 +453,9 @@ async function runAutoRoute(upload) {
           is_featured: false,
           is_pinned: false,
           metadata: buildBaseMetadata(upload)
-        },
-        {
-          user_id: currentUser.id,
-          body: upload.description || upload.title,
-          media_url: upload.public_url,
-          media_type: upload.media_type,
-          post_type: routeKey,
-          metadata: buildBaseMetadata(upload)
         }
       ]);
+
       return;
     }
 
@@ -422,33 +465,7 @@ async function runAutoRoute(upload) {
         return;
       }
 
-      await insertFirstWorking("tracks", [
-        {
-          creator_id: currentUser.id,
-          title: upload.title,
-          artist_name: displayName,
-          description: upload.description,
-          genre: upload.category,
-          audio_url: upload.public_url,
-          cover_url: avatarUrl,
-          is_featured: false,
-          play_count: 0,
-          like_count: 0,
-          metadata: buildBaseMetadata(upload)
-        }
-      ]);
-
       await insertFirstWorking("music_tracks", [
-        {
-          creator_id: currentUser.id,
-          title: upload.title,
-          description: upload.description,
-          audio_url: upload.public_url,
-          cover_url: avatarUrl,
-          genre: upload.category,
-          is_published: true,
-          metadata: buildBaseMetadata(upload)
-        },
         {
           user_id: currentUser.id,
           username,
@@ -463,6 +480,16 @@ async function runAutoRoute(upload) {
           is_featured: false
         }
       ]);
+
+      return;
+    }
+
+    if (routeKey === "music-cover") {
+      await updateFirstWorking(
+        "music_tracks",
+        [{ type: "eq", column: "user_id", value: currentUser.id }],
+        { cover_url: upload.public_url }
+      );
 
       return;
     }
@@ -475,16 +502,6 @@ async function runAutoRoute(upload) {
 
       await insertFirstWorking("podcast_episodes", [
         {
-          creator_id: currentUser.id,
-          title: upload.title,
-          description: upload.description,
-          audio_url: upload.public_url,
-          cover_url: avatarUrl,
-          episode_number: 1,
-          is_published: true,
-          metadata: buildBaseMetadata(upload)
-        },
-        {
           user_id: currentUser.id,
           username,
           display_name: displayName,
@@ -495,34 +512,37 @@ async function runAutoRoute(upload) {
           episode_number: 1
         }
       ]);
+
       return;
     }
 
-    if (routeKey === "sports") {
-      await insertFirstWorking("sports_uploads", [
+    if (routeKey === "podcast-cover") {
+      await updateFirstWorking(
+        "podcast_episodes",
+        [{ type: "eq", column: "user_id", value: currentUser.id }],
+        { cover_url: upload.public_url }
+      );
+
+      return;
+    }
+
+    if (routeKey === "radio") {
+      await insertFirstWorking("radio_stations", [
         {
           user_id: currentUser.id,
-          title: upload.title,
-          caption: upload.description,
-          sport_name: upload.category,
-          content_type: upload.media_type,
-          clip_type: "upload",
-          file_url: upload.public_url,
-          thumbnail_url: upload.media_type === "image" ? upload.public_url : null,
-          views: 0,
-          likes: 0,
-          is_featured: false
+          station_name: upload.title,
+          station_tag: upload.category || "radio",
+          stream_url: upload.public_url,
+          cover_url: upload.public_url,
+          is_live: false
         }
       ]);
 
+      return;
+    }
+
+    if (routeKey === "sports" || routeKey === "sports-clip") {
       await insertFirstWorking("sports_posts", [
-        {
-          user_id: currentUser.id,
-          title: upload.title,
-          description: upload.description,
-          video_url: upload.media_type === "video" ? upload.public_url : null,
-          category: upload.category
-        },
         {
           user_id: currentUser.id,
           username,
@@ -530,6 +550,7 @@ async function runAutoRoute(upload) {
           title: upload.title,
           body: upload.description,
           sport: upload.category,
+          team_name: null,
           media_url: upload.public_url,
           media_type: upload.media_type,
           cover_url: upload.media_type === "image" ? upload.public_url : null,
@@ -539,20 +560,41 @@ async function runAutoRoute(upload) {
           is_featured: false
         }
       ]);
+
+      return;
+    }
+
+    if (routeKey === "sports-cover") {
+      await insertFirstWorking("sports_broadcasts", [
+        {
+          user_id: currentUser.id,
+          username,
+          display_name: displayName,
+          title: upload.title,
+          description: upload.description,
+          sport: upload.category,
+          team_name: null,
+          stream_url: null,
+          replay_url: null,
+          cover_url: upload.public_url,
+          status: "draft",
+          access_type: "free",
+          price_cents: 0,
+          currency: "usd",
+          viewer_count: 0,
+          peak_viewers: 0,
+          total_revenue_cents: 0,
+          metadata: buildBaseMetadata(upload)
+        }
+      ]);
+
       return;
     }
 
     if (routeKey === "gaming") {
       await insertFirstWorking("game_clips", [
         {
-          user_id: currentUser.id,
-          title: upload.title,
-          description: upload.description,
-          clip_url: upload.public_url,
-          media_type: upload.media_type,
-          metadata: buildBaseMetadata(upload)
-        },
-        {
+          game_id: null,
           game_slug: "general",
           user_id: currentUser.id,
           username,
@@ -564,14 +606,23 @@ async function runAutoRoute(upload) {
         }
       ]);
 
-      await insertFirstWorking("gaming_uploads", [
+      return;
+    }
+
+    if (routeKey === "game-cover" || routeKey === "game-asset") {
+      await insertFirstWorking("games", [
         {
-          user_id: currentUser.id,
+          slug: `user-${currentUser.id.slice(0, 8)}-${Date.now()}`,
           title: upload.title,
           description: upload.description,
-          file_url: upload.public_url,
-          thumbnail_url: upload.media_type === "image" ? upload.public_url : null,
-          media_type: upload.media_type,
+          category: upload.category || "arcade",
+          play_url: "#",
+          cover_url: upload.public_url,
+          logo_url: routeKey === "game-asset" ? upload.public_url : null,
+          is_active: true,
+          is_featured: false,
+          total_plays: 0,
+          high_score: 0,
           metadata: buildBaseMetadata(upload)
         }
       ]);
@@ -597,21 +648,17 @@ async function runAutoRoute(upload) {
           is_digital: false,
           is_local: false,
           is_featured: false,
+          city: null,
+          state: null,
+          location_label: null,
           status: "active",
           views: 0,
           likes: 0,
           sales_count: 0,
           metadata: buildBaseMetadata(upload, { source_type: "store_product" })
-        },
-        {
-          creator_id: currentUser.id,
-          name: upload.title,
-          description: upload.description,
-          price_cents: 1000,
-          image_url: upload.public_url,
-          metadata: buildBaseMetadata(upload)
         }
       ]);
+
       return;
     }
 
@@ -624,6 +671,8 @@ async function runAutoRoute(upload) {
           category: upload.category || "digital",
           price_cents: 1000,
           currency: "usd",
+          image_url: upload.media_type === "image" ? upload.public_url : null,
+          cover_url: upload.media_type === "image" ? upload.public_url : null,
           media_url: upload.public_url,
           product_type: "digital",
           fulfillment_type: "digital",
@@ -631,6 +680,9 @@ async function runAutoRoute(upload) {
           is_digital: true,
           is_local: false,
           is_featured: false,
+          city: null,
+          state: null,
+          location_label: null,
           status: "active",
           views: 0,
           likes: 0,
@@ -638,18 +690,24 @@ async function runAutoRoute(upload) {
           metadata: buildBaseMetadata(upload, { source_type: "store_digital" })
         }
       ]);
+
       return;
     }
 
     if (routeKey === "store-seller") {
-      await updateFirstWorking(
-        "store_seller_profiles",
-        [{ type: "eq", column: "user_id", value: currentUser.id }],
-        {
+      await supabase
+        .from("store_seller_profiles")
+        .upsert({
+          user_id: currentUser.id,
+          seller_name: displayName,
+          bio: currentProfile?.bio || null,
+          avatar_url: avatarUrl,
           banner_url: upload.public_url,
-          updated_at: new Date().toISOString()
-        }
-      );
+          status: "active",
+          metadata: buildBaseMetadata(upload),
+          updated_at: now
+        }, { onConflict: "user_id" });
+
       return;
     }
 
@@ -660,24 +718,50 @@ async function runAutoRoute(upload) {
         {
           thumbnail_url: upload.public_url,
           cover_url: upload.public_url,
-          updated_at: new Date().toISOString()
+          last_activity_at: now,
+          metadata: buildBaseMetadata(upload)
         }
       );
+
       return;
     }
 
     if (routeKey === "live-recording") {
-      await insertFirstWorking("live_stream_cards", [
+      await insertFirstWorking("live_streams", [
         {
+          creator_id: currentUser.id,
           user_id: currentUser.id,
+          username,
+          display_name: displayName,
           title: upload.title,
           description: upload.description,
+          category: upload.category || "recording",
+          status: "ended",
+          access_type: "free",
+          price_cents: 0,
+          currency: "usd",
+          livekit_room_name: null,
+          slug: `recording-${currentUser.id.slice(0, 8)}-${Date.now()}`,
+          viewer_count: 0,
+          total_revenue_cents: 0,
+          is_chat_enabled: true,
+          thumbnail_url: upload.media_type === "image" ? upload.public_url : null,
           cover_url: upload.media_type === "image" ? upload.public_url : null,
-          replay_url: upload.public_url,
-          status: "recording",
-          metadata: buildBaseMetadata(upload)
+          peak_viewers: 0,
+          total_chat_messages: 0,
+          total_reactions: 0,
+          is_cohost_enabled: false,
+          is_vip_enabled: false,
+          is_featured: false,
+          ended_at: now,
+          last_activity_at: now,
+          metadata: buildBaseMetadata(upload, {
+            recording_url: upload.public_url,
+            source_type: "live_recording"
+          })
         }
       ]);
+
       return;
     }
   } catch (error) {
@@ -698,10 +782,11 @@ async function uploadFile() {
   }
 
   const route = getRoute();
+  const routeKey = getRouteKey();
   const mediaType = getMediaType(selectedFile);
   const title = getTitle();
-  const category = els.categoryInput.value.trim() || route.category;
-  const visibility = els.visibilityInput.value || "public";
+  const category = els.categoryInput?.value.trim() || route.category;
+  const visibility = els.visibilityInput?.value || "public";
 
   const path = [
     currentUser.id,
@@ -710,7 +795,8 @@ async function uploadFile() {
   ].join("/");
 
   try {
-    els.uploadBtn.disabled = true;
+    if (els.uploadBtn) els.uploadBtn.disabled = true;
+
     setProgress(5);
     setStatus("UPLOADING TO CLOUD...", "uploading");
 
@@ -735,14 +821,14 @@ async function uploadFile() {
     if (!publicUrl) throw new Error("Public URL missing");
 
     setProgress(78);
-    setStatus("SAVING UPLOAD RECORD...", "saving");
+    setStatus("SAVING UNIVERSAL UPLOAD RECORD...", "saving");
 
     const payload = {
       user_id: currentUser.id,
       category,
       section: route.section,
       title,
-      description: els.descriptionInput.value.trim() || null,
+      description: els.descriptionInput?.value.trim() || null,
       bucket: route.bucket,
       file_path: path,
       public_url: publicUrl,
@@ -754,7 +840,7 @@ async function uploadFile() {
       metadata: {
         source: "upload.html",
         app: "Rich Bizness Mobile",
-        route_key: els.sectionInput.value,
+        route_key: routeKey,
         original_name: selectedFile.name,
         identity: getIdentityPayload()
       }
@@ -769,7 +855,7 @@ async function uploadFile() {
     if (error) throw error;
 
     setProgress(92);
-    setStatus("ROUTING INTO SECTION...", "routing");
+    setStatus("ROUTING INTO SECTION TABLE...", "routing");
 
     await runAutoRoute(data);
 
@@ -784,7 +870,7 @@ async function uploadFile() {
     console.error("Upload error:", error);
     setStatus(`UPLOAD ERROR: ${error.message}`, "error");
   } finally {
-    els.uploadBtn.disabled = false;
+    if (els.uploadBtn) els.uploadBtn.disabled = false;
 
     setTimeout(() => {
       if (els.progressWrap) els.progressWrap.style.display = "none";
@@ -795,29 +881,35 @@ async function uploadFile() {
 
 function resetFormSoft() {
   selectedFile = null;
-  els.fileInput.value = "";
-  els.previewCard.style.display = "none";
-  els.previewSlot.innerHTML = "";
-  els.fileMeta.textContent = "";
-  els.titleInput.value = "";
-  els.categoryInput.value = "";
-  els.descriptionInput.value = "";
+
+  if (els.fileInput) els.fileInput.value = "";
+  if (els.previewCard) els.previewCard.style.display = "none";
+  if (els.previewSlot) els.previewSlot.innerHTML = "";
+  if (els.fileMeta) els.fileMeta.textContent = "";
+  if (els.titleInput) els.titleInput.value = "";
+  if (els.categoryInput) els.categoryInput.value = "";
+  if (els.descriptionInput) els.descriptionInput.value = "";
+
+  updateStats();
 }
 
 async function loadUploads() {
+  const safeUserId = currentUser?.id || "00000000-0000-0000-0000-000000000000";
+
   const { data, error } = await supabase
     .from("uploads")
     .select("*")
-    .or(
-      "visibility.eq.public,user_id.eq." +
-      (currentUser?.id || "00000000-0000-0000-0000-000000000000")
-    )
+    .or(`visibility.eq.public,user_id.eq.${safeUserId}`)
     .order("created_at", { ascending: false })
     .limit(80);
 
   if (error) {
     console.warn("Uploads load error:", error.message);
-    els.uploadsList.innerHTML = `<div class="empty">Uploads could not load. Check uploads RLS.</div>`;
+
+    if (els.uploadsList) {
+      els.uploadsList.innerHTML = `<div class="empty">Uploads could not load. Check uploads RLS.</div>`;
+    }
+
     return;
   }
 
@@ -827,6 +919,8 @@ async function loadUploads() {
 }
 
 function renderUploads() {
+  if (!els.uploadsList) return;
+
   if (!uploads.length) {
     els.uploadsList.innerHTML = `
       <div class="empty">No uploads yet. Drop the first file into the Rich Bizness cloud.</div>
@@ -853,12 +947,14 @@ function renderUploads() {
 
         <div class="upload-info">
           <h3>${escapeHtml(upload.title || "Rich Bizness Upload")}</h3>
+
           <div class="upload-meta">
             ${escapeHtml(upload.section || "general")} ·
             ${escapeHtml(upload.category || "upload")} ·
             ${escapeHtml(upload.bucket || "bucket")} ·
             ${escapeHtml(upload.media_type || "file")}
           </div>
+
           <p>${escapeHtml(upload.description || upload.file_path || "Realtime media upload.")}</p>
 
           <div class="upload-actions">
@@ -873,9 +969,10 @@ function renderUploads() {
 
 function startRealtime() {
   if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+  if (!currentUser?.id) return;
 
   realtimeChannel = supabase
-    .channel("rich-bizness-uploads-max")
+    .channel("rich-bizness-uploads-corrected")
     .on("postgres_changes", { event: "*", schema: "public", table: "uploads" }, async () => {
       await loadUploads();
       setStatus("UPLOADS UPDATED LIVE", "realtime");
@@ -904,7 +1001,7 @@ function startRealtime() {
 els.sectionInput?.addEventListener("change", () => {
   const route = getRoute();
 
-  if (!els.categoryInput.value.trim()) {
+  if (els.categoryInput && !els.categoryInput.value.trim()) {
     els.categoryInput.value = route.category;
   }
 
