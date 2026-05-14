@@ -1,8 +1,7 @@
 /* =========================================================
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL OMNI DIAL
-   DECAGON TOUCH LOCK / PORTAL HUB
-   FIXED NO-BOX / NO-CLIP VERSION
+   TRUE DECAGON ORBIT / EVEN 10-CARD LOCK
    /styles/omni-dial.css
 ========================================================= */
 
@@ -12,6 +11,7 @@
 
   --rb-dial-top:54%;
   --rb-dial-size:min(80vw,390px);
+  --rb-orbit-radius:calc(var(--rb-dial-size) * .48);
 
   --rb-card-size:72px;
   --rb-card-radius:22px;
@@ -20,10 +20,6 @@
   --rb-green-soft:#6bff8d;
   --rb-gold:#ffd76a;
 }
-
-/* =========================================================
-   DIAL STAGE
-========================================================= */
 
 .dial-ui{
   position:fixed;
@@ -42,17 +38,12 @@
 
   transform-origin:center center;
   will-change:transform;
-
   transition:transform .055s linear;
 
   overflow:visible;
   contain:none;
   border-radius:50%;
 }
-
-/* =========================================================
-   OUTER MACHINE RING
-========================================================= */
 
 .dial-ui::before{
   content:"";
@@ -81,13 +72,9 @@
     0 0 46px rgba(141,255,91,.18),
     0 0 120px rgba(141,255,91,.08);
 
-  opacity:.92;
+  opacity:.9;
   animation:rbDialBreath 4.2s ease-in-out infinite;
 }
-
-/* =========================================================
-   INNER DECAGON PLATE
-========================================================= */
 
 .dial-ui::after{
   content:"";
@@ -118,22 +105,23 @@
     inset 0 0 60px rgba(0,0,0,.72),
     0 0 28px rgba(141,255,91,.14);
 
-  opacity:.78;
+  opacity:.76;
 }
 
 /* =========================================================
-   CARD BASE
+   TRUE ORBIT CARDS
 ========================================================= */
 
 .dial-card{
   position:absolute;
+  left:50%;
+  top:50%;
 
   width:var(--rb-card-size);
   height:var(--rb-card-size);
 
   border:none;
   outline:none;
-
   border-radius:var(--rb-card-radius);
 
   display:flex;
@@ -144,7 +132,6 @@
 
   pointer-events:auto;
   overflow:hidden;
-
   color:#fff;
 
   background:
@@ -163,6 +150,9 @@
 
   transform:
     translate3d(-50%,-50%,0)
+    rotate(var(--slot-angle))
+    translateY(calc(var(--rb-orbit-radius) * -1))
+    rotate(calc(-1 * var(--slot-angle)))
     rotate(var(--rb-dial-counter-rotation));
 
   transform-origin:center center;
@@ -222,6 +212,9 @@
 
   transform:
     translate3d(-50%,-50%,0)
+    rotate(var(--slot-angle))
+    translateY(calc(var(--rb-orbit-radius) * -1))
+    rotate(calc(-1 * var(--slot-angle)))
     rotate(var(--rb-dial-counter-rotation))
     scale(1.08);
 }
@@ -257,33 +250,29 @@
 }
 
 /* =========================================================
-   DECAGON SOCKET MAP
+   PERFECT 10-POINT DECAGON ORDER
 ========================================================= */
 
-.card-feed{ left:50%; top:4%; }
-.card-watch{ left:78.5%; top:15.8%; }
-.card-live{ left:95.5%; top:45%; }
-.card-music{ left:83.5%; top:73.5%; }
-.card-gaming{ left:62%; top:91.5%; }
-.card-meta{ left:50%; top:99%; }
-.card-sports{ left:38%; top:91.5%; }
-.card-gallery{ left:16.5%; top:73.5%; }
-.card-upload{ left:4.5%; top:45%; }
-.card-store{ left:21.5%; top:15.8%; }
+.card-feed{ --slot-angle:0deg; }
+.card-watch{ --slot-angle:36deg; }
+.card-live{ --slot-angle:72deg; }
+.card-music{ --slot-angle:108deg; }
+.card-gaming{ --slot-angle:144deg; }
+.card-sports{ --slot-angle:180deg; }
+.card-gallery{ --slot-angle:216deg; }
+.card-upload{ --slot-angle:252deg; }
+.card-store{ --slot-angle:288deg; }
+.card-meta{ --slot-angle:324deg; }
 
 /* OLD CLASS SAFETY */
-.top-card{ left:50%; top:4%; }
-.top-left-card{ left:16.5%; top:73.5%; }
-.top-right-card{ left:83.5%; top:73.5%; }
-.left-card{ left:4.5%; top:45%; }
-.right-card{ left:62%; top:91.5%; }
-.bottom-left-card{ left:38%; top:91.5%; }
-.bottom-card{ left:50%; top:99%; }
-.bottom-right-card{ left:21.5%; top:15.8%; }
-
-/* =========================================================
-   CONNECTOR LINES
-========================================================= */
+.top-card{ --slot-angle:72deg; }
+.top-left-card{ --slot-angle:216deg; }
+.top-right-card{ --slot-angle:108deg; }
+.left-card{ --slot-angle:252deg; }
+.right-card{ --slot-angle:144deg; }
+.bottom-left-card{ --slot-angle:180deg; }
+.bottom-card{ --slot-angle:324deg; }
+.bottom-right-card{ --slot-angle:288deg; }
 
 .dial-card .dial-icon::after{
   content:"";
@@ -312,7 +301,7 @@
 }
 
 /* =========================================================
-   TOUCH STATE
+   TOUCH / STATES
 ========================================================= */
 
 .dial-ui.is-dragging{
@@ -326,10 +315,6 @@
     filter .12s ease;
 }
 
-/* =========================================================
-   ACTIVATION FEEL
-========================================================= */
-
 body.portal-arming .dial-ui{
   filter:
     brightness(1.12)
@@ -341,7 +326,7 @@ body.portal-arming .dial-card.is-active{
 }
 
 /* =========================================================
-   PHONE HEIGHT PATCH
+   PHONE PATCHES
 ========================================================= */
 
 @media (max-height:760px){
@@ -365,10 +350,6 @@ body.portal-arming .dial-card.is-active{
   }
 }
 
-/* =========================================================
-   SMALL WIDTH PATCH
-========================================================= */
-
 @media (max-width:380px){
   :root{
     --rb-dial-size:min(78vw,360px);
@@ -388,10 +369,6 @@ body.portal-arming .dial-card.is-active{
     font-size:.98rem;
   }
 }
-
-/* =========================================================
-   BIG SCREEN PATCH
-========================================================= */
 
 @media (min-width:900px){
   :root{
