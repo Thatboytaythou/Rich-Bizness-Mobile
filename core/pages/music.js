@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 /* =========================
    RICH BIZNESS MOBILE MUSIC
    /core/pages/music.js
-   Tracks + Podcast + Radio Realtime
+   Tracks + Upload Sync + Podcast + Radio Realtime
 ========================= */
 
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
@@ -47,6 +47,7 @@ let currentProfile = null;
 
 let activeTab = "tracks";
 let tracks = [];
+let musicUploads = [];
 let podcasts = [];
 let radioStations = [];
 let likedTrackIds = new Set();
@@ -114,19 +115,17 @@ function formatDate(value) {
 async function loadUser() {
   const { data, error } = await supabase.auth.getUser();
 
-  if (error) {
-    console.warn("Music auth error:", error);
-  }
+  if (error) console.warn("Music auth error:", error);
 
   currentUser = data?.user || null;
 
   if (!currentUser) {
-    els.createDropBtn.disabled = true;
+    if (els.createDropBtn) els.createDropBtn.disabled = true;
     setStatus("SIGN IN REQUIRED TO DROP MUSIC");
     return;
   }
 
-  els.createDropBtn.disabled = false;
+  if (els.createDropBtn) els.createDropBtn.disabled = false;
   await loadProfile();
 }
 
@@ -139,9 +138,7 @@ async function loadProfile() {
     .eq("id", currentUser.id)
     .maybeSingle();
 
-  if (error) {
-    console.warn("Music profile load error:", error);
-  }
+  if (error) console.warn("Music profile load error:", error);
 
   currentProfile = data || null;
 }
@@ -183,6 +180,23 @@ async function loadTracks() {
   tracks = data || [];
 }
 
+async function loadMusicUploads() {
+  const { data, error } = await supabase
+    .from("uploads")
+    .select("*")
+    .eq("section", "music")
+    .eq("media_type", "audio")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.warn("Music uploads load error:", error.message);
+    return;
+  }
+
+  musicUploads = data || [];
+}
+
 async function loadPodcasts() {
   const { data, error } = await supabase
     .from("podcast_episodes")
@@ -220,12 +234,52 @@ async function loadAllMusic() {
 
   await loadLikedTracks();
   await loadTracks();
+  await loadMusicUploads();
   await loadPodcasts();
   await loadRadioStations();
 
   renderActiveTab();
 
   setStatus("MUSIC REALTIME CONNECTED");
+}
+
+/* =========================
+   UPLOAD SYNC
+========================= */
+function getSyncedTracks() {
+  const existingUploadIds = new Set(
+    tracks
+      .map((track) => track?.metadata?.upload_id)
+      .filter(Boolean)
+  );
+
+  const uploadTracks = musicUploads
+    .filter((upload) => !existingUploadIds.has(upload.id))
+    .map((upload) => {
+      const identity = upload?.metadata?.identity || {};
+
+      return {
+        id: `upload-${upload.id}`,
+        upload_id: upload.id,
+        user_id: upload.user_id,
+        username: identity.username || "creator",
+        display_name: identity.display_name || "Rich Creator",
+        title: upload.title || "Untitled Track",
+        description: upload.description || "",
+        audio_url: upload.public_url,
+        cover_url: identity.avatar_url || null,
+        genre: upload.category || "music",
+        like_count: 0,
+        play_count: 0,
+        is_featured: false,
+        created_at: upload.created_at,
+        from_uploads_table: true
+      };
+    });
+
+  return [...tracks, ...uploadTracks].sort((a, b) => {
+    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+  });
 }
 
 /* =========================
@@ -238,40 +292,26 @@ function setActiveTab(tab) {
     btn.classList.toggle("is-active", btn.dataset.tab === tab);
   });
 
-  if (tab === "tracks") {
-    els.dropType.value = "track";
-  }
-
-  if (tab === "podcasts") {
-    els.dropType.value = "podcast";
-  }
-
-  if (tab === "radio") {
-    els.dropType.value = "radio";
-  }
+  if (tab === "tracks" && els.dropType) els.dropType.value = "track";
+  if (tab === "podcasts" && els.dropType) els.dropType.value = "podcast";
+  if (tab === "radio" && els.dropType) els.dropType.value = "radio";
 
   renderActiveTab();
 }
 
 function renderActiveTab() {
-  if (activeTab === "tracks") {
-    renderTracks();
-    return;
-  }
-
-  if (activeTab === "podcasts") {
-    renderPodcasts();
-    return;
-  }
-
-  renderRadio();
+  if (activeTab === "tracks") return renderTracks();
+  if (activeTab === "podcasts") return renderPodcasts();
+  return renderRadio();
 }
 
 function renderTracks() {
-  els.sectionTitle.textContent = "TRACKS";
-  els.sectionCount.textContent = `${tracks.length} live`;
+  const syncedTracks = getSyncedTracks();
 
-  if (!tracks.length) {
+  els.sectionTitle.textContent = "TRACKS";
+  els.sectionCount.textContent = `${syncedTracks.length} live`;
+
+  if (!syncedTracks.length) {
     els.musicList.innerHTML = `
       <div class="empty">
         No tracks yet. Drop the first Rich Bizness track.
@@ -280,8 +320,8 @@ function renderTracks() {
     return;
   }
 
-  els.musicList.innerHTML = tracks.map((track) => {
-    const liked = likedTrackIds.has(track.id);
+  els.musicList.innerHTML = syncedTracks.map((track) => {
+    const liked = !track.from_uploads_table && likedTrackIds.has(track.id);
 
     return `
       <article class="music-card">
@@ -290,7 +330,12 @@ function renderTracks() {
 
           <div class="music-info">
             <strong>${escapeHtml(track.title)}</strong>
-            <small>@${escapeHtml(track.username || "creator")} · ${escapeHtml(track.genre || "MUSIC")} · ${formatDate(track.created_at)}</small>
+            <small>
+              @${escapeHtml(track.username || "creator")} ·
+              ${escapeHtml(track.genre || "MUSIC")} ·
+              ${track.from_uploads_table ? "UPLOAD SYNC · " : ""}
+              ${formatDate(track.created_at)}
+            </small>
             ${track.description ? `<p>${escapeHtml(track.description)}</p>` : ""}
           </div>
 
@@ -310,6 +355,7 @@ function renderTracks() {
             type="button"
             data-action="like-track"
             data-id="${escapeHtml(track.id)}"
+            ${track.from_uploads_table ? "disabled" : ""}
           >
             ${liked ? "💚" : "♡"} ${track.like_count || 0}
           </button>
@@ -328,6 +374,7 @@ function renderTracks() {
             type="button"
             data-action="comment-track"
             data-id="${escapeHtml(track.id)}"
+            ${track.from_uploads_table ? "disabled" : ""}
           >
             💬 COMMENT
           </button>
@@ -342,38 +389,23 @@ function renderPodcasts() {
   els.sectionCount.textContent = `${podcasts.length} live`;
 
   if (!podcasts.length) {
-    els.musicList.innerHTML = `
-      <div class="empty">
-        No podcast episodes yet. Drop the first Rich Bizness episode.
-      </div>
-    `;
+    els.musicList.innerHTML = `<div class="empty">No podcast episodes yet. Drop the first Rich Bizness episode.</div>`;
     return;
   }
 
-  els.musicList.innerHTML = podcasts.map((episode) => {
-    return `
-      <article class="music-card">
-        <div class="music-row">
-          <div class="cover">${coverHtml(episode.cover_url, "🎙️")}</div>
-
-          <div class="music-info">
-            <strong>${escapeHtml(episode.title)}</strong>
-            <small>EP ${episode.episode_number || 1} · @${escapeHtml(episode.username || "creator")} · ${formatDate(episode.created_at)}</small>
-            ${episode.description ? `<p>${escapeHtml(episode.description)}</p>` : ""}
-          </div>
-
-          <button
-            class="play-btn"
-            type="button"
-            data-action="play-podcast"
-            data-id="${escapeHtml(episode.id)}"
-          >
-            ▶
-          </button>
+  els.musicList.innerHTML = podcasts.map((episode) => `
+    <article class="music-card">
+      <div class="music-row">
+        <div class="cover">${coverHtml(episode.cover_url, "🎙️")}</div>
+        <div class="music-info">
+          <strong>${escapeHtml(episode.title)}</strong>
+          <small>EP ${episode.episode_number || 1} · @${escapeHtml(episode.username || "creator")} · ${formatDate(episode.created_at)}</small>
+          ${episode.description ? `<p>${escapeHtml(episode.description)}</p>` : ""}
         </div>
-      </article>
-    `;
-  }).join("");
+        <button class="play-btn" type="button" data-action="play-podcast" data-id="${escapeHtml(episode.id)}">▶</button>
+      </div>
+    </article>
+  `).join("");
 }
 
 function renderRadio() {
@@ -381,38 +413,23 @@ function renderRadio() {
   els.sectionCount.textContent = `${radioStations.length} live`;
 
   if (!radioStations.length) {
-    els.musicList.innerHTML = `
-      <div class="empty">
-        No radio stations yet. Create the first Rich Bizness station.
-      </div>
-    `;
+    els.musicList.innerHTML = `<div class="empty">No radio stations yet. Create the first Rich Bizness station.</div>`;
     return;
   }
 
-  els.musicList.innerHTML = radioStations.map((station) => {
-    return `
-      <article class="music-card">
-        <div class="music-row">
-          <div class="cover">${coverHtml(station.cover_url, "📡")}</div>
-
-          <div class="music-info">
-            <strong>${escapeHtml(station.station_name)}</strong>
-            <small>${station.is_live ? "LIVE NOW" : "STATION"} · ${escapeHtml(station.station_tag || "RADIO")} · ${formatDate(station.created_at)}</small>
-            <p>${station.stream_url ? "Stream ready." : "Add a stream URL to activate this station."}</p>
-          </div>
-
-          <button
-            class="play-btn"
-            type="button"
-            data-action="play-radio"
-            data-id="${escapeHtml(station.id)}"
-          >
-            ▶
-          </button>
+  els.musicList.innerHTML = radioStations.map((station) => `
+    <article class="music-card">
+      <div class="music-row">
+        <div class="cover">${coverHtml(station.cover_url, "📡")}</div>
+        <div class="music-info">
+          <strong>${escapeHtml(station.station_name)}</strong>
+          <small>${station.is_live ? "LIVE NOW" : "STATION"} · ${escapeHtml(station.station_tag || "RADIO")} · ${formatDate(station.created_at)}</small>
+          <p>${station.stream_url ? "Stream ready." : "Add a stream URL to activate this station."}</p>
         </div>
-      </article>
-    `;
-  }).join("");
+        <button class="play-btn" type="button" data-action="play-radio" data-id="${escapeHtml(station.id)}">▶</button>
+      </div>
+    </article>
+  `).join("");
 }
 
 /* =========================
@@ -421,17 +438,9 @@ function renderRadio() {
 async function playItem(type, id) {
   let item = null;
 
-  if (type === "track") {
-    item = tracks.find((row) => row.id === id);
-  }
-
-  if (type === "podcast") {
-    item = podcasts.find((row) => row.id === id);
-  }
-
-  if (type === "radio") {
-    item = radioStations.find((row) => row.id === id);
-  }
+  if (type === "track") item = getSyncedTracks().find((row) => String(row.id) === String(id));
+  if (type === "podcast") item = podcasts.find((row) => String(row.id) === String(id));
+  if (type === "radio") item = radioStations.find((row) => String(row.id) === String(id));
 
   if (!item) return;
 
@@ -456,11 +465,12 @@ async function playItem(type, id) {
   );
 
   els.audioPlayer.src = audioUrl;
+
   await els.audioPlayer.play().catch(() => {
     setStatus("TAP PLAY ON THE AUDIO BAR TO START");
   });
 
-  if (type === "track") {
+  if (type === "track" && !item.from_uploads_table) {
     const nextPlayCount = (item.play_count || 0) + 1;
 
     await supabase
@@ -488,15 +498,8 @@ async function createDrop() {
   const genre = els.genreInput.value.trim();
   const episodeNumber = Number(els.episodeInput.value || 1);
 
-  if (!title) {
-    setStatus("TITLE REQUIRED");
-    return;
-  }
-
-  if (!audioUrl) {
-    setStatus("AUDIO / STREAM URL REQUIRED");
-    return;
-  }
+  if (!title) return setStatus("TITLE REQUIRED");
+  if (!audioUrl) return setStatus("AUDIO / STREAM URL REQUIRED");
 
   els.createDropBtn.disabled = true;
   setStatus("CREATING DROP...");
@@ -505,50 +508,47 @@ async function createDrop() {
   const displayName = getProfileName(currentProfile, currentUser);
 
   if (type === "track") {
-    const { error } = await supabase
-      .from("music_tracks")
-      .insert({
-        user_id: currentUser.id,
-        username,
-        display_name: displayName,
-        title,
-        description: description || null,
-        audio_url: audioUrl,
-        cover_url: coverUrl || null,
-        genre: genre || "Music"
-      });
+    const { error } = await supabase.from("music_tracks").insert({
+      user_id: currentUser.id,
+      username,
+      display_name: displayName,
+      title,
+      description: description || null,
+      audio_url: audioUrl,
+      cover_url: coverUrl || null,
+      genre: genre || "Music",
+      like_count: 0,
+      play_count: 0,
+      is_featured: false
+    });
 
     if (error) return handleCreateError(error);
   }
 
   if (type === "podcast") {
-    const { error } = await supabase
-      .from("podcast_episodes")
-      .insert({
-        user_id: currentUser.id,
-        username,
-        display_name: displayName,
-        title,
-        description: description || null,
-        audio_url: audioUrl,
-        cover_url: coverUrl || null,
-        episode_number: episodeNumber || 1
-      });
+    const { error } = await supabase.from("podcast_episodes").insert({
+      user_id: currentUser.id,
+      username,
+      display_name: displayName,
+      title,
+      description: description || null,
+      audio_url: audioUrl,
+      cover_url: coverUrl || null,
+      episode_number: episodeNumber || 1
+    });
 
     if (error) return handleCreateError(error);
   }
 
   if (type === "radio") {
-    const { error } = await supabase
-      .from("radio_stations")
-      .insert({
-        user_id: currentUser.id,
-        station_name: title,
-        station_tag: genre || "Radio",
-        stream_url: audioUrl,
-        cover_url: coverUrl || null,
-        is_live: true
-      });
+    const { error } = await supabase.from("radio_stations").insert({
+      user_id: currentUser.id,
+      station_name: title,
+      station_tag: genre || "Radio",
+      stream_url: audioUrl,
+      cover_url: coverUrl || null,
+      is_live: true
+    });
 
     if (error) return handleCreateError(error);
   }
@@ -576,6 +576,11 @@ function handleCreateError(error) {
    LIKES / COMMENTS
 ========================= */
 async function toggleTrackLike(trackId) {
+  if (String(trackId).startsWith("upload-")) {
+    setStatus("UPLOAD SYNC TRACK NEEDS MUSIC_TRACKS RECORD FIRST");
+    return;
+  }
+
   if (!currentUser) {
     setStatus("SIGN IN TO LIKE TRACKS");
     window.location.href = "/auth.html";
@@ -605,12 +610,10 @@ async function toggleTrackLike(trackId) {
   likedTrackIds.add(trackId);
   renderTracks();
 
-  const { error } = await supabase
-    .from("music_likes")
-    .insert({
-      track_id: trackId,
-      user_id: currentUser.id
-    });
+  const { error } = await supabase.from("music_likes").insert({
+    track_id: trackId,
+    user_id: currentUser.id
+  });
 
   if (error) {
     likedTrackIds.delete(trackId);
@@ -629,6 +632,11 @@ async function toggleTrackLike(trackId) {
 }
 
 async function commentTrack(trackId) {
+  if (String(trackId).startsWith("upload-")) {
+    setStatus("UPLOAD SYNC TRACK NEEDS MUSIC_TRACKS RECORD FIRST");
+    return;
+  }
+
   if (!currentUser) {
     setStatus("SIGN IN TO COMMENT");
     window.location.href = "/auth.html";
@@ -638,19 +646,14 @@ async function commentTrack(trackId) {
   const comment = prompt("Drop a music comment:");
   if (!comment || !comment.trim()) return;
 
-  const { error } = await supabase
-    .from("music_comments")
-    .insert({
-      track_id: trackId,
-      user_id: currentUser.id,
-      username: getUsername(currentProfile, currentUser),
-      comment: comment.trim()
-    });
+  const { error } = await supabase.from("music_comments").insert({
+    track_id: trackId,
+    user_id: currentUser.id,
+    username: getUsername(currentProfile, currentUser),
+    comment: comment.trim()
+  });
 
-  if (error) {
-    setStatus(`COMMENT ERROR: ${error.message}`);
-    return;
-  }
+  if (error) return setStatus(`COMMENT ERROR: ${error.message}`);
 
   setStatus("COMMENT LIVE");
 }
@@ -659,56 +662,36 @@ async function commentTrack(trackId) {
    REALTIME
 ========================= */
 function startRealtime() {
-  if (realtimeChannel) {
-    supabase.removeChannel(realtimeChannel);
-  }
+  if (realtimeChannel) supabase.removeChannel(realtimeChannel);
 
   realtimeChannel = supabase
     .channel("rich-bizness-music-realtime")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "music_tracks" },
-      async () => {
-        await loadTracks();
-        renderActiveTab();
-      }
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "podcast_episodes" },
-      async () => {
-        await loadPodcasts();
-        renderActiveTab();
-      }
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "radio_stations" },
-      async () => {
-        await loadRadioStations();
-        renderActiveTab();
-      }
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "music_likes" },
-      async () => {
-        await loadLikedTracks();
-        await loadTracks();
-        renderActiveTab();
-      }
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "music_comments" },
-      async () => {
-        setStatus("MUSIC COMMENT UPDATED LIVE");
-      }
-    )
+    .on("postgres_changes", { event: "*", schema: "public", table: "music_tracks" }, async () => {
+      await loadTracks();
+      renderActiveTab();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "uploads" }, async () => {
+      await loadMusicUploads();
+      renderActiveTab();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "podcast_episodes" }, async () => {
+      await loadPodcasts();
+      renderActiveTab();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "radio_stations" }, async () => {
+      await loadRadioStations();
+      renderActiveTab();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "music_likes" }, async () => {
+      await loadLikedTracks();
+      await loadTracks();
+      renderActiveTab();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "music_comments" }, async () => {
+      setStatus("MUSIC COMMENT UPDATED LIVE");
+    })
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        setStatus("MUSIC REALTIME CONNECTED");
-      }
+      if (status === "SUBSCRIBED") setStatus("MUSIC REALTIME CONNECTED");
     });
 }
 
@@ -716,14 +699,11 @@ function startRealtime() {
    EVENTS
 ========================= */
 els.tabs.forEach((button) => {
-  button.addEventListener("click", () => {
-    setActiveTab(button.dataset.tab);
-  });
+  button.addEventListener("click", () => setActiveTab(button.dataset.tab));
 });
 
 els.dropType?.addEventListener("change", () => {
   const type = els.dropType.value;
-
   if (type === "track") setActiveTab("tracks");
   if (type === "podcast") setActiveTab("podcasts");
   if (type === "radio") setActiveTab("radio");
@@ -733,36 +713,18 @@ els.createDropBtn?.addEventListener("click", createDrop);
 
 els.musicList?.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-action]");
-  if (!button) return;
+  if (!button || button.disabled) return;
 
   const action = button.dataset.action;
   const id = button.dataset.id;
 
   if (!id) return;
 
-  if (action === "play-track") {
-    await playItem("track", id);
-    return;
-  }
-
-  if (action === "play-podcast") {
-    await playItem("podcast", id);
-    return;
-  }
-
-  if (action === "play-radio") {
-    await playItem("radio", id);
-    return;
-  }
-
-  if (action === "like-track") {
-    await toggleTrackLike(id);
-    return;
-  }
-
-  if (action === "comment-track") {
-    await commentTrack(id);
-  }
+  if (action === "play-track") return playItem("track", id);
+  if (action === "play-podcast") return playItem("podcast", id);
+  if (action === "play-radio") return playItem("radio", id);
+  if (action === "like-track") return toggleTrackLike(id);
+  if (action === "comment-track") return commentTrack(id);
 });
 
 /* =========================
@@ -770,10 +732,8 @@ els.musicList?.addEventListener("click", async (event) => {
 ========================= */
 async function bootMusic() {
   setStatus("BOOTING MUSIC...");
-
   await loadUser();
   await loadAllMusic();
-
   startRealtime();
 }
 
