@@ -11,7 +11,7 @@ import {
   getPieceClass,
   getCapturedSummary,
   boardToFenLite
-} from "./pieces.js";
+} from "/pieces.js";
 
 import {
   getLegalMoves,
@@ -19,7 +19,7 @@ import {
   getGameStatus,
   oppositeColor,
   algebraic
-} from "./engine.js";
+} from "/engine.js";
 
 import { getCpuMove, getCpuMoveLabel, explainCpuMove } from "./ai.js";
 
@@ -36,20 +36,20 @@ import {
   getPlayerColor,
   canPlayerMove,
   roomToBoard
-} from "./multiplayer.js";
+} from "/multiplayer.js";
 
 import {
   ensureTournamentLobby,
   joinChessTournament,
   renderTournamentOptions
-} from "./tournaments.js";
+} from "/tournaments.js";
 
 import {
   resetCamera,
   pulseBoard,
   cinematicMove,
   flashVictory
-} from "./camera.js";
+} from "/camera.js";
 
 import {
   explodeSquare,
@@ -57,7 +57,7 @@ import {
   showMoveTrail,
   rainVictory,
   boardPowerPulse
-} from "./effects.js";
+} from "/effects.js";
 
 import {
   playMoveSound,
@@ -68,7 +68,7 @@ import {
   playErrorSound,
   playRoomSound,
   playTournamentSound
-} from "./sound.js";
+} from "/sound.js";
 
 const $ = (id) => document.getElementById(id);
 
