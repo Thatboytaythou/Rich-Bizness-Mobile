@@ -2,159 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Rich Bizness LLC — Auth</title>
 
+  <link rel="stylesheet" href="/styles/main.css" />
+  <link rel="stylesheet" href="/styles/omni-fx.css" />
+
   <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    html,
     body{
-      width:100%;
-      min-height:100%;
-      background:#020402;
-      color:#fff;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
-      overflow-x:hidden;
-    }
-
-    body{
-      background:
-        radial-gradient(circle at 50% 14%,rgba(145,255,89,.18),transparent 30%),
-        radial-gradient(circle at 18% 48%,rgba(0,255,190,.08),transparent 25%),
-        radial-gradient(circle at 82% 72%,rgba(255,220,120,.08),transparent 28%),
-        #020402;
-    }
-
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
-      background:
-        linear-gradient(135deg,rgba(120,255,75,.09),transparent 30%,rgba(255,220,120,.04)),
-        radial-gradient(circle at center,transparent 36%,rgba(0,0,0,.88) 100%);
+      overflow:hidden;
     }
 
     .auth-page{
       position:relative;
-      z-index:1;
+      z-index:80;
       width:min(760px,100%);
       min-height:100vh;
       margin:0 auto;
-      padding:
-        calc(22px + env(safe-area-inset-top))
-        18px
-        calc(30px + env(safe-area-inset-bottom));
-
+      padding:calc(24px + env(safe-area-inset-top)) 18px calc(32px + env(safe-area-inset-bottom));
       display:flex;
       flex-direction:column;
       justify-content:center;
     }
 
-    .topbar{
+    .auth-nav{
       position:absolute;
       top:calc(18px + env(safe-area-inset-top));
       left:18px;
       right:18px;
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap:14px;
+      z-index:120;
     }
 
-    .circle-btn{
-      width:48px;
-      height:48px;
-      border-radius:50%;
-      border:1px solid rgba(255,219,123,.52);
-      background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));
-      color:#ffe58a;
-      font-size:21px;
-      display:grid;
-      place-items:center;
-      box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);
-      text-decoration:none;
-    }
-
-    .brand{
-      display:flex;
-      flex-direction:column;
-      line-height:.9;
+    .auth-brand{
       text-align:center;
-      font-family:Georgia,"Times New Roman",serif;
-      margin-bottom:18px;
+      font-family:Georgia,serif;
+      line-height:.82;
+      margin-bottom:22px;
+      filter:drop-shadow(0 0 20px rgba(141,255,91,.35));
     }
 
-    .brand strong{
-      font-size:clamp(38px,9vw,68px);
-      letter-spacing:.05em;
-      background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      filter:drop-shadow(0 0 16px rgba(129,255,82,.48));
+    .auth-brand strong{
+      display:block;
+      font-size:clamp(42px,11vw,74px);
+      color:#e2ca74;
     }
 
-    .brand small{
-      color:#ffe58a;
-      letter-spacing:.24em;
-      margin-top:8px;
-      font-size:14px;
+    .auth-brand small{
+      display:block;
+      margin-top:10px;
+      letter-spacing:.34em;
+      color:#ffe28a;
+      font-weight:900;
     }
 
     .auth-card{
       position:relative;
       overflow:hidden;
-      border:1px solid rgba(151,255,97,.24);
       border-radius:34px;
       padding:24px;
-      background:
-        linear-gradient(145deg,rgba(12,22,12,.94),rgba(0,0,0,.78)),
-        radial-gradient(circle at top,rgba(132,255,80,.18),transparent 58%);
-      box-shadow:
-        0 0 45px rgba(0,0,0,.84),
-        0 0 34px rgba(122,255,77,.16);
+      background:linear-gradient(180deg,rgba(18,28,18,.94),rgba(0,0,0,.9));
+      border:1px solid rgba(141,255,91,.26);
+      box-shadow:0 0 60px rgba(0,0,0,.86),0 0 44px rgba(141,255,91,.14);
+      backdrop-filter:blur(22px);
     }
 
-    .auth-card::after{
+    .auth-card::before{
       content:"";
       position:absolute;
-      right:-44px;
-      top:-54px;
-      width:220px;
-      height:220px;
-      border-radius:50%;
-      background:radial-gradient(circle,rgba(157,255,99,.24),transparent 68%);
+      inset:-40%;
+      background:radial-gradient(circle,rgba(141,255,91,.16),transparent 48%);
+      animation:rbAuraBreath 5s ease-in-out infinite;
       pointer-events:none;
     }
 
+    .auth-content{
+      position:relative;
+      z-index:2;
+    }
+
     .kicker{
-      color:#9dff67;
+      color:#8dff5b;
       font-size:12px;
       font-weight:950;
-      letter-spacing:.18em;
+      letter-spacing:.22em;
       margin-bottom:8px;
     }
 
     h1{
+      font-family:Georgia,serif;
       font-size:42px;
       line-height:.95;
-      font-family:Georgia,"Times New Roman",serif;
-      background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
+      color:#e2ca74;
       margin-bottom:10px;
+      text-shadow:0 0 18px rgba(141,255,91,.25);
     }
 
     .copy{
@@ -162,21 +105,18 @@
       font-size:15px;
       line-height:1.45;
       margin-bottom:18px;
-      max-width:560px;
     }
 
     .form{
       display:flex;
       flex-direction:column;
       gap:13px;
-      position:relative;
-      z-index:2;
     }
 
     label{
-      color:#9dff67;
+      color:#8dff5b;
       font-size:11px;
-      letter-spacing:.14em;
+      letter-spacing:.16em;
       font-weight:950;
     }
 
@@ -187,18 +127,13 @@
       color:#fff;
       border-radius:18px;
       padding:15px;
-      background:rgba(255,255,255,.045);
-      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(141,255,91,.14);
       font-size:16px;
-    }
-
-    input::placeholder{
-      color:rgba(255,255,255,.52);
     }
 
     .actions{
       display:grid;
-      grid-template-columns:1fr;
       gap:10px;
       margin-top:8px;
     }
@@ -210,7 +145,7 @@
       border:none;
       outline:none;
       border-radius:18px;
-      min-height:50px;
+      min-height:52px;
       font-weight:950;
       letter-spacing:.12em;
       font-size:14px;
@@ -218,14 +153,14 @@
 
     .primary-btn{
       color:#081008;
-      background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);
-      box-shadow:0 0 24px rgba(128,255,80,.36);
+      background:linear-gradient(to bottom,#e7ffc9,#8dff5b 55%,#4c7618);
+      box-shadow:0 0 28px rgba(141,255,91,.38);
     }
 
     .secondary-btn{
       color:#dfffd2;
-      background:rgba(255,255,255,.045);
-      border:1px solid rgba(151,255,97,.2);
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(141,255,91,.22);
     }
 
     .danger-btn{
@@ -234,21 +169,8 @@
       border:1px solid rgba(255,219,123,.36);
     }
 
-    .status{
-      margin-top:14px;
-      color:#9dff67;
-      font-size:12px;
-      letter-spacing:.13em;
-      font-weight:850;
-      min-height:18px;
-      position:relative;
-      z-index:2;
-    }
-
     .signed-panel{
       display:none;
-      position:relative;
-      z-index:2;
       margin-top:18px;
       padding:16px;
       border-radius:24px;
@@ -261,7 +183,7 @@
     }
 
     .signed-panel small{
-      color:#9dff67;
+      color:#8dff5b;
       letter-spacing:.14em;
       font-weight:900;
       display:block;
@@ -275,80 +197,76 @@
       margin-bottom:12px;
     }
 
-    @media(max-width:640px){
-      .auth-card{
-        padding:22px;
-      }
-
-      h1{
-        font-size:36px;
-      }
+    .status{
+      margin-top:14px;
+      color:#8dff5b;
+      font-size:12px;
+      letter-spacing:.13em;
+      font-weight:850;
+      min-height:18px;
     }
   </style>
 </head>
 
 <body>
+  <canvas id="engine"></canvas>
+
+  <div class="omni-bg-glow"></div>
+  <div class="omni-light-beams"></div>
+  <div class="omni-particles"></div>
+  <div class="omni-scanlines"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-noise"></div>
 
   <main class="auth-page">
+    <nav class="auth-nav">
+      <a class="icon" href="/index.html" aria-label="Home">‹</a>
+      <a class="icon" href="/profile.html" aria-label="Profile">◈</a>
+    </nav>
 
-    <header class="topbar">
-      <a class="circle-btn" href="/index.html" aria-label="Home">‹</a>
-      <a class="circle-btn" href="/profile.html" aria-label="Profile">◈</a>
-    </header>
-
-    <div class="brand">
+    <div class="auth-brand">
       <strong>RICH BIZNESS</strong>
       <small>LLC</small>
     </div>
 
     <section class="auth-card">
+      <div class="auth-content">
+        <div class="kicker">SECURE ACCESS</div>
+        <h1>Tap In 💰</h1>
 
-      <div class="kicker">SECURE ACCESS</div>
+        <p class="copy">
+          Sign in or create your Rich Bizness account to unlock the full cinematic platform.
+        </p>
 
-      <h1>Tap In 💰</h1>
+        <div class="form">
+          <div>
+            <label for="email">EMAIL</label>
+            <input id="email" type="email" autocomplete="email" placeholder="you@email.com" />
+          </div>
 
-      <p class="copy">
-        Sign in or create your Rich Bizness account to unlock feed, profile, live, music, gaming, sports, and the full money-ready platform.
-      </p>
+          <div>
+            <label for="password">PASSWORD</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" />
+          </div>
 
-      <div class="form">
-        <div>
-          <label for="email">EMAIL</label>
-          <input id="email" type="email" autocomplete="email" placeholder="you@email.com" />
+          <div class="actions">
+            <button class="primary-btn" id="signInBtn" type="button">TAP IN 💰</button>
+            <button class="secondary-btn" id="signUpBtn" type="button">CREATE ACCOUNT</button>
+          </div>
         </div>
 
-        <div>
-          <label for="password">PASSWORD</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" />
+        <div class="signed-panel" id="signedPanel">
+          <small>ALREADY TAPPED IN</small>
+          <strong id="signedEmail">Signed in</strong>
+          <button class="danger-btn" id="signOutBtn" type="button">IM OUT ✌🏽</button>
         </div>
 
-        <div class="actions">
-          <button class="primary-btn" id="signInBtn" type="button">
-            TAP IN 💰
-          </button>
-
-          <button class="secondary-btn" id="signUpBtn" type="button">
-            TAP IN 💰 — SIGN UP
-          </button>
-        </div>
+        <div class="status" id="authStatus">BOOTING AUTH...</div>
       </div>
-
-      <div class="signed-panel" id="signedPanel">
-        <small>ALREADY TAPPED IN</small>
-        <strong id="signedEmail">Signed in</strong>
-
-        <button class="danger-btn" id="signOutBtn" type="button">
-          IM OUT ✌🏽
-        </button>
-      </div>
-
-      <div class="status" id="authStatus">BOOTING AUTH...</div>
-
     </section>
-
   </main>
 
+  <script type="module" src="/core/engine/omni-fx.js"></script>
   <script type="module" src="/core/pages/auth.js"></script>
-
 </body>
 </html>
