@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   />
 
   <title>Rich Bizness LLC — Cinematic Universal Omni Dial</title>
+
   <link rel="stylesheet" href="/styles/main.css" />
   <link rel="stylesheet" href="/styles/omni-dial.css" />
+  <link rel="stylesheet" href="/styles/omni-portal.css" />
+  <link rel="stylesheet" href="/styles/omni-fx.css" />
 </head>
 
 <body>
   <canvas id="engine"></canvas>
+
+  <div class="omni-bg-glow"></div>
+  <div class="omni-light-beams"></div>
+  <div class="omni-particles"></div>
+  <div class="omni-scanlines"></div>
 
   <div class="screen-vignette"></div>
   <div class="screen-noise"></div>
@@ -43,8 +52,19 @@
     </div>
 
     <div class="top-right">
-      <button class="icon notification" id="notificationBtn" data-route="/notifications.html" type="button" aria-label="Notifications">🔔</button>
-      <button class="icon" id="menuBtn" type="button" aria-label="Open Menu">☰</button>
+      <button
+        class="icon notification"
+        id="notificationBtn"
+        data-route="/notifications.html"
+        type="button"
+        aria-label="Notifications"
+      >
+        🔔
+      </button>
+
+      <button class="icon" id="menuBtn" type="button" aria-label="Open Menu">
+        ☰
+      </button>
     </div>
   </header>
 
@@ -68,7 +88,6 @@
   </aside>
 
   <main class="dial-ui" id="dialUi">
-
     <button class="dial-card card-feed" data-dial-card="feed" data-route="/feed.html" type="button">
       <div class="dial-icon">◆</div>
       <div class="dial-title">FEED</div>
@@ -128,11 +147,17 @@
       <div class="dial-title">META</div>
       <div class="dial-sub" id="metaDialSub">VERSE</div>
     </button>
-
   </main>
 
-  <section class="center-ui">
+  <section class="center-ui" id="centerPortal">
     <div class="portal-core">
+      <div class="portal-door portal-door-left"></div>
+      <div class="portal-door portal-door-right"></div>
+
+      <div class="portal-ring portal-ring-outer"></div>
+      <div class="portal-ring portal-ring-mid"></div>
+      <div class="portal-ring portal-ring-inner"></div>
+
       <div class="portal-inner">
         <div class="portal-title">
           <span>RICH</span>
@@ -140,6 +165,8 @@
           <small id="portalStatus">LLC</small>
         </div>
       </div>
+
+      <div class="portal-flare"></div>
     </div>
   </section>
 
@@ -210,7 +237,12 @@
       const title = activeCard?.querySelector(".dial-title")?.textContent || "RICH";
 
       const activateSub = document.getElementById("activateSub");
+      const portalStatus = document.getElementById("portalStatus");
+      const centerPortal = document.getElementById("centerPortal");
+
       if (activateSub) activateSub.textContent = `ENTER ${title}`;
+      if (portalStatus) portalStatus.textContent = title;
+      if (centerPortal) centerPortal.dataset.activePortal = key;
 
       if (!fromEngine && typeof window.RB_spinTo === "function") {
         window.RB_spinTo(key);
@@ -223,7 +255,15 @@
     }
 
     function enterWorld() {
-      goToRoute(window.RB_ACTIVE_ROUTE || "/feed.html");
+      const centerPortal = document.getElementById("centerPortal");
+
+      if (centerPortal) {
+        centerPortal.classList.add("portal-opening");
+      }
+
+      setTimeout(() => {
+        goToRoute(window.RB_ACTIVE_ROUTE || "/feed.html");
+      }, 520);
     }
 
     function toggleMenu() {
@@ -277,7 +317,7 @@
       }
     });
 
-    setActiveDial("live");
+    setActiveDial("live", true);
   </script>
 
   <script type="module" src="/core/engine/omni-engine.js"></script>
