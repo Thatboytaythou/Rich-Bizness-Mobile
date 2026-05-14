@@ -1,1 +1,527 @@
+/* =========================================================
+   RICH BIZNESS LLC
+   CINEMATIC UNIVERSAL REALISTIC OMNI DIAL
+   DECAGON TOUCH-TURN STABILIZED LAYER
+   /styles/omni-dial.css
+========================================================= */
 
+:root{
+  --rb-dial-rotation:0rad;
+  --rb-dial-counter-rotation:0rad;
+  --rb-dial-top:55%;
+  --rb-dial-size:min(86vw,440px);
+}
+
+/* =========================================================
+   DIAL STAGE
+========================================================= */
+
+.dial-ui{
+  position:fixed;
+  left:50%;
+  top:var(--rb-dial-top);
+
+  width:var(--rb-dial-size);
+  height:var(--rb-dial-size);
+
+  z-index:20;
+  pointer-events:none;
+
+  transform:
+    translate3d(-50%,-50%,0)
+    rotate(var(--rb-dial-rotation));
+
+  transform-origin:center center;
+  will-change:transform;
+
+  transition:transform .045s linear;
+
+  contain:layout paint style;
+}
+
+/* MAIN MACHINE PLATE */
+.dial-ui::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(circle at center, transparent 25%, rgba(141,255,91,.11) 27%, transparent 31%),
+    radial-gradient(circle at center, transparent 43%, rgba(141,255,91,.28) 46%, transparent 50%),
+    radial-gradient(circle at center, transparent 61%, rgba(255,216,106,.18) 64%, transparent 67%),
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(141,255,91,.16) 0deg,
+      rgba(141,255,91,.16) 1.4deg,
+      transparent 1.4deg,
+      transparent 36deg
+    );
+
+  box-shadow:
+    inset 0 0 34px rgba(141,255,91,.12),
+    0 0 48px rgba(141,255,91,.18),
+    0 0 120px rgba(141,255,91,.08);
+
+  opacity:.92;
+  animation:rbMachineBreath 4s ease-in-out infinite;
+}
+
+/* INNER STABLE RING */
+.dial-ui::after{
+  content:"";
+  position:absolute;
+  inset:10%;
+
+  border-radius:50%;
+
+  border:1px solid rgba(141,255,91,.2);
+
+  background:
+    radial-gradient(circle at center, rgba(141,255,91,.08), transparent 68%);
+
+  box-shadow:
+    inset 0 0 26px rgba(141,255,91,.1),
+    0 0 24px rgba(141,255,91,.12);
+
+  opacity:.78;
+}
+
+/* =========================================================
+   DIAL CARDS
+========================================================= */
+
+.dial-card{
+  position:absolute;
+
+  width:82px;
+  height:82px;
+
+  border:none;
+  outline:none;
+
+  border-radius:24px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+
+  pointer-events:auto;
+
+  color:#fff;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(141,255,91,.12), transparent 56%),
+    linear-gradient(180deg, rgba(16,22,16,.96), rgba(3,5,3,.985));
+
+  border:1px solid rgba(141,255,91,.28);
+
+  backdrop-filter:blur(16px);
+
+  box-shadow:
+    inset 0 0 18px rgba(141,255,91,.06),
+    0 0 20px rgba(0,0,0,.82),
+    0 0 16px rgba(141,255,91,.12);
+
+  transform:
+    translate3d(-50%,-50%,0)
+    rotate(var(--rb-dial-counter-rotation));
+
+  transform-origin:center center;
+  will-change:transform;
+
+  transition:
+    box-shadow .18s ease,
+    border-color .18s ease,
+    filter .18s ease;
+}
+
+/* CARD CONNECTOR LINE */
+.dial-card::before{
+  content:"";
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  width:2px;
+  height:72px;
+
+  transform:
+    translateX(-50%)
+    translateY(28px);
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(141,255,91,.48),
+      rgba(141,255,91,0)
+    );
+
+  opacity:.54;
+  pointer-events:none;
+}
+
+/* SOCKET DOT */
+.dial-card::after{
+  content:"";
+  position:absolute;
+
+  width:7px;
+  height:7px;
+
+  border-radius:50%;
+
+  background:#9dff63;
+
+  bottom:-16px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  box-shadow:
+    0 0 12px rgba(141,255,91,.95),
+    0 0 28px rgba(141,255,91,.42);
+}
+
+.dial-card.is-active{
+  border-color:rgba(190,255,130,.96);
+
+  filter:brightness(1.2);
+
+  box-shadow:
+    inset 0 0 20px rgba(141,255,91,.1),
+    0 0 26px rgba(141,255,91,.6),
+    0 0 82px rgba(141,255,91,.2);
+
+  transform:
+    translate3d(-50%,-50%,0)
+    rotate(var(--rb-dial-counter-rotation))
+    scale(1.08);
+}
+
+.dial-icon{
+  font-size:1.25rem;
+  color:var(--rb-green);
+  text-shadow:0 0 12px rgba(141,255,91,.78);
+}
+
+.dial-title{
+  font-size:.8rem;
+  font-weight:950;
+  letter-spacing:.1em;
+  line-height:1;
+}
+
+.dial-sub{
+  font-size:.52rem;
+  letter-spacing:.18em;
+  font-weight:900;
+  color:var(--rb-green-soft);
+  line-height:1.1;
+}
+
+/* =========================================================
+   DECAGON SOCKET MAP
+   10 EVEN POINTS
+========================================================= */
+
+.card-feed,
+.top-card{
+  left:50%;
+  top:4%;
+}
+
+.card-watch{
+  left:78%;
+  top:16%;
+}
+
+.card-live{
+  left:95%;
+  top:45%;
+}
+
+.card-music,
+.top-right-card{
+  left:83%;
+  top:73%;
+}
+
+.card-gaming,
+.right-card{
+  left:62%;
+  top:91%;
+}
+
+.card-meta,
+.bottom-card{
+  left:50%;
+  top:99%;
+}
+
+.card-sports,
+.bottom-left-card{
+  left:38%;
+  top:91%;
+}
+
+.card-gallery,
+.top-left-card{
+  left:17%;
+  top:73%;
+}
+
+.card-upload,
+.left-card{
+  left:5%;
+  top:45%;
+}
+
+.card-store,
+.bottom-right-card{
+  left:22%;
+  top:16%;
+}
+
+/* =========================================================
+   CENTER PORTAL CORE
+========================================================= */
+
+.center-ui{
+  position:fixed;
+  left:50%;
+  top:var(--rb-dial-top);
+
+  transform:translate3d(-50%,-50%,0);
+
+  z-index:22;
+  pointer-events:none;
+
+  will-change:transform;
+}
+
+.portal-core{
+  width:160px;
+  height:160px;
+
+  border-radius:50%;
+
+  position:relative;
+
+  background:
+    radial-gradient(circle, rgba(141,255,91,.14), transparent 58%),
+    radial-gradient(circle, rgba(0,0,0,.32), rgba(0,0,0,.96) 72%);
+
+  border:1px solid rgba(141,255,91,.28);
+
+  box-shadow:
+    0 0 34px rgba(141,255,91,.3),
+    0 0 90px rgba(141,255,91,.1),
+    inset 0 0 26px rgba(141,255,91,.12);
+}
+
+.portal-core::before{
+  content:"";
+  position:absolute;
+  inset:-16px;
+
+  border-radius:50%;
+
+  border:2px solid rgba(141,255,91,.18);
+
+  box-shadow:
+    0 0 24px rgba(141,255,91,.18);
+
+  animation:rbSpinSlow 16s linear infinite;
+}
+
+.portal-core::after{
+  content:"";
+  position:absolute;
+  inset:12px;
+
+  border-radius:50%;
+
+  border:1px solid rgba(255,216,106,.12);
+
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent,
+      rgba(141,255,91,.18),
+      transparent,
+      rgba(255,216,106,.12),
+      transparent
+    );
+
+  animation:rbSpinReverse 22s linear infinite;
+  opacity:.7;
+}
+
+.portal-inner{
+  position:absolute;
+  inset:20px;
+
+  z-index:2;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    radial-gradient(circle, rgba(10,16,10,.72), rgba(0,0,0,.97));
+
+  border:1px solid rgba(141,255,91,.14);
+}
+
+.portal-title{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  line-height:.82;
+  text-align:center;
+}
+
+.portal-title span{
+  font-family:Georgia,serif;
+  font-size:1.55rem;
+  font-weight:950;
+
+  color:#ddca74;
+
+  text-shadow:
+    0 0 14px rgba(141,255,91,.3),
+    0 3px 8px rgba(0,0,0,.85);
+}
+
+.portal-title small{
+  margin-top:6px;
+
+  font-size:.66rem;
+  letter-spacing:.26em;
+  font-weight:900;
+
+  color:var(--rb-green);
+
+  text-shadow:0 0 12px rgba(141,255,91,.55);
+}
+
+/* =========================================================
+   TOUCH STATE
+========================================================= */
+
+.dial-ui.is-dragging{
+  transition:none;
+}
+
+.dial-ui.is-dragging .dial-card{
+  transition:
+    box-shadow .12s ease,
+    border-color .12s ease,
+    filter .12s ease;
+}
+
+/* =========================================================
+   SHORT PHONE PATCH
+========================================================= */
+
+@media (max-height:760px){
+  :root{
+    --rb-dial-top:56%;
+    --rb-dial-size:min(82vw,410px);
+  }
+
+  .dial-card{
+    width:76px;
+    height:76px;
+    border-radius:22px;
+  }
+
+  .dial-card::before{
+    height:64px;
+    transform:
+      translateX(-50%)
+      translateY(25px);
+  }
+
+  .portal-core{
+    width:148px;
+    height:148px;
+  }
+
+  .portal-title span{
+    font-size:1.38rem;
+  }
+}
+
+/* =========================================================
+   EXTRA SMALL WIDTH PATCH
+========================================================= */
+
+@media (max-width:380px){
+  :root{
+    --rb-dial-size:min(84vw,390px);
+  }
+
+  .dial-card{
+    width:72px;
+    height:72px;
+    border-radius:20px;
+  }
+
+  .dial-title{
+    font-size:.72rem;
+  }
+
+  .dial-sub{
+    font-size:.48rem;
+  }
+
+  .portal-core{
+    width:140px;
+    height:140px;
+  }
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes rbMachineBreath{
+  0%,100%{
+    opacity:.86;
+    filter:brightness(.96);
+  }
+
+  50%{
+    opacity:1;
+    filter:brightness(1.12);
+  }
+}
+
+@keyframes rbSpinSlow{
+  from{
+    transform:rotate(0deg);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+@keyframes rbSpinReverse{
+  from{
+    transform:rotate(360deg);
+  }
+
+  to{
+    transform:rotate(0deg);
+  }
+}
