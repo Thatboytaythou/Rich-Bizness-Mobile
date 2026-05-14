@@ -2,6 +2,7 @@
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL OMNI DIAL
    DECAGON TOUCH LOCK / PORTAL HUB
+   FIXED NO-BOX / NO-CLIP VERSION
    /styles/omni-dial.css
 ========================================================= */
 
@@ -9,10 +10,10 @@
   --rb-dial-rotation:0rad;
   --rb-dial-counter-rotation:0rad;
 
-  --rb-dial-top:53%;
-  --rb-dial-size:min(78vw,390px);
+  --rb-dial-top:54%;
+  --rb-dial-size:min(80vw,390px);
 
-  --rb-card-size:74px;
+  --rb-card-size:72px;
   --rb-card-radius:22px;
 
   --rb-green:#8dff5b;
@@ -26,7 +27,6 @@
 
 .dial-ui{
   position:fixed;
-
   left:50%;
   top:var(--rb-dial-top);
 
@@ -34,7 +34,6 @@
   height:var(--rb-dial-size);
 
   z-index:32;
-
   pointer-events:none;
 
   transform:
@@ -46,7 +45,9 @@
 
   transition:transform .055s linear;
 
-  contain:layout paint style;
+  overflow:visible;
+  contain:none;
+  border-radius:50%;
 }
 
 /* =========================================================
@@ -55,43 +56,15 @@
 
 .dial-ui::before{
   content:"";
-
   position:absolute;
-  inset:0;
-
+  inset:-8%;
   border-radius:50%;
 
   background:
-    radial-gradient(
-      circle at center,
-      transparent 20%,
-      rgba(141,255,91,.06) 22%,
-      transparent 25%
-    ),
-
-    radial-gradient(
-      circle at center,
-      transparent 36%,
-      rgba(141,255,91,.12) 38%,
-      transparent 41%
-    ),
-
-    radial-gradient(
-      circle at center,
-      transparent 51%,
-      rgba(141,255,91,.34) 53%,
-      rgba(255,216,106,.12) 55%,
-      transparent 58%
-    ),
-
-    radial-gradient(
-      circle at center,
-      transparent 67%,
-      rgba(255,216,106,.18) 69%,
-      rgba(141,255,91,.24) 71%,
-      transparent 74%
-    ),
-
+    radial-gradient(circle at center, transparent 20%, rgba(141,255,91,.06) 22%, transparent 25%),
+    radial-gradient(circle at center, transparent 36%, rgba(141,255,91,.12) 38%, transparent 41%),
+    radial-gradient(circle at center, transparent 51%, rgba(141,255,91,.34) 53%, rgba(255,216,106,.12) 55%, transparent 58%),
+    radial-gradient(circle at center, transparent 67%, rgba(255,216,106,.18) 69%, rgba(141,255,91,.24) 71%, transparent 74%),
     repeating-conic-gradient(
       from 0deg,
       rgba(141,255,91,.22) 0deg,
@@ -100,8 +73,7 @@
       transparent 18deg
     );
 
-  border:
-    1px solid rgba(141,255,91,.18);
+  border:1px solid rgba(141,255,91,.18);
 
   box-shadow:
     inset 0 0 38px rgba(141,255,91,.12),
@@ -109,8 +81,7 @@
     0 0 46px rgba(141,255,91,.18),
     0 0 120px rgba(141,255,91,.08);
 
-  opacity:.95;
-
+  opacity:.92;
   animation:rbDialBreath 4.2s ease-in-out infinite;
 }
 
@@ -120,10 +91,8 @@
 
 .dial-ui::after{
   content:"";
-
   position:absolute;
-  inset:9%;
-
+  inset:8%;
   border-radius:50%;
 
   background:
@@ -142,15 +111,14 @@
       rgba(141,255,91,.18)
     );
 
-  border:
-    1px solid rgba(141,255,91,.24);
+  border:1px solid rgba(141,255,91,.24);
 
   box-shadow:
     inset 0 0 28px rgba(141,255,91,.14),
     inset 0 0 60px rgba(0,0,0,.72),
     0 0 28px rgba(141,255,91,.14);
 
-  opacity:.82;
+  opacity:.78;
 }
 
 /* =========================================================
@@ -175,23 +143,15 @@
   gap:4px;
 
   pointer-events:auto;
+  overflow:hidden;
 
   color:#fff;
 
   background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(141,255,91,.16),
-      transparent 54%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(22,30,22,.97),
-      rgba(4,7,4,.99)
-    );
+    radial-gradient(circle at 50% 0%, rgba(141,255,91,.16), transparent 54%),
+    linear-gradient(180deg, rgba(22,30,22,.97), rgba(4,7,4,.99));
 
-  border:
-    1px solid rgba(141,255,91,.3);
+  border:1px solid rgba(141,255,91,.3);
 
   backdrop-filter:blur(18px);
 
@@ -214,7 +174,6 @@
     filter .18s ease;
 }
 
-/* CARD GLASS EDGE */
 .dial-card > *{
   position:relative;
   z-index:2;
@@ -222,35 +181,24 @@
 
 .dial-card::before{
   content:"";
-
   position:absolute;
   inset:7px;
-
-  border-radius:19px;
-
-  border:
-    1px solid rgba(255,255,255,.055);
-
-  box-shadow:
-    inset 0 0 14px rgba(141,255,91,.06);
-
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.055);
+  box-shadow:inset 0 0 14px rgba(141,255,91,.06);
   pointer-events:none;
 }
 
-/* SOCKET DOT / LOCK PIN */
 .dial-card::after{
   content:"";
-
   position:absolute;
-
   left:50%;
-  bottom:-16px;
+  bottom:-13px;
 
   width:8px;
   height:8px;
 
   border-radius:50%;
-
   transform:translateX(-50%);
 
   background:var(--rb-green);
@@ -262,10 +210,8 @@
   pointer-events:none;
 }
 
-/* ACTIVE CARD */
 .dial-card.is-active{
   border-color:rgba(190,255,130,.98);
-
   filter:brightness(1.18) saturate(1.08);
 
   box-shadow:
@@ -281,37 +227,30 @@
 }
 
 .dial-icon{
-  font-size:1.25rem;
-
+  font-size:1.1rem;
   line-height:1;
-
   color:var(--rb-green);
-
   text-shadow:
     0 0 12px rgba(141,255,91,.82),
     0 0 24px rgba(141,255,91,.24);
 }
 
 .dial-title{
-  font-size:.78rem;
+  font-size:.68rem;
   line-height:1;
-
   font-weight:950;
-
-  letter-spacing:.11em;
+  letter-spacing:.1em;
 }
 
 .dial-sub{
   max-width:90%;
-
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 
-  font-size:.5rem;
+  font-size:.44rem;
   line-height:1.1;
-
-  letter-spacing:.16em;
+  letter-spacing:.14em;
   font-weight:900;
 
   color:var(--rb-green-soft);
@@ -319,129 +258,55 @@
 
 /* =========================================================
    DECAGON SOCKET MAP
-   10 LOCKED POINTS AROUND THE PORTAL
 ========================================================= */
 
-.card-feed{
-  left:50%;
-  top:4%;
-}
-
-.card-watch{
-  left:78.5%;
-  top:15.8%;
-}
-
-.card-live{
-  left:95.5%;
-  top:45%;
-}
-
-.card-music{
-  left:83.5%;
-  top:73.5%;
-}
-
-.card-gaming{
-  left:62%;
-  top:91.5%;
-}
-
-.card-meta{
-  left:50%;
-  top:99%;
-}
-
-.card-sports{
-  left:38%;
-  top:91.5%;
-}
-
-.card-gallery{
-  left:16.5%;
-  top:73.5%;
-}
-
-.card-upload{
-  left:4.5%;
-  top:45%;
-}
-
-.card-store{
-  left:21.5%;
-  top:15.8%;
-}
+.card-feed{ left:50%; top:4%; }
+.card-watch{ left:78.5%; top:15.8%; }
+.card-live{ left:95.5%; top:45%; }
+.card-music{ left:83.5%; top:73.5%; }
+.card-gaming{ left:62%; top:91.5%; }
+.card-meta{ left:50%; top:99%; }
+.card-sports{ left:38%; top:91.5%; }
+.card-gallery{ left:16.5%; top:73.5%; }
+.card-upload{ left:4.5%; top:45%; }
+.card-store{ left:21.5%; top:15.8%; }
 
 /* OLD CLASS SAFETY */
-.top-card{
-  left:50%;
-  top:4%;
-}
-
-.top-left-card{
-  left:16.5%;
-  top:73.5%;
-}
-
-.top-right-card{
-  left:83.5%;
-  top:73.5%;
-}
-
-.left-card{
-  left:4.5%;
-  top:45%;
-}
-
-.right-card{
-  left:62%;
-  top:91.5%;
-}
-
-.bottom-left-card{
-  left:38%;
-  top:91.5%;
-}
-
-.bottom-card{
-  left:50%;
-  top:99%;
-}
-
-.bottom-right-card{
-  left:21.5%;
-  top:15.8%;
-}
+.top-card{ left:50%; top:4%; }
+.top-left-card{ left:16.5%; top:73.5%; }
+.top-right-card{ left:83.5%; top:73.5%; }
+.left-card{ left:4.5%; top:45%; }
+.right-card{ left:62%; top:91.5%; }
+.bottom-left-card{ left:38%; top:91.5%; }
+.bottom-card{ left:50%; top:99%; }
+.bottom-right-card{ left:21.5%; top:15.8%; }
 
 /* =========================================================
    CONNECTOR LINES
-   EACH CARD FEELS BOLTED TO WHEEL
 ========================================================= */
 
 .dial-card .dial-icon::after{
   content:"";
-
   position:absolute;
 
   left:50%;
   top:50%;
 
   width:2px;
-  height:58px;
+  height:48px;
 
   transform:
     translateX(-50%)
-    translateY(26px);
+    translateY(22px);
 
   background:
     linear-gradient(
       to bottom,
-      rgba(141,255,91,.36),
+      rgba(141,255,91,.32),
       rgba(141,255,91,0)
     );
 
-  opacity:.42;
-
+  opacity:.36;
   pointer-events:none;
   z-index:-1;
 }
@@ -481,26 +346,22 @@ body.portal-arming .dial-card.is-active{
 
 @media (max-height:760px){
   :root{
-    --rb-dial-top:56%;
-    --rb-dial-size:min(84vw,420px);
-    --rb-card-size:76px;
-    --rb-card-radius:22px;
+    --rb-dial-top:54%;
+    --rb-dial-size:min(76vw,370px);
+    --rb-card-size:68px;
+    --rb-card-radius:20px;
   }
 
   .dial-title{
-    font-size:.72rem;
+    font-size:.62rem;
   }
 
   .dial-sub{
-    font-size:.47rem;
+    font-size:.4rem;
   }
 
   .dial-icon{
-    font-size:1.15rem;
-  }
-
-  .dial-card::after{
-    bottom:-13px;
+    font-size:1rem;
   }
 }
 
@@ -510,21 +371,21 @@ body.portal-arming .dial-card.is-active{
 
 @media (max-width:380px){
   :root{
-    --rb-dial-size:min(86vw,390px);
-    --rb-card-size:72px;
-    --rb-card-radius:20px;
+    --rb-dial-size:min(78vw,360px);
+    --rb-card-size:66px;
+    --rb-card-radius:19px;
   }
 
   .dial-title{
-    font-size:.68rem;
+    font-size:.6rem;
   }
 
   .dial-sub{
-    font-size:.44rem;
+    font-size:.38rem;
   }
 
   .dial-icon{
-    font-size:1.08rem;
+    font-size:.98rem;
   }
 }
 
