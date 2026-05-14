@@ -111,8 +111,8 @@
     },
 
     {
-      "source": "/settings",
-      "destination": "/settings.html"
+      "source": "/setting",
+      "destination": "/setting.html"
     },
 
     {
