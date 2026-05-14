@@ -9,11 +9,11 @@
   --rb-dial-rotation:0rad;
   --rb-dial-counter-rotation:0rad;
 
-  --rb-dial-top:56%;
-  --rb-dial-size:min(88vw,470px);
+  --rb-dial-top:53%;
+  --rb-dial-size:min(78vw,390px);
 
-  --rb-card-size:84px;
-  --rb-card-radius:25px;
+  --rb-card-size:74px;
+  --rb-card-radius:22px;
 
   --rb-green:#8dff5b;
   --rb-green-soft:#6bff8d;
