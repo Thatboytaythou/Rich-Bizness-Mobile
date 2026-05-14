@@ -16,32 +16,27 @@
         #020402;
     }
     body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
         linear-gradient(135deg,rgba(120,255,75,.08),transparent 35%,rgba(255,220,120,.04)),
         repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 1px,transparent 1px 9px),
         radial-gradient(circle at center,transparent 34%,rgba(0,0,0,.92) 100%);
     }
 
-    .page{position:relative;z-index:1;width:min(980px,100%);margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom))}
+    .page{position:relative;z-index:1;width:min(980px,100%);margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(126px + env(safe-area-inset-bottom))}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-    .circle-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,219,123,.52);background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));color:#ffe58a;font-size:21px;display:grid;place-items:center;box-shadow:0 0 18px rgba(120,255,80,.15),inset 0 0 12px rgba(255,255,255,.06);text-decoration:none}
+    .circle-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,219,123,.52);background:linear-gradient(145deg,rgba(44,44,44,.88),rgba(0,0,0,.72));color:#ffe58a;font-size:21px;display:grid;place-items:center;text-decoration:none}
     .brand{display:flex;flex-direction:column;line-height:.9;text-align:center;font-family:Georgia,"Times New Roman",serif}
     .brand strong{font-size:32px;letter-spacing:.05em;background:linear-gradient(to bottom,#fff4b8,#9dff67 45%,#4c7618);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(129,255,82,.45))}
     .brand small{color:#ffe58a;letter-spacing:.22em;margin-top:5px;font-size:12px}
 
     .hero{position:relative;overflow:hidden;border:1px solid rgba(151,255,97,.24);border-radius:34px;padding:20px;margin-bottom:16px;background:linear-gradient(145deg,rgba(12,22,12,.94),rgba(0,0,0,.76)),radial-gradient(circle at top,rgba(132,255,80,.18),transparent 58%);box-shadow:0 0 45px rgba(0,0,0,.84),0 0 34px rgba(122,255,77,.16)}
-    .hero::after{content:"";position:absolute;right:-48px;top:-58px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(157,255,99,.28),transparent 68%)}
     .kicker{color:#9dff67;font-size:12px;font-weight:950;letter-spacing:.18em;margin-bottom:8px}
     .hero h1{font-size:36px;line-height:.95;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(to bottom,#fff6be,#9dff6d 45%,#547d19);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .hero p{color:#dfffd2;margin-top:10px;font-size:14px;line-height:1.45}
 
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-    .stat{min-height:82px;border-radius:22px;border:1px solid rgba(151,255,97,.18);background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 0 28px rgba(0,0,0,.7);padding:10px}
+    .stat{min-height:82px;border-radius:22px;border:1px solid rgba(151,255,97,.18);background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
     .stat small{color:#9dff67;font-size:10px;letter-spacing:.14em;font-weight:900}
     .stat strong{margin-top:6px;font-size:17px}
 
@@ -50,38 +45,38 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 
     .drop-zone{
-      position:relative;
-      overflow:hidden;
-      min-height:280px;
-      border-radius:30px;
+      position:relative;overflow:hidden;min-height:280px;border-radius:30px;
       border:1px dashed rgba(151,255,97,.45);
-      background:
-        radial-gradient(circle at center,rgba(157,255,99,.14),transparent 55%),
-        linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.65));
-      display:grid;
-      place-items:center;
-      text-align:center;
-      padding:24px;
+      background:radial-gradient(circle at center,rgba(157,255,99,.14),transparent 55%),linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.65));
+      display:grid;place-items:center;text-align:center;padding:24px;cursor:pointer;
       box-shadow:inset 0 0 50px rgba(120,255,80,.08),0 0 30px rgba(0,0,0,.72);
     }
     .drop-zone.active{border-color:#9dff67;box-shadow:0 0 34px rgba(157,255,103,.32),inset 0 0 50px rgba(120,255,80,.12)}
-    .drop-core{position:relative;z-index:2}
+    .drop-core{position:relative;z-index:2;pointer-events:none}
     .drop-icon{width:92px;height:92px;border-radius:28px;margin:0 auto 14px;display:grid;place-items:center;font-size:42px;background:linear-gradient(145deg,rgba(157,255,99,.24),rgba(0,0,0,.65));border:1px solid rgba(151,255,97,.28);box-shadow:0 0 28px rgba(157,255,99,.18)}
     .drop-zone h3{font-size:28px;font-family:Georgia,"Times New Roman",serif;color:#cfff9b;margin-bottom:8px}
     .drop-zone p{font-size:14px;color:#dfffd2;line-height:1.45}
-    #fileInput{display:none}
+
+    #fileInput{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor:pointer;
+      z-index:5;
+    }
 
     .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
     .field label{color:#9dff67;font-size:11px;letter-spacing:.12em;font-weight:900}
-    input,textarea,select{width:100%;border:none;outline:none;color:#fff;border-radius:16px;padding:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);font-size:15px}
+    input,textarea,select{width:100%;outline:none;color:#fff;border-radius:16px;padding:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);font-size:15px}
     textarea{min-height:88px;resize:none;line-height:1.4}
 
-    .main-btn,.ghost-btn,.money-btn{border:none;outline:none;border-radius:18px;min-height:50px;font-weight:950;letter-spacing:.12em;font-size:13px;width:100%}
-    .main-btn,.money-btn{color:#081008;background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);box-shadow:0 0 24px rgba(128,255,80,.36)}
-    .ghost-btn{color:#dfffd2;background:rgba(255,255,255,.045);border:1px solid rgba(151,255,97,.2)}
+    .money-btn{border:none;outline:none;border-radius:18px;min-height:50px;font-weight:950;letter-spacing:.12em;font-size:13px;width:100%;color:#081008;background:linear-gradient(to bottom,#dfffbc,#9dff67 50%,#4c7618);box-shadow:0 0 24px rgba(128,255,80,.36)}
 
     .preview-card{display:none;border:1px solid rgba(151,255,97,.18);border-radius:24px;padding:12px;background:rgba(255,255,255,.035);margin-top:12px}
     .preview-media{width:100%;max-height:320px;border-radius:18px;object-fit:cover;background:#000;border:1px solid rgba(151,255,97,.16)}
+    audio.preview-media{height:54px;object-fit:initial}
     .preview-file{display:grid;place-items:center;min-height:180px;border-radius:18px;background:rgba(0,0,0,.42);font-size:42px;border:1px solid rgba(151,255,97,.16)}
     .file-meta{margin-top:10px;color:#dfffd2;font-size:13px;line-height:1.45}
 
@@ -91,7 +86,6 @@
     .status{margin-top:12px;color:#9dff67;font-size:12px;letter-spacing:.12em;font-weight:850;min-height:18px}
 
     .uploads-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-    .uploads-head h2{margin:0}
     .upload-count{color:#dfffd2;font-size:14px}
     .uploads-list{display:grid;grid-template-columns:1fr;gap:12px}
     .upload-card{display:grid;grid-template-columns:86px 1fr;gap:12px;border:1px solid rgba(151,255,97,.18);border-radius:24px;padding:12px;background:rgba(0,0,0,.52)}
@@ -148,14 +142,14 @@
 
       <div class="grid">
         <div>
-          <label class="drop-zone" id="dropZone" for="fileInput">
+          <div class="drop-zone" id="dropZone">
             <input id="fileInput" type="file" accept="image/*,video/*,audio/*,.mp3,.m4a,.wav,.aac,.mp4,.mov,.heic,.heif,.pdf,.zip,.txt,.json" />
             <div class="drop-core">
               <div class="drop-icon">⬆️</div>
               <h3>Tap or Drop File</h3>
               <p>Images, video, audio, documents, assets, avatars, covers, products, clips, and digital drops.</p>
             </div>
-          </label>
+          </div>
 
           <div class="preview-card" id="previewCard">
             <div id="previewSlot"></div>
@@ -174,18 +168,35 @@
             <label>SECTION ROUTE</label>
             <select id="sectionInput">
               <option value="general">General Uploads</option>
+              <option value="feed">Feed Post</option>
+
               <option value="profile-avatar">Profile Avatar</option>
               <option value="profile-banner">Profile Banner</option>
-              <option value="feed">Feed Post</option>
-              <option value="music">Music Track</option>
-              <option value="podcast">Podcast Episode</option>
+              <option value="meta-avatar">Meta Avatar</option>
+
+              <option value="music">Music Track Audio</option>
+              <option value="music-cover">Music Cover</option>
+
+              <option value="podcast">Podcast Episode Audio</option>
+              <option value="podcast-cover">Podcast Cover</option>
+
+              <option value="radio">Radio Cover / Station</option>
+
+              <option value="gallery">Gallery Art / Media</option>
+
+              <option value="gaming">Gaming Clip</option>
+              <option value="game-cover">Game Cover</option>
+              <option value="game-asset">Game Asset</option>
+
               <option value="sports">Sports Media</option>
-              <option value="gaming">Gaming Media</option>
-              <option value="gallery">Gallery Art</option>
+              <option value="sports-clip">Sports Clip</option>
+              <option value="sports-cover">Sports Cover</option>
+
               <option value="store-product">Store Product</option>
               <option value="store-digital">Store Digital File</option>
               <option value="store-seller">Seller Media</option>
-              <option value="live-thumbnail">Live Thumbnail</option>
+
+              <option value="live-thumbnail">Live Thumbnail / Cover</option>
               <option value="live-recording">Live Recording</option>
             </select>
           </div>
@@ -213,7 +224,7 @@
             <textarea id="descriptionInput" placeholder="Tell the platform what this upload is for..."></textarea>
           </div>
 
-          <button class="money-btn" id="uploadBtn">UPLOAD TO RICH BIZNESS 🚀</button>
+          <button class="money-btn" id="uploadBtn" type="button">UPLOAD TO RICH BIZNESS 🚀</button>
           <div class="status" id="uploadStatus">UPLOAD ENGINE READY</div>
         </div>
       </div>
