@@ -1,7 +1,7 @@
 /* =========================================================
    RICH BIZNESS LLC
    CINEMATIC UNIVERSAL REALISTIC OMNI WATCH
-   JS-ORBIT FINAL MASTER BUILD
+   TOUCH-TURN CONNECTED DIAL MASTER BUILD
    /styles/main.css
 ========================================================= */
 
@@ -16,9 +16,12 @@
   --rb-green:#8dff5b;
   --rb-green-soft:#6bff8d;
   --rb-gold:#ffd76a;
+
   --safe-top:env(safe-area-inset-top);
   --safe-bottom:env(safe-area-inset-bottom);
+
   --stats-h:104px;
+  --rb-dial-rotation:0rad;
 }
 
 html,
@@ -59,6 +62,7 @@ body::after{
   background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.28) 62%,rgba(0,0,0,.9) 100%);
 }
 
+/* ENGINE */
 #engine{
   position:fixed;
   inset:0;
@@ -69,6 +73,7 @@ body::after{
   mix-blend-mode:screen;
 }
 
+/* FX */
 .screen-vignette{
   position:fixed;
   inset:0;
@@ -135,6 +140,7 @@ body::after{
   color:#fff;
 }
 
+/* PROFILE */
 .rank-panel{
   border:none;
   outline:none;
@@ -282,17 +288,21 @@ body::after{
   font-weight:800;
 }
 
-/* OMNI DIAL — STATIC CONTAINER, JS MOVES CARDS */
+/* =========================================================
+   TOUCH TURN OMNI DIAL — WHOLE MACHINE ROTATES TOGETHER
+========================================================= */
+
 .dial-ui{
   position:fixed;
   left:50%;
   top:55%;
-  width:min(84vw,430px);
-  height:min(84vw,430px);
+  width:min(86vw,440px);
+  height:min(86vw,440px);
   z-index:20;
   pointer-events:none;
-  transform:translate(-50%,-50%);
+  transform:translate(-50%,-50%) rotate(var(--rb-dial-rotation));
   transform-origin:center center;
+  transition:transform .08s linear;
 }
 
 /* DIAL RINGS */
@@ -302,13 +312,14 @@ body::after{
   inset:0;
   border-radius:50%;
   background:
-    radial-gradient(circle at center,transparent 30%,rgba(141,255,91,.12) 31%,transparent 33%),
-    radial-gradient(circle at center,transparent 47%,rgba(141,255,91,.26) 48%,transparent 50%),
-    radial-gradient(circle at center,transparent 63%,rgba(255,216,106,.18) 64%,transparent 66%);
+    radial-gradient(circle at center,transparent 28%,rgba(141,255,91,.13) 30%,transparent 32%),
+    radial-gradient(circle at center,transparent 45%,rgba(141,255,91,.28) 47%,transparent 50%),
+    radial-gradient(circle at center,transparent 62%,rgba(255,216,106,.18) 64%,transparent 66%),
+    repeating-conic-gradient(from 0deg,rgba(141,255,91,.16) 0deg,rgba(141,255,91,.16) 2deg,transparent 2deg,transparent 36deg);
   box-shadow:
-    inset 0 0 30px rgba(141,255,91,.12),
-    0 0 40px rgba(141,255,91,.14),
-    0 0 100px rgba(141,255,91,.08);
+    inset 0 0 34px rgba(141,255,91,.12),
+    0 0 44px rgba(141,255,91,.16),
+    0 0 110px rgba(141,255,91,.08);
   animation:machineBreath 4s ease-in-out infinite;
 }
 
@@ -318,11 +329,11 @@ body::after{
   inset:10%;
   border-radius:50%;
   border:1px solid rgba(141,255,91,.18);
-  background:repeating-conic-gradient(from 0deg,rgba(141,255,91,.14) 0deg,rgba(141,255,91,.14) 2deg,transparent 2deg,transparent 36deg);
-  opacity:.75;
+  background:radial-gradient(circle,rgba(141,255,91,.08),transparent 68%);
+  opacity:.78;
 }
 
-/* CARDS */
+/* CARDS — LOCKED TO WHEEL, ROTATES WITH WHEEL */
 .dial-card{
   position:absolute;
   width:82px;
@@ -342,7 +353,21 @@ body::after{
   backdrop-filter:blur(16px);
   box-shadow:inset 0 0 18px rgba(141,255,91,.06),0 0 20px rgba(0,0,0,.8);
   transform:translate(-50%,-50%);
+  transform-origin:center center;
   transition:box-shadow .22s ease,border-color .22s ease,filter .22s ease;
+}
+
+.dial-card::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:2px;
+  height:72px;
+  transform:translateX(-50%) translateY(28px);
+  background:linear-gradient(to bottom,rgba(141,255,91,.48),rgba(141,255,91,0));
+  opacity:.6;
+  pointer-events:none;
 }
 
 .dial-card::after{
@@ -383,19 +408,29 @@ body::after{
   color:var(--rb-green-soft);
 }
 
-/* JS ORBIT FALLBACK POSITIONS */
-.card-feed{left:50%;top:6%}
-.card-watch{left:79%;top:18%}
-.card-live{left:94%;top:48%}
-.card-music{left:80%;top:76%}
-.card-gaming{left:61%;top:92%}
+/* 10 SOCKET POSITIONS — EVEN REAL DIAL */
+.card-feed{left:50%;top:4%}
+.card-watch{left:78%;top:16%}
+.card-live{left:95%;top:45%}
+.card-music{left:83%;top:73%}
+.card-gaming{left:62%;top:91%}
 .card-meta{left:50%;top:99%}
-.card-sports{left:39%;top:92%}
-.card-gallery{left:20%;top:76%}
-.card-upload{left:6%;top:48%}
-.card-store{left:21%;top:18%}
+.card-sports{left:38%;top:91%}
+.card-gallery{left:17%;top:73%}
+.card-upload{left:5%;top:45%}
+.card-store{left:22%;top:16%}
 
-/* CENTER CORE */
+/* old class safety */
+.top-card{left:50%;top:4%}
+.top-left-card{left:17%;top:73%}
+.top-right-card{left:83%;top:73%}
+.left-card{left:5%;top:45%}
+.right-card{left:62%;top:91%}
+.bottom-left-card{left:38%;top:91%}
+.bottom-card{left:50%;top:99%}
+.bottom-right-card{left:22%;top:16%}
+
+/* CENTER CORE — STAYS LOCKED, DOES NOT ROTATE */
 .center-ui{
   position:fixed;
   left:50%;
@@ -546,6 +581,45 @@ body::after{
 .stat-card strong{
   font-size:.92rem;
   font-weight:950;
+}
+
+/* SHORT PHONE */
+@media (max-height:760px){
+  :root{--stats-h:96px}
+
+  .dial-ui,
+  .center-ui{
+    top:56%;
+  }
+
+  .dial-ui{
+    width:min(82vw,410px);
+    height:min(82vw,410px);
+  }
+
+  .dial-card{
+    width:76px;
+    height:76px;
+    border-radius:22px;
+  }
+
+  .portal-core{
+    width:148px;
+    height:148px;
+  }
+
+  .portal-title span{
+    font-size:1.38rem;
+  }
+
+  .enter{
+    height:80px;
+    bottom:calc(var(--stats-h) + 12px);
+  }
+
+  .enter-main{
+    font-size:1.7rem;
+  }
 }
 
 /* ANIMATION */
