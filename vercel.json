@@ -1,70 +1,120 @@
 {
+  "version": 2,
+
   "cleanUrls": true,
+
+  "builds": [
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "styles/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "core/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "images/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "games/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+
   "rewrites": [
     {
       "source": "/",
       "destination": "/index.html"
     },
+
     {
       "source": "/feed",
       "destination": "/feed.html"
     },
+
     {
       "source": "/live",
       "destination": "/live.html"
     },
+
     {
       "source": "/watch",
       "destination": "/watch.html"
     },
+
     {
       "source": "/music",
       "destination": "/music.html"
     },
+
     {
       "source": "/gaming",
       "destination": "/gaming.html"
     },
+
     {
       "source": "/sports",
       "destination": "/sports.html"
     },
+
     {
       "source": "/gallery",
       "destination": "/gallery.html"
     },
+
     {
       "source": "/upload",
       "destination": "/upload.html"
     },
+
     {
       "source": "/store",
       "destination": "/store.html"
     },
+
     {
       "source": "/profile",
       "destination": "/profile.html"
     },
+
     {
       "source": "/edit",
       "destination": "/edit.html"
     },
+
     {
       "source": "/messages",
       "destination": "/messages.html"
     },
+
     {
       "source": "/notifications",
       "destination": "/notifications.html"
     },
+
     {
       "source": "/meta",
       "destination": "/meta.html"
     },
+
     {
       "source": "/settings",
       "destination": "/settings.html"
     },
+
     {
       "source": "/auth",
       "destination": "/auth.html"
