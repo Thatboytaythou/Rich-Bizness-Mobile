@@ -1,1 +1,625 @@
+/* =========================================================
+   RICH BIZNESS LLC
+   CINEMATIC UNIVERSAL OMNI PORTAL
+   CENTER VAULT / GREEN AURA OPENING CORE
+   /styles/omni-portal.css
+========================================================= */
 
+:root{
+  --rb-green:#8dff5b;
+  --rb-green-soft:#6bff8d;
+  --rb-gold:#ffd76a;
+
+  --rb-dial-top:56%;
+  --rb-portal-size:180px;
+}
+
+/* =========================================================
+   CENTER PORTAL STAGE
+========================================================= */
+
+.center-ui{
+  position:fixed;
+
+  left:50%;
+  top:var(--rb-dial-top);
+
+  width:var(--rb-portal-size);
+  height:var(--rb-portal-size);
+
+  transform:translate3d(-50%,-50%,0);
+
+  z-index:44;
+  pointer-events:none;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  will-change:transform, filter;
+}
+
+/* =========================================================
+   CORE BODY
+========================================================= */
+
+.portal-core{
+  position:relative;
+
+  width:100%;
+  height:100%;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(141,255,91,.16),
+      rgba(11,22,10,.54) 34%,
+      rgba(0,0,0,.96) 72%
+    );
+
+  border:1px solid rgba(141,255,91,.32);
+
+  box-shadow:
+    inset 0 0 26px rgba(141,255,91,.14),
+    inset 0 0 64px rgba(0,0,0,.78),
+    0 0 40px rgba(141,255,91,.32),
+    0 0 100px rgba(141,255,91,.12);
+
+  animation:rbPortalBreath 4.4s ease-in-out infinite;
+}
+
+/* OUTER HALO */
+.portal-core::before{
+  content:"";
+
+  position:absolute;
+  inset:-18px;
+
+  border-radius:50%;
+
+  border:2px solid rgba(141,255,91,.16);
+
+  box-shadow:
+    0 0 24px rgba(141,255,91,.24),
+    inset 0 0 22px rgba(141,255,91,.12);
+
+  animation:rbPortalHaloSpin 18s linear infinite;
+}
+
+/* INNER SWIRL */
+.portal-core::after{
+  content:"";
+
+  position:absolute;
+  inset:12px;
+
+  border-radius:50%;
+
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent,
+      rgba(141,255,91,.18),
+      transparent 26%,
+      rgba(255,216,106,.14),
+      transparent 48%,
+      rgba(141,255,91,.16),
+      transparent 72%,
+      rgba(255,216,106,.1),
+      transparent
+    );
+
+  opacity:.72;
+
+  animation:rbPortalSwirl 15s linear infinite;
+}
+
+/* =========================================================
+   VAULT DOORS
+========================================================= */
+
+.portal-door{
+  position:absolute;
+
+  top:0;
+  bottom:0;
+
+  width:50%;
+
+  z-index:5;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18,26,18,.96),
+      rgba(2,5,2,.98)
+    );
+
+  border:1px solid rgba(141,255,91,.16);
+
+  box-shadow:
+    inset 0 0 24px rgba(141,255,91,.08),
+    inset 0 0 44px rgba(0,0,0,.7);
+
+  transition:
+    transform .52s cubic-bezier(.2,.9,.15,1),
+    opacity .42s ease,
+    filter .42s ease;
+}
+
+.portal-door-left{
+  left:0;
+
+  border-radius:999px 0 0 999px;
+
+  transform-origin:left center;
+}
+
+.portal-door-right{
+  right:0;
+
+  border-radius:0 999px 999px 0;
+
+  transform-origin:right center;
+}
+
+/* Door center seams */
+.portal-door-left::after,
+.portal-door-right::after{
+  content:"";
+
+  position:absolute;
+  top:16%;
+  bottom:16%;
+
+  width:1px;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(141,255,91,.46),
+      transparent
+    );
+
+  box-shadow:0 0 14px rgba(141,255,91,.38);
+}
+
+.portal-door-left::after{
+  right:0;
+}
+
+.portal-door-right::after{
+  left:0;
+}
+
+/* =========================================================
+   PORTAL RINGS
+========================================================= */
+
+.portal-ring{
+  position:absolute;
+
+  border-radius:50%;
+
+  pointer-events:none;
+
+  z-index:4;
+}
+
+.portal-ring-outer{
+  inset:2px;
+
+  border:1px solid rgba(141,255,91,.28);
+
+  box-shadow:
+    inset 0 0 20px rgba(141,255,91,.12),
+    0 0 24px rgba(141,255,91,.2);
+
+  animation:rbPortalRingSpin 12s linear infinite;
+}
+
+.portal-ring-mid{
+  inset:16px;
+
+  border:1px dashed rgba(255,216,106,.24);
+
+  box-shadow:
+    0 0 20px rgba(255,216,106,.12);
+
+  animation:rbPortalRingReverse 18s linear infinite;
+}
+
+.portal-ring-inner{
+  inset:31px;
+
+  border:1px solid rgba(141,255,91,.2);
+
+  box-shadow:
+    inset 0 0 18px rgba(141,255,91,.12);
+
+  animation:rbPortalRingSpin 8s linear infinite;
+}
+
+/* =========================================================
+   INNER PORTAL CONTENT
+========================================================= */
+
+.portal-inner{
+  position:absolute;
+
+  inset:28px;
+
+  z-index:8;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(141,255,91,.12),
+      rgba(8,14,8,.78) 42%,
+      rgba(0,0,0,.98) 78%
+    );
+
+  border:1px solid rgba(141,255,91,.18);
+
+  box-shadow:
+    inset 0 0 24px rgba(141,255,91,.12),
+    0 0 22px rgba(0,0,0,.7);
+}
+
+.portal-inner::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(141,255,91,.18),
+      transparent 48%
+    );
+
+  opacity:.62;
+
+  animation:rbPortalInnerPulse 3s ease-in-out infinite;
+}
+
+.portal-inner::after{
+  content:"";
+
+  position:absolute;
+
+  width:44%;
+  height:130%;
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(141,255,91,.38),
+      transparent
+    );
+
+  transform:rotate(35deg) translateX(-90%);
+
+  opacity:.36;
+
+  animation:rbPortalBeamSweep 4.6s ease-in-out infinite;
+}
+
+/* =========================================================
+   PORTAL TITLE
+========================================================= */
+
+.portal-title{
+  position:relative;
+  z-index:10;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  line-height:.82;
+  text-align:center;
+}
+
+.portal-title span{
+  font-family:Georgia,serif;
+
+  font-size:1.72rem;
+  font-weight:950;
+
+  color:#ddca74;
+
+  text-shadow:
+    0 0 16px rgba(255,216,106,.18),
+    0 0 22px rgba(141,255,91,.22),
+    0 3px 8px rgba(0,0,0,.86);
+}
+
+.portal-title small{
+  margin-top:8px;
+
+  font-size:.72rem;
+  font-weight:950;
+
+  letter-spacing:.32em;
+
+  color:var(--rb-green);
+
+  text-shadow:
+    0 0 14px rgba(141,255,91,.58);
+}
+
+/* =========================================================
+   FLARE
+========================================================= */
+
+.portal-flare{
+  position:absolute;
+
+  inset:0;
+
+  z-index:9;
+
+  border-radius:50%;
+
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(141,255,91,.42),
+      rgba(141,255,91,.12) 26%,
+      transparent 56%
+    );
+
+  opacity:.28;
+
+  mix-blend-mode:screen;
+
+  animation:rbPortalFlare 2.8s ease-in-out infinite;
+}
+
+/* =========================================================
+   ACTIVE SECTION COLOR ENERGY
+========================================================= */
+
+.center-ui[data-active-portal="live"] .portal-core{
+  box-shadow:
+    inset 0 0 26px rgba(141,255,91,.16),
+    inset 0 0 64px rgba(0,0,0,.78),
+    0 0 42px rgba(141,255,91,.38),
+    0 0 118px rgba(141,255,91,.14);
+}
+
+.center-ui[data-active-portal="music"] .portal-flare{
+  background:
+    radial-gradient(circle, rgba(141,255,91,.38), rgba(255,216,106,.16) 30%, transparent 58%);
+}
+
+.center-ui[data-active-portal="gaming"] .portal-flare,
+.center-ui[data-active-portal="meta"] .portal-flare{
+  opacity:.36;
+}
+
+/* =========================================================
+   OPENING STATE
+========================================================= */
+
+.center-ui.portal-opening .portal-core{
+  animation:
+    rbPortalOpenPulse .52s ease-in-out forwards;
+}
+
+.center-ui.portal-opening .portal-door-left{
+  transform:
+    translateX(-72%)
+    rotateY(-34deg);
+
+  opacity:.38;
+  filter:brightness(1.4);
+}
+
+.center-ui.portal-opening .portal-door-right{
+  transform:
+    translateX(72%)
+    rotateY(34deg);
+
+  opacity:.38;
+  filter:brightness(1.4);
+}
+
+.center-ui.portal-opening .portal-flare{
+  animation:rbPortalOpenFlash .52s ease-in-out forwards;
+}
+
+.center-ui.portal-opening .portal-inner{
+  box-shadow:
+    inset 0 0 40px rgba(141,255,91,.3),
+    0 0 54px rgba(141,255,91,.42);
+}
+
+/* =========================================================
+   PHONE PATCH
+========================================================= */
+
+@media (max-height:760px){
+  :root{
+    --rb-portal-size:160px;
+  }
+
+  .portal-inner{
+    inset:25px;
+  }
+
+  .portal-title span{
+    font-size:1.48rem;
+  }
+
+  .portal-title small{
+    font-size:.62rem;
+  }
+}
+
+@media (max-width:380px){
+  :root{
+    --rb-portal-size:148px;
+  }
+
+  .portal-inner{
+    inset:24px;
+  }
+
+  .portal-title span{
+    font-size:1.32rem;
+  }
+
+  .portal-title small{
+    font-size:.58rem;
+  }
+}
+
+@media (min-width:900px){
+  :root{
+    --rb-portal-size:210px;
+  }
+
+  .portal-title span{
+    font-size:1.95rem;
+  }
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes rbPortalBreath{
+  0%,100%{
+    transform:scale(1);
+    filter:brightness(.98);
+  }
+
+  50%{
+    transform:scale(1.025);
+    filter:brightness(1.14);
+  }
+}
+
+@keyframes rbPortalHaloSpin{
+  from{
+    transform:rotate(0deg);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+@keyframes rbPortalSwirl{
+  from{
+    transform:rotate(0deg) scale(1);
+  }
+
+  to{
+    transform:rotate(360deg) scale(1);
+  }
+}
+
+@keyframes rbPortalRingSpin{
+  from{
+    transform:rotate(0deg);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+@keyframes rbPortalRingReverse{
+  from{
+    transform:rotate(360deg);
+  }
+
+  to{
+    transform:rotate(0deg);
+  }
+}
+
+@keyframes rbPortalInnerPulse{
+  0%,100%{
+    opacity:.48;
+    transform:scale(.96);
+  }
+
+  50%{
+    opacity:.86;
+    transform:scale(1.06);
+  }
+}
+
+@keyframes rbPortalBeamSweep{
+  0%,100%{
+    transform:rotate(35deg) translateX(-92%);
+    opacity:.18;
+  }
+
+  50%{
+    transform:rotate(35deg) translateX(92%);
+    opacity:.62;
+  }
+}
+
+@keyframes rbPortalFlare{
+  0%,100%{
+    opacity:.22;
+    transform:scale(.96);
+  }
+
+  50%{
+    opacity:.42;
+    transform:scale(1.08);
+  }
+}
+
+@keyframes rbPortalOpenPulse{
+  0%{
+    transform:scale(1);
+    filter:brightness(1);
+  }
+
+  100%{
+    transform:scale(1.16);
+    filter:brightness(1.42);
+  }
+}
+
+@keyframes rbPortalOpenFlash{
+  0%{
+    opacity:.28;
+    transform:scale(1);
+  }
+
+  100%{
+    opacity:.92;
+    transform:scale(1.55);
+  }
+}
