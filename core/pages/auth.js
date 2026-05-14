@@ -1,10 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* =========================
-   RICH BIZNESS MOBILE AUTH
-   /core/pages/auth.js
-========================= */
-
 const SUPABASE_URL = "https://zsancpcyhdidrlezggrl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Hahozdb2FpB9cDsoWEEJzQ_WA_xdWV2";
 
@@ -29,83 +24,82 @@ const els = {
   authStatus: $("authStatus")
 };
 
-let currentSession = null;
-let currentUser = null;
-
 function setStatus(message) {
   if (els.authStatus) els.authStatus.textContent = message || "";
 }
 
+function lockButtons(locked) {
+  [els.signInBtn, els.signUpBtn, els.signOutBtn].forEach((btn) => {
+    if (btn) btn.disabled = locked;
+  });
+}
+
 function cleanEmail() {
-  return els.email.value.trim().toLowerCase();
+  return els.email?.value?.trim().toLowerCase() || "";
 }
 
 function cleanPassword() {
-  return els.password.value;
-}
-
-function lockButtons(isLocked) {
-  els.signInBtn.disabled = isLocked;
-  els.signUpBtn.disabled = isLocked;
-  els.signOutBtn.disabled = isLocked;
+  return els.password?.value || "";
 }
 
 function showSignedIn(user) {
-  currentUser = user || null;
+  if (!els.signedPanel) return;
 
   if (user) {
     els.signedPanel.classList.add("is-visible");
     els.signedEmail.textContent = user.email || "Signed in";
-    setStatus("AUTH REALTIME CONNECTED");
-    return;
+  } else {
+    els.signedPanel.classList.remove("is-visible");
+    els.signedEmail.textContent = "";
   }
-
-  els.signedPanel.classList.remove("is-visible");
-  els.signedEmail.textContent = "";
 }
 
 async function ensureProfile(user) {
-  if (!user) return null;
+  if (!user) return;
 
-  const emailName = user.email?.split("@")[0] || "creator";
   const username =
     user.user_metadata?.username ||
     user.user_metadata?.display_name ||
-    emailName;
+    user.email?.split("@")[0] ||
+    "creator";
 
   const displayName =
     user.user_metadata?.display_name ||
     username;
 
-  const { data: existing, error: readError } = await supabase
+  const { data: existing } = await supabase
     .from("profiles")
-    .select("id, username, display_name, created_at")
+    .select("id")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (readError) {
-    console.warn("Profile read error:", readError);
+  if (existing) {
+    await supabase
+      .from("profiles")
+      .update({
+        username,
+        display_name: displayName,
+        online_status: "online",
+        last_seen_at: new Date().toISOString()
+      })
+      .eq("id", user.id);
+
+    return;
   }
 
-  if (existing) return existing;
-
-  const { data: created, error: insertError } = await supabase
+  await supabase
     .from("profiles")
     .insert({
       id: user.id,
       username,
-      display_name: displayName
-    })
-    .select("id, username, display_name, created_at")
-    .single();
-
-  if (insertError) {
-    console.warn("Profile create error:", insertError);
-    setStatus(`PROFILE SYNC WARNING: ${insertError.message}`);
-    return null;
-  }
-
-  return created;
+      display_name: displayName,
+      rich_level: "GUEST",
+      rank_title: "VISITOR",
+      rich_points: 0,
+      balance_cents: 0,
+      online_status: "online",
+      last_seen_at: new Date().toISOString()
+    });
 }
 
 async function signIn() {
@@ -131,10 +125,7 @@ async function signIn() {
     return;
   }
 
-  currentSession = data?.session || null;
-  currentUser = data?.user || null;
-
-  await ensureProfile(currentUser);
+  await ensureProfile(data.user);
 
   setStatus("TAPPED IN 💰");
   window.location.href = "/index.html";
@@ -166,7 +157,8 @@ async function signUp() {
       data: {
         username,
         display_name: username
-      }
+      },
+      emailRedirectTo: `${window.location.origin}/auth.html`
     }
   });
 
@@ -176,20 +168,15 @@ async function signUp() {
     return;
   }
 
-  currentSession = data?.session || null;
-  currentUser = data?.user || null;
+  if (data.user) await ensureProfile(data.user);
 
-  if (currentUser) {
-    await ensureProfile(currentUser);
-  }
-
-  setStatus("ACCOUNT CREATED — TAP IN 💰");
-
-  if (currentSession) {
+  if (data.session) {
+    setStatus("ACCOUNT READY 💰");
     window.location.href = "/index.html";
     return;
   }
 
+  setStatus("CHECK EMAIL TO CONFIRM ACCOUNT");
   lockButtons(false);
 }
 
@@ -197,16 +184,7 @@ async function signOut() {
   lockButtons(true);
   setStatus("SIGNING OUT...");
 
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    setStatus(error.message);
-    lockButtons(false);
-    return;
-  }
-
-  currentSession = null;
-  currentUser = null;
+  await supabase.auth.signOut();
 
   showSignedIn(null);
   setStatus("IM OUT ✌🏽");
@@ -219,34 +197,28 @@ async function signOut() {
 async function bootAuth() {
   setStatus("BOOTING AUTH...");
 
-  const { data, error } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
+  const user = data?.session?.user || null;
 
-  if (error) {
-    setStatus(error.message);
-    return;
+  showSignedIn(user);
+
+  if (user) {
+    await ensureProfile(user);
+    setStatus("AUTH CONNECTED");
+  } else {
+    setStatus("READY TO TAP IN 💰");
   }
 
-  currentSession = data?.session || null;
-  currentUser = currentSession?.user || null;
-
-  showSignedIn(currentUser);
-
-  if (currentUser) {
-    await ensureProfile(currentUser);
-  }
-
-  setStatus(currentUser ? "AUTH REALTIME CONNECTED" : "READY TO TAP IN 💰");
   lockButtons(false);
 }
 
 supabase.auth.onAuthStateChange(async (event, session) => {
-  currentSession = session || null;
-  currentUser = session?.user || null;
+  const user = session?.user || null;
 
-  showSignedIn(currentUser);
+  showSignedIn(user);
 
-  if (event === "SIGNED_IN" && currentUser) {
-    await ensureProfile(currentUser);
+  if (event === "SIGNED_IN" && user) {
+    await ensureProfile(user);
     setStatus("TAPPED IN 💰");
   }
 
@@ -260,9 +232,7 @@ els.signUpBtn?.addEventListener("click", signUp);
 els.signOutBtn?.addEventListener("click", signOut);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    signIn();
-  }
+  if (event.key === "Enter") signIn();
 });
 
 bootAuth();
