@@ -1,77 +1,70 @@
 {
   "cleanUrls": true,
-
   "rewrites": [
     {
       "source": "/",
       "destination": "/index.html"
     },
-
     {
       "source": "/feed",
       "destination": "/feed.html"
     },
-
     {
       "source": "/live",
       "destination": "/live.html"
     },
-
     {
       "source": "/watch",
       "destination": "/watch.html"
     },
-
     {
       "source": "/music",
       "destination": "/music.html"
     },
-
     {
       "source": "/gaming",
       "destination": "/gaming.html"
     },
-
     {
       "source": "/sports",
       "destination": "/sports.html"
     },
-
     {
       "source": "/gallery",
       "destination": "/gallery.html"
     },
-
     {
       "source": "/upload",
       "destination": "/upload.html"
     },
-
     {
       "source": "/store",
       "destination": "/store.html"
     },
-
     {
       "source": "/profile",
       "destination": "/profile.html"
     },
-
+    {
+      "source": "/edit",
+      "destination": "/edit.html"
+    },
     {
       "source": "/messages",
       "destination": "/messages.html"
     },
-
     {
       "source": "/notifications",
       "destination": "/notifications.html"
     },
-
     {
       "source": "/meta",
       "destination": "/meta.html"
     },
-
+    {
+      "source": "/setting",
+      "destination": "/settings.html"
+    },
     {
       "source": "/auth",
       "destination": "/auth.html"
