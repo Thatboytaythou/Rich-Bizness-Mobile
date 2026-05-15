@@ -1,26 +1,78 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-
-    { "source": "/feed", "destination": "/feed.html" },
-    { "source": "/live", "destination": "/live.html" },
-    { "source": "/watch", "destination": "/watch.html" },
-    { "source": "/music", "destination": "/music.html" },
-    { "source": "/gaming", "destination": "/gaming.html" },
-    { "source": "/sports", "destination": "/sports.html" },
-    { "source": "/gallery", "destination": "/gallery.html" },
-    { "source": "/store", "destination": "/store.html" },
-    { "source": "/upload", "destination": "/upload.html" },
-    { "source": "/meta", "destination": "/meta.html" },
-    { "source": "/profile", "destination": "/profile.html" },
-    { "source": "/messages", "destination": "/messages.html" },
-    { "source": "/notifications", "destination": "/notifications.html" },
-
-    { "source": "/artist", "destination": "/artist/index.html" },
-    { "source": "/artist/upload", "destination": "/artist/upload.html" },
-    { "source": "/artist/manage", "destination": "/artist/manage.html" },
-    { "source": "/artist/analytics", "destination": "/artist/analytics.html" },
-
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/index",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/feed",
+      "destination": "/feed.html"
+    },
+    {
+      "source": "/watch",
+      "destination": "/watch.html"
+    },
+    {
+      "source": "/live",
+      "destination": "/live.html"
+    },
+    {
+      "source": "/music",
+      "destination": "/music.html"
+    },
+    {
+      "source": "/gaming",
+      "destination": "/gaming.html"
+    },
+    {
+      "source": "/sports",
+      "destination": "/sports.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/gallery.html"
+    },
+    {
+      "source": "/upload",
+      "destination": "/upload.html"
+    },
+    {
+      "source": "/store",
+      "destination": "/store.html"
+    },
+    {
+      "source": "/meta",
+      "destination": "/meta.html"
+    },
+    {
+      "source": "/messages",
+      "destination": "/messages.html"
+    },
+    {
+      "source": "/notifications",
+      "destination": "/notifications.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/edit",
+      "destination": "/edit.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/settings.html"
+    },
+    {
+      "source": "/auth",
+      "destination": "/auth.html"
+    }
   ]
 }
